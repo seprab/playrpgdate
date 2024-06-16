@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project("HelloWorldCPP")
+project(${PROJECT_NAME})
 
 # C++ 20 and up is required in order to include the playdate headers
 set(CMAKE_CXX_STANDARD 20)
@@ -14,7 +14,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/playdate-cpp)
 
 # Now we can declare our application
-add_playdate_application(HelloWorld)
+add_playdate_application(${PROJECT_NAME})
 
 # Add its sources, and you're good to go!
-target_sources(HelloWorld PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
