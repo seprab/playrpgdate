@@ -1,5 +1,5 @@
 #!/bin/bash
-export PROJECT_NAME="HelloWorld"
+export PROJECT_NAME="CardoBlast"
 
 
 echo "Select build option:"
