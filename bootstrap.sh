@@ -40,12 +40,12 @@ case $option in
         # Build for Playdate device
         mkdir -p build
         echo "Configuring the project, specifying the source and build directories, and sets the toolchain file for cross-compilation."
-        cmake -S . -B build -DPROJECT_NAME=$PROJECT_NAME -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
+        cmake -S . -B build/device -DPROJECT_NAME=$PROJECT_NAME -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
         echo "Compiling the project using the configuration specified in the build directory."
         # using this command instead of "make" to avoid moving to another directory
-        cmake --build build
-        # echo "Running the executable."
-        # open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
+        cmake --build build/device
+        echo "Running the executable."
+        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args ${PROJECT_NAME}.pdx
         ;;
     2)
         # Clean previous build cache
@@ -53,12 +53,12 @@ case $option in
         # Build for simulator
         mkdir -p build
         echo "Configuring the project, specifying the source and build directories, and sets the toolchain file for cross-compilation."
-        cmake -S . -B build -DPROJECT_NAME=$PROJECT_NAME
+        cmake -S . -B build/simulator -DPROJECT_NAME=$PROJECT_NAME
         echo "Compiling the project using the configuration specified in the build directory."
         # using this command instead of "make" to avoid moving to another directory
-        cmake --build build
-        # echo "Running the executable."
-        # open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
+        cmake --build build/simulator
+        echo "Running the executable."
+        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args ${PROJECT_NAME}.pdx
         ;;
     3)
         # Clean previous build cache

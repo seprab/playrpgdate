@@ -21,7 +21,7 @@ void GameManager::Update()
 {
     pd->graphics->clear(kColorWhite);
     pd->graphics->setFont(font);
-    pd->graphics->drawText("Hellooo!", strlen("Hello World!"), kASCIIEncoding, x, y);
+    pd->graphics->drawText("SepraB!", strlen("Hello World!"), kASCIIEncoding, x, y);
 
     x += dx;
     y += dy;
