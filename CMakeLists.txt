@@ -16,10 +16,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/playdate-cpp)
 # Now we can declare our application
 add_playdate_application(${PROJECT_NAME})
 
-# Add its sources, and you're good to go!
-target_sources(${PROJECT_NAME} PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/GameManager.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/GameManager.h
+#use the file(GLOB ...) command in CMake to collect all the source files in a directory and then add them to your target
+file(GLOB SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
-# target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+# Add its sources, and you're good to go!
+target_sources(${PROJECT_NAME} PUBLIC ${SOURCES})

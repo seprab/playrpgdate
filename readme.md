@@ -1,4 +1,6 @@
-# Playdate-C++
+# Cardo Blast
+
+Attempting to create an text-based RPG for the playdate using c++. This is based on [utilForever RPG](https://github.com/utilForever/SimpleRPG-Text/tree/master).
 
 ## How to build
 Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it. Then choose the option that works for you.
