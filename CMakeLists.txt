@@ -17,4 +17,4 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/playdate-cpp)
 add_playdate_application(${PROJECT_NAME})
 
 # Add its sources, and you're good to go!
-target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+target_sources(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)

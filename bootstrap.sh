@@ -25,12 +25,12 @@ clean_build_cache() {
     fi
 
     # Check if the "HelloWorld.pdx" file exists before attempting to remove it
-    if [ -f "HelloWorld.pdx" ]; then
-        rm -rf HelloWorld.pdx
+    if [ -d "${PROJECT_NAME}.pdx" ]; then
+        rm -rf ${PROJECT_NAME}.pdx
         echo "HelloWorld.pdx file removed."
+    else
+        echo "File ${PROJECT_NAME}.pdx does not exist."
     fi
-
-    echo "Build cache cleaned."
     }
 
 case $option in
@@ -44,8 +44,8 @@ case $option in
         echo "Compiling the project using the configuration specified in the build directory."
         # using this command instead of "make" to avoid moving to another directory
         cmake --build build
-        echo "Running the executable."
-        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
+        # echo "Running the executable."
+        # open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
         ;;
     2)
         # Clean previous build cache
@@ -57,8 +57,8 @@ case $option in
         echo "Compiling the project using the configuration specified in the build directory."
         # using this command instead of "make" to avoid moving to another directory
         cmake --build build
-        echo "Running the executable."
-        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
+        # echo "Running the executable."
+        # open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app" --args ${PROJECT_NAME}.pdx
         ;;
     3)
         # Clean previous build cache

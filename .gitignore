@@ -1,3 +1,5 @@
 Source/
 *.pdx
 build/
+.idea/
+.DS_Store
