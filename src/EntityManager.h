@@ -3,15 +3,17 @@
 
 #include <string>
 #include <map>
+#include <pd_api.h>
 #include "Entity.h"
 
 class EntityManager
 {
 private:
     std::map<std::string, Entity*> data;
+    PlaydateAPI* pd;
 
 public:
-    EntityManager();
+    explicit EntityManager(PlaydateAPI* api);
     ~EntityManager();
 
     template <typename T>
@@ -19,9 +21,11 @@ public:
 
     template <typename T>
     T* GetEntity(std::string id);
-};
 
-template <typename T>
-std::string EntityToString();
+    template <typename T>
+    std::string EntityToString();
+
+    int readfile(void *readud, uint8_t *buf, int bufsize);
+};
 
 #endif

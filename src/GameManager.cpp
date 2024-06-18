@@ -1,7 +1,3 @@
-//
-// Created by Sergio Prada on 16/06/24.
-//
-
 #include "GameManager.h"
 
 GameManager::GameManager(PlaydateAPI* api)
@@ -16,6 +12,8 @@ GameManager::GameManager(PlaydateAPI* api)
 
     if (font == nullptr)
         pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
+
+    entityManager = new EntityManager(pd);
 }
 void GameManager::Update()
 {

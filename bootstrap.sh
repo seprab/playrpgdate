@@ -45,7 +45,7 @@ case $option in
         # using this command instead of "make" to avoid moving to another directory
         cmake --build build/device
         echo "Running the executable."
-        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args ${PROJECT_NAME}.pdx
+        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args "$PWD/${PROJECT_NAME}.pdx"
         ;;
     2)
         # Clean previous build cache
@@ -58,7 +58,7 @@ case $option in
         # using this command instead of "make" to avoid moving to another directory
         cmake --build build/simulator
         echo "Running the executable."
-        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args ${PROJECT_NAME}.pdx
+        open -a "${PLAYDATE_SDK_PATH}/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" --args "$PWD/${PROJECT_NAME}.pdx"
         ;;
     3)
         # Clean previous build cache

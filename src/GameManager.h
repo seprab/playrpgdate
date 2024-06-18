@@ -3,6 +3,7 @@
 
 #include <string>
 #include <pdcpp/pdnewlib.h>
+#include "EntityManager.h"
 
 class GameManager {
 
@@ -14,6 +15,7 @@ public:
 
 private:
     PlaydateAPI* pd;
+    EntityManager* entityManager;
     std::string fontpath;
     LCDFont* font;
     int x, y, dx, dy;

@@ -11,10 +11,10 @@ private:
     std::string id;
 
 public:
-    Entity(std::string _id);
+    explicit Entity(std::string _id);
     virtual ~Entity();
 
-    std::string GetID();
+    [[nodiscard]] std::string GetID() const;
 };
 
 #endif

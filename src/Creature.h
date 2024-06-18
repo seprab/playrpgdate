@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "Entity.h"
 #include "Inventory.h"
+#include "Area.h"
 
 class Area;
 class EntityManager;
