@@ -18,8 +18,8 @@ add_playdate_application(${PROJECT_NAME})
 
 #use the file(GLOB ...) command in CMake to collect all the source files in a directory and then add them to your target
 file(GLOB SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h
 )
 
 # Add its sources, and you're good to go!

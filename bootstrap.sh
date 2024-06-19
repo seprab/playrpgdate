@@ -18,12 +18,6 @@ clean_build_cache() {
         echo "Build directory removed."
     fi
 
-    # Check if the "source" directory exists before attempting to remove it
-    if [ -d "source" ]; then
-        rm -rf source
-        echo "Source directory removed."
-    fi
-
     # Check if the "HelloWorld.pdx" file exists before attempting to remove it
     if [ -d "${PROJECT_NAME}.pdx" ]; then
         rm -rf ${PROJECT_NAME}.pdx
