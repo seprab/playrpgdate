@@ -18,7 +18,7 @@ private:
     std::pair<std::string, std::string> areas;
 
 public:
-    Door(std::string _id, std::string _description, std::pair<std::string, std::string> _areas, int _locked, Item* _key = nullptr);
+    Door(unsigned int _id, std::string _description, std::pair<std::string, std::string> _areas, int _locked, Item* _key = nullptr);
 
     std::string GetDescription();
     int GetLocked();

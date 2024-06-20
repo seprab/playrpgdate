@@ -11,8 +11,6 @@
 #include "jsmn.h"
 
 PlaydateAPI* EntityManager::pd = nullptr;
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
-static char* subchar(const char* source, int start, int end);
 
 EntityManager::EntityManager(PlaydateAPI* api)
 {
@@ -57,7 +55,62 @@ void EntityManager::LoadJSON(const char* fileName)
     jsmn_init(&p);
     int r = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
 
-    std::vector<T> entities_decoded = T.decodeJson(charBuffer, t, r);
+
+    if(std::is_same<T, Item>::value)
+    {
+        Item dummy{};
+        auto* items = static_cast<std::vector<Item>*>(dummy.DecodeJson(charBuffer, t, r));
+        for (Item item : *items)
+        {
+            data[item.GetID()] = &item;
+        }
+    }
+    /*else if(std::is_same<T, Weapon>::value)
+    {
+        auto weapons = Weapon::DecodeJson(charBuffer, t, r);
+        for (auto& weapon : *weapons)
+        {
+            data[weapon.GetID()] = &weapon;
+        }
+    }
+    else if(std::is_same<T, Armor>::value)
+    {
+        auto armors = Armor::DecodeJson(charBuffer, t, r);
+        for (auto& armor : *armors)
+        {
+            data[armor.GetID()] = &armor;
+        }
+    }
+    else if(std::is_same<T, Creature>::value)
+    {
+        auto creatures = Creature::DecodeJson(charBuffer, t, r);
+        for (auto& creature : *creatures)
+        {
+            data[creature.GetID()] = &creature;
+        }
+    }
+    else if(std::is_same<T, Area>::value)
+    {
+        auto areas = Area::DecodeJson(charBuffer, t, r);
+        for (auto& area : *areas)
+        {
+            data[area.GetID()] = &area;
+        }
+    }
+    else if(std::is_same<T, Door>::value)
+    {
+        auto doors = Door::DecodeJson(charBuffer, t, r);
+        for (auto& door : *doors)
+        {
+            data[door.GetID()] = &door;
+        }
+    }*/
+}
+
+template <typename T>
+T* EntityManager::GetEntity(unsigned int id)
+{
+    return dynamic_cast<T*>(data.at(id));
 }
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }

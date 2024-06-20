@@ -8,6 +8,7 @@
 
 class Utils {
 public:
+    Utils() = delete;
     static char* Subchar(const char* source, int start, int end);
 };
 

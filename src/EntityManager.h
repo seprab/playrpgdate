@@ -9,7 +9,7 @@
 class EntityManager
 {
 private:
-    std::map<std::string, Entity*> data;
+    std::map<unsigned int, Entity*> data;
     static PlaydateAPI* pd;
 
 public:
@@ -21,6 +21,9 @@ public:
 
     template <typename T>
     std::string EntityToString();
+
+    template <typename T>
+    T* GetEntity(unsigned int id);
 
 };
 

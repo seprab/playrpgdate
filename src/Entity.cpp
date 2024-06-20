@@ -4,10 +4,8 @@
 
 #include "Entity.h"
 
-#include <utility>
-
-Entity::Entity(std::string _id):
-id(std::move(_id))
+Entity::Entity(unsigned int _id):
+id(_id)
 {
 
 }
@@ -15,6 +13,6 @@ id(std::move(_id))
 Entity::~Entity()
 = default;
 
-std::string Entity::GetID() const {
+unsigned int Entity::GetID() const {
     return id;
 }

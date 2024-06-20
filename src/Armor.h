@@ -12,7 +12,7 @@ private:
     int defense;
 
 public:
-    Armor(std::string _id, std::string _name, std::string _description, int _defense);
+    Armor(unsigned int _id, std::string _name, std::string _description, int _defense);
 
     int GetDefense();
 

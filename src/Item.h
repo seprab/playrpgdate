@@ -11,10 +11,11 @@ class EntityManager;
 class Item : public Entity
 {
 public:
-    Item(std::string _id, char *itemName, char *itemDescription);
+    Item() = default;
+    Item(unsigned int _id, char *itemName, char *itemDescription);
     [[nodiscard]] const char * GetName() const;
     [[nodiscard]] const char * GetDescription() const;
-    static std::vector<Item>* DecodeJson(char *buffer, jsmntok_t *tokens, int size);
+    void* DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
 private:
     char* name{};

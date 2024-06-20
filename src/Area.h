@@ -21,7 +21,7 @@ private:
     std::vector<Creature> creatures;
 
 public:
-    Area(std::string _id, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
+    Area(unsigned int _id, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
 
     Dialogue GetDialogue();
     Inventory& GetItem();

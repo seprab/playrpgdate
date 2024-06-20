@@ -12,7 +12,7 @@ private:
     int damage;
 
 public:
-    Weapon(std::string _id, std::string _name, std::string _description, int _damage);
+    Weapon(unsigned int _id, std::string _name, std::string _description, int _damage);
 
     int GetDamage();
 

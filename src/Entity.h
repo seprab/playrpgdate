@@ -6,16 +6,18 @@
 
 class EntityManager;
 
+
 class Entity
 {
 private:
-    std::string id;
+    unsigned int id;
 
 public:
-    explicit Entity(std::string _id);
+    explicit Entity() = default;
+    explicit Entity(unsigned int _id);
     virtual ~Entity();
-
-    [[nodiscard]] std::string GetID() const;
+    [[nodiscard]] unsigned int GetID() const;
+    virtual void* DecodeJson(char *buffer, jsmntok_t *tokens, int size) = 0;
 };
 
 #endif

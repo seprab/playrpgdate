@@ -33,7 +33,7 @@ private:
     std::string currentArea;
 
 public:
-    Creature(std::string _id, std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp);
+    Creature(unsigned int _id, std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp);
     std::string GetName();
 
     int GetHP();
