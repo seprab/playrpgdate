@@ -1,9 +1,40 @@
-# Cardo Blast
+# CardoBlast
 
-Attempting to create an text-based RPG for the playdate using c++. This is based on [utilForever RPG](https://github.com/utilForever/SimpleRPG-Text/tree/master).
+Attempting to create an text-based RPG for the playdate using c++.
 
 ## How to build
+I work with this either with Terminal or CLion
+
+### Terminal
 Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it. Then choose the option that works for you.
+
+### CLion
+1. Open the project in CLion
+2. Open Run/Debug Configurations
+3. Add a new configuration
+- Name: CardoBlast
+- Target: CardoBlast
+- Executable: (~/Developer/PlaydateSDK/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator)
+- Program arguments: <ProjectDir>/CardoBlast.pdx
+4. Go to Clion Preferences -> Build, Execution, Deployment -> CMake
+5. Add two profiles
+6. "Simulator"
+- Name: Simulator
+- Build type: Debug
+- CMake options: -DPROJECT_NAME=CardoBlast
+- Build directory: <ProjectDir>/build/simulator
+7. "Device"
+- Name: Simulator
+- Build type: Debug
+- CMake options: -DPROJECT_NAME="CardoBlast" -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
+- Build directory: <ProjectDir>/build/device
+
+
+## Credits
+- [UtilForever RPG](https://github.com/utilForever/SimpleRPG-Text/tree/master).
+- [Playdate-cpp](https://github.com/nstbayless/playdate-cpp)
+- [Playdate SDK](https://play.date/)
+- [JSMN - json parser](https://github.com/zserge/jsmn)
 
 ## Disclaimer
 
