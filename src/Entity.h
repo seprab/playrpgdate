@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include <string>
+#include "jsmn.h"
 
 class EntityManager;
 

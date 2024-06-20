@@ -14,6 +14,7 @@ public:
     Item(std::string _id, char *itemName, char *itemDescription);
     [[nodiscard]] const char * GetName() const;
     [[nodiscard]] const char * GetDescription() const;
+    static std::vector<Item>* DecodeJson(char *buffer, jsmntok_t *tokens, int size);
 
 private:
     char* name{};

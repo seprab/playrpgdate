@@ -5,7 +5,6 @@
 #include <map>
 #include <pd_api.h>
 #include "Entity.h"
-#include "jsmn.h"
 
 class EntityManager
 {
@@ -21,12 +20,8 @@ public:
     void LoadJSON(const char* fileName);
 
     template <typename T>
-    T* GetEntity(std::string id);
-
-    template <typename T>
     std::string EntityToString();
 
-    static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include <string>
-#include <map>
+#include <vector>
 #include <pd_api/pd_api_file.h>
 #include "EntityManager.h"
 #include "Item.h"
@@ -11,6 +11,8 @@
 #include "jsmn.h"
 
 PlaydateAPI* EntityManager::pd = nullptr;
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
+static char* subchar(const char* source, int start, int end);
 
 EntityManager::EntityManager(PlaydateAPI* api)
 {
@@ -47,7 +49,6 @@ void EntityManager::LoadJSON(const char* fileName)
         pd->system->logToConsole("Error reading the file %s: %s", fileName, pd->file->geterr());
         return;
     }
-    pd->system->logToConsole("Read %d bytes from the file %s", readResult, fileName);
     pd->file->close(file);
     char* charBuffer = static_cast<char*>(buffer);
 
@@ -56,62 +57,7 @@ void EntityManager::LoadJSON(const char* fileName)
     jsmn_init(&p);
     int r = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
 
-    for (int i = 1; i < r; i++) {
-        if (jsoneq(charBuffer, &t[i], "user") == 0) {
-            /* We may use strndup() to fetch string value */
-            printf("- User: %.*s\n", t[i + 1].end - t[i + 1].start,
-                   charBuffer + t[i + 1].start);
-            i++;
-        } else if (jsoneq(charBuffer, &t[i], "admin") == 0) {
-            /* We may additionally check if the value is either "true" or "false" */
-            printf("- Admin: %.*s\n", t[i + 1].end - t[i + 1].start,
-                   charBuffer + t[i + 1].start);
-            i++;
-        } else if (jsoneq(charBuffer, &t[i], "uid") == 0) {
-            /* We may want to do strtol() here to get numeric value */
-            printf("- UID: %.*s\n", t[i + 1].end - t[i + 1].start,
-                   charBuffer + t[i + 1].start);
-            i++;
-        } else if (jsoneq(charBuffer, &t[i], "groups") == 0) {
-            int j;
-            printf("- Groups:\n");
-            if (t[i + 1].type != JSMN_ARRAY) {
-                continue; /* We expect groups to be an array of strings */
-            }
-            for (j = 0; j < t[i + 1].size; j++) {
-                jsmntok_t *g = &t[i + j + 2];
-                printf("  * %.*s\n", g->end - g->start, charBuffer + g->start);
-            }
-            i += t[i + 1].size + 1;
-        } else {
-            printf("Unexpected key: %.*s\n", t[i].end - t[i].start,
-                   charBuffer + t[i].start);
-        }
-    }
-    /*JsonBox::Value v;
-    v.loadFromFile(fileName);
-
-    JsonBox::Object obj = v.getObject();
-    for (auto entity : obj)
-    {
-        std::string key = entity.first;
-        data[key] = dynamic_cast<Entity*>(new T(key, entity.second, this));
-    }*/
-}
-int EntityManager::jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-    if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
-        strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-        return 0;
-    }
-    return -1;
-}
-template <typename T>
-T* EntityManager::GetEntity(std::string id)
-{
-    if (id.substr(0, EntityToString<T>().size()) == EntityToString<T>())
-        return dynamic_cast<T*>(data.at(id));
-    else
-        return nullptr;
+    std::vector<T> entities_decoded = T.decodeJson(charBuffer, t, r);
 }
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
@@ -128,9 +74,3 @@ template void EntityManager::LoadJSON<Creature>(const char*);
 template void EntityManager::LoadJSON<Area>(const char*);
 template void EntityManager::LoadJSON<Door>(const char*);
 
-template Item* EntityManager::GetEntity<Item>(std::string);
-template Weapon* EntityManager::GetEntity<Weapon>(std::string);
-template Armor* EntityManager::GetEntity<Armor>(std::string);
-template Creature* EntityManager::GetEntity<Creature>(std::string);
-template Area* EntityManager::GetEntity<Area>(std::string);
-template Door* EntityManager::GetEntity<Door>(std::string);
