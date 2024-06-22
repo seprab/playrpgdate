@@ -1,8 +1,52 @@
-[{
-	"name": "Gold Coin",
-	"description": "A small disc made of lustrous metal"
-},
-{
-	"name": "Iron Key",
-	"description": "A heavy iron key with a simple cut"
-}]
+[
+	{
+		"id" : 100,
+		"name": "Gold Coin",
+		"description": "A small disc made of lustrous metal"
+	},
+	{
+		"id" : 101,
+		"name": "Iron Key",
+		"description": "A heavy iron key with a simple cut"
+	},
+    {
+        "id": 102,
+        "name": "Silver Sword",
+        "description": "A finely crafted sword with a silver blade"
+    },
+    {
+        "id": 103,
+        "name": "Emerald Amulet",
+        "description": "A beautiful amulet embedded with a large emerald"
+    },
+    {
+        "id": 104,
+        "name": "Leather Boots",
+        "description": "Sturdy boots made from high-quality leather"
+    },
+    {
+        "id": 105,
+        "name": "Magic Scroll",
+        "description": "An ancient scroll filled with arcane writings"
+    },
+    {
+        "id": 106,
+        "name": "Golden Crown",
+        "description": "A magnificent crown made of pure gold"
+    },
+    {
+        "id": 107,
+        "name": "Healing Potion",
+        "description": "A potion that restores health when consumed"
+    },
+    {
+        "id": 108,
+        "name": "Diamond Ring",
+        "description": "A valuable ring adorned with a large diamond"
+    },
+    {
+        "id": 109,
+        "name": "Dragon Egg",
+        "description": "A rare and precious dragon egg"
+    }
+]

@@ -4,18 +4,20 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "jsmn.h"
 
 class Dialogue
 {
 private:
-    std::string description;
-    std::vector<std::string> choices;
+    char* description;
+    std::vector<char*> choices;
 
 public:
     Dialogue();
-    Dialogue(std::string _description, std::vector<std::string> _choices);
+    Dialogue(char* _description, std::vector<char*> _choices);
+    Dialogue(char *buffer, jsmntok_t *tokens, int size);
 
-    void AddChoice(std::string choice);
+    void AddChoice(char* choice);
     unsigned int Size();
 
     int Activate();

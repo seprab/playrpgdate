@@ -1,33 +1,42 @@
-{
-	"area_01": {
-		"dialogue": {
+[
+	{
+		"name" : "area_01",
+		"dialogue":
+		{
 			"description": "You are in room 1",
 			"choices": []
 		},
 		"doors": ["door_01_02"],
-		"inventory": {
-			"items": [
+		"inventory":
+		{
+			"items":
+			[
 				["item_gold_coin", 5],
 				["item_iron_key", 1]
 			],
-			"weapons": [
+			"weapons":
+			[
 				["weapon_dagger", 1]
 			],
-			"armor": [
+			"armor":
+			[
 				["armor_leather", 1]
 			]
 		},
 		"creatures": []
 	},
-
-	"area_02": {
-		"dialogue": {
+	{
+		"name" : "area_02",
+		"dialogue":
+		{
 			"description": "You are in room 2",
 			"choices": []
 		},
 		"doors": ["door_01_02"],
-		"inventory": {
-			"items": [
+		"inventory":
+		{
+			"items":
+			[
 				["item_gold_coin", 100]
 			],
 			"weapons": [],
@@ -38,4 +47,4 @@
 			"creature_rat"
 		]
 	}
-}
+]

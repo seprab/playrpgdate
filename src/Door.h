@@ -28,6 +28,7 @@ public:
 
     std::pair<std::string, std::string> GetArea();
     void SetArea(std::pair<std::string, std::string> _areas);
+    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 };
 
 #endif

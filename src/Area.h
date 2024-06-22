@@ -21,12 +21,15 @@ private:
     std::vector<Creature> creatures;
 
 public:
+    Area() = default;
     Area(unsigned int _id, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
 
     Dialogue GetDialogue();
     Inventory& GetItem();
     std::vector<Door*> GetDoor();
     std::vector<Creature>& GetCreature();
+    void* DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+
 };
 
 #endif
