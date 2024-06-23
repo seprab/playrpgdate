@@ -11,17 +11,13 @@
 		{
 			"items":
 			[
-				["item_gold_coin", 5],
-				["item_iron_key", 1]
+				[101, 5],
+				[102, 1],
+				[130, 1],
+				[140, 1]
 			],
-			"weapons":
-			[
-				["weapon_dagger", 1]
-			],
-			"armor":
-			[
-				["armor_leather", 1]
-			]
+			"weapons": [],
+			"armor": []
 		},
 		"creatures": []
 	},
@@ -37,14 +33,18 @@
 		{
 			"items":
 			[
-				["item_gold_coin", 100]
+				[101, 5],
+				[102, 1],
+				[130, 1],
+				[140, 1]
 			],
 			"weapons": [],
 			"armor": []
 		},
 		"creatures":
 		[
-			"creature_rat"
+			2049,
+			2047
 		]
 	}
 ]

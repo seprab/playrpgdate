@@ -15,7 +15,7 @@ private:
 public:
     Dialogue();
     Dialogue(char* _description, std::vector<char*> _choices);
-    Dialogue(char *buffer, jsmntok_t *tokens, int size);
+    Dialogue(char *buffer);
 
     void AddChoice(char* choice);
     unsigned int Size();

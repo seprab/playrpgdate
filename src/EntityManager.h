@@ -9,12 +9,22 @@
 class EntityManager
 {
 private:
+    static EntityManager* instance;
+    static PlaydateAPI* pd;
     std::map<unsigned int, Entity*> data;
 
-public:
-    static PlaydateAPI* pd;
-
+    // Private constructor
+    EntityManager();
     explicit EntityManager(PlaydateAPI* api);
+
+public:
+    // Deleted copy constructor and assignment operator
+    EntityManager(const EntityManager&) = delete;
+    EntityManager& operator=(const EntityManager&) = delete;
+
+    // Method to get the instance of the class
+    static EntityManager* GetInstance();
+
     ~EntityManager();
 
     template <typename T>

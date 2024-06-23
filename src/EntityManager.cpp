@@ -10,12 +10,23 @@
 #include "Door.h"
 #include "jsmn.h"
 
+// Initialize the instance pointer
+EntityManager* EntityManager::instance = nullptr;
 PlaydateAPI* EntityManager::pd = nullptr;
 
+EntityManager::EntityManager()= default;
 EntityManager::EntityManager(PlaydateAPI* api)
 {
     pd = api;
     LoadJSON<Item>("data/items.json");
+}
+EntityManager* EntityManager::GetInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new EntityManager();
+    }
+    return instance;
 }
 
 EntityManager::~EntityManager()

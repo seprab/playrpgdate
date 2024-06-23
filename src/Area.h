@@ -15,6 +15,7 @@ class Creature;
 class Area : public Entity
 {
 private:
+    char* name;
     Dialogue dialogue;
     Inventory items;
     std::vector<Door*> doors;
@@ -22,7 +23,7 @@ private:
 
 public:
     Area() = default;
-    Area(unsigned int _id, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
+    Area(unsigned int _id, char* _name, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
 
     Dialogue GetDialogue();
     Inventory& GetItem();
