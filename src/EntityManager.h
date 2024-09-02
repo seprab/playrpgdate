@@ -14,8 +14,7 @@ private:
     std::map<unsigned int, Entity*> data;
 
     // Private constructor
-    EntityManager();
-    explicit EntityManager(PlaydateAPI* api);
+    explicit EntityManager(PlaydateAPI* pdApi);
 
 public:
     // Deleted copy constructor and assignment operator
@@ -24,8 +23,11 @@ public:
 
     // Method to get the instance of the class
     static EntityManager* GetInstance();
+    static EntityManager* GetInstance(PlaydateAPI* pdApi);
 
     ~EntityManager();
+
+    PlaydateAPI* GetPD();
 
     template <typename T>
     void LoadJSON(const char* fileName);

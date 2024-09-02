@@ -7,7 +7,7 @@
 Item::Item(unsigned int _id, char* itemName, char* itemDescription) :
 Entity(_id), name(itemName), description(itemDescription)
 {
-    EntityManager::pd->system->logToConsole("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
+    EntityManager::GetInstance()->GetPD()->system->logToConsole("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
 }
 const char* Item::GetName() const
 {

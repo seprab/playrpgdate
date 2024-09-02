@@ -14,18 +14,20 @@
 EntityManager* EntityManager::instance = nullptr;
 PlaydateAPI* EntityManager::pd = nullptr;
 
-EntityManager::EntityManager()= default;
 EntityManager::EntityManager(PlaydateAPI* api)
 {
     pd = api;
-    LoadJSON<Item>("data/items.json");
 }
-EntityManager* EntityManager::GetInstance()
+EntityManager* EntityManager::GetInstance(PlaydateAPI* pdApi)
 {
     if (instance == nullptr)
     {
-        instance = new EntityManager();
+        instance = new EntityManager(pdApi);
     }
+    return instance;
+}
+EntityManager* EntityManager::GetInstance()
+{
     return instance;
 }
 
@@ -39,6 +41,10 @@ EntityManager::~EntityManager()
             entity.second = nullptr;
         }
     }
+}
+
+PlaydateAPI* EntityManager::GetPD() {
+    return pd;
 }
 
 template <typename T>
@@ -75,6 +81,17 @@ void EntityManager::LoadJSON(const char* fileName)
         {
             data[item.GetID()] = &item;
         }
+    }
+    else if(std::is_same<T, Area>::value)
+    {
+        //TODO: I'm working on validating the area deserialization
+        Area dummy{};
+        dummy.DecodeJson(charBuffer, t, r);
+        //auto areas = Area::DecodeJson(charBuffer, t, r);
+        //for (auto& area : *areas)
+        //{
+        //    data[area.GetID()] = &area;
+        //}
     }
     /*else if(std::is_same<T, Weapon>::value)
     {
@@ -123,6 +140,13 @@ T* EntityManager::GetEntity(unsigned int id)
 {
     return dynamic_cast<T*>(data.at(id));
 }
+
+template Item* EntityManager::GetEntity<Item>(unsigned int id);
+template Weapon* EntityManager::GetEntity<Weapon>(unsigned int id);
+template Armor* EntityManager::GetEntity<Armor>(unsigned int id);
+template Creature* EntityManager::GetEntity<Creature>(unsigned int id);
+template Area* EntityManager::GetEntity<Area>(unsigned int id);
+template Door* EntityManager::GetEntity<Door>(unsigned int id);
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
 template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }

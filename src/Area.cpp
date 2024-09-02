@@ -81,18 +81,20 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
                 {
                     i++; //move into the inventory array token
                     int endOfItems = tokens[i].end;
+                    EntityManager::GetInstance()->GetPD()->system->logToConsole("Start of items:");
                     while(tokens[i].end < endOfItems)
                     {
                         i++;
                         if(tokens[i].type != JSMN_ARRAY) continue;
                         int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
+                        EntityManager::GetInstance()->GetPD()->system->logToConsole("Item ID: %d, Item Count: %d", itemID, itemCount);
                         decodedInventory.Add(EntityManager::GetInstance()->GetEntity<Item>(itemID), itemCount);
                     }
                 }
                 else if(strcmp(parseProperty, "weapons") == 0)
                 {
-                    i++; //move into the inventory array token
+                    i++; //move into the weapons array token
                     int endOfItems = tokens[i].end;
                     while(tokens[i].end < endOfItems)
                     {
@@ -105,7 +107,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
                 }
                 else if(strcmp(parseProperty, "armor") == 0)
                 {
-                    i++; //move into the inventory array token
+                    i++; //move into the armor array token
                     int endOfItems = tokens[i].end;
                     while(tokens[i].end < endOfItems)
                     {
@@ -118,7 +120,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
                 }
                 else if(strcmp(parseProperty, "creatures") == 0)
                 {
-                    i++; //move into the doors array token
+                    i++; //move into the creatures array token
                     int numOfCreatures = tokens[i].size;
                     for (int j = 0; j < numOfCreatures; j++)
                     {

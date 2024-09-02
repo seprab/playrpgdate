@@ -1,3 +1,4 @@
+#include <cstring>
 #include "Dialogue.h"
 #include "Utils.h"
 

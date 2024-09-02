@@ -18,10 +18,10 @@ private:
     std::pair<std::string, std::string> areas;
 
 public:
-    Door(unsigned int _id, std::string _description, std::pair<std::string, std::string> _areas, int _locked, Item* _key = nullptr);
+    Door(unsigned int _id, std::string _description, int _locked, Item* _key = nullptr, std::pair<std::string, std::string> _areas = std::make_pair("", ""));
 
     std::string GetDescription();
-    int GetLocked();
+    int GetLocked() const;
     void SetLocked(int _locked);
 
     Item* GetKey();

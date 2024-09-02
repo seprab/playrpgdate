@@ -15,7 +15,6 @@ public:
 
 private:
     PlaydateAPI* pd;
-    EntityManager* entityManager;
     std::string fontpath;
     LCDFont* font;
     int x, y, dx, dy;

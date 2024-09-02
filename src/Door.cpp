@@ -6,8 +6,8 @@
 #include "Entity.h"
 #include "EntityManager.h"
 
-Door::Door(unsigned int _id, std::string _description, std::pair<std::string, std::string> _areas, int _locked, Item* _key)
-        : Entity(_id), description(_description), areas(_areas), locked(_locked), key(_key)
+Door::Door(unsigned int _id, std::string _description, int _locked, Item* _key, std::pair<std::string, std::string> _areas)
+        : Entity(_id), description(_description), locked(_locked), key(_key), areas(_areas)
 {
 
 }
@@ -17,7 +17,7 @@ std::string Door::GetDescription()
     return description;
 }
 
-int Door::GetLocked()
+int Door::GetLocked() const
 {
     return locked;
 }
@@ -39,7 +39,7 @@ std::pair<std::string, std::string> Door::GetArea()
 
 void Door::SetArea(std::pair<std::string, std::string> _areas)
 {
-    areas = _areas;
+    areas = std::move(_areas);
 }
 
 void *Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)

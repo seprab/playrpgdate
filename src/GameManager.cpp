@@ -1,4 +1,5 @@
 #include "GameManager.h"
+#include "Area.h"
 
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
@@ -13,7 +14,8 @@ GameManager::GameManager(PlaydateAPI* api)
     if (font == nullptr)
         pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
-    entityManager = new EntityManager(pd);
+    pd->system->logToConsole("Hello World!");
+    EntityManager::GetInstance(api)->LoadJSON<Area>("data/areas.json");
 }
 void GameManager::Update()
 {
