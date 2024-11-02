@@ -24,7 +24,7 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 - CMake options: -DPROJECT_NAME=CardoBlast
 - Build directory: <ProjectDir>/build/simulator
 7. "Device"
-- Name: Simulator
+- Name: Device
 - Build type: Debug
 - CMake options: -DPROJECT_NAME="CardoBlast" -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
 - Build directory: <ProjectDir>/build/device
