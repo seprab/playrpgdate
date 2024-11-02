@@ -10,24 +10,29 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 
 ### CLion
 1. Open the project in CLion
-2. Open Run/Debug Configurations
-3. Add a new configuration
-- Name: CardoBlast
-- Target: CardoBlast
-- Executable: (~/Developer/PlaydateSDK/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator)
-- Program arguments: <ProjectDir>/CardoBlast.pdx
-4. Go to Clion Preferences -> Build, Execution, Deployment -> CMake
-5. Add two profiles
-6. "Simulator"
-- Name: Simulator
-- Build type: Debug
-- CMake options: -DPROJECT_NAME=CardoBlast
-- Build directory: <ProjectDir>/build/simulator
-7. "Device"
-- Name: Device
-- Build type: Debug
-- CMake options: -DPROJECT_NAME="CardoBlast" -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
-- Build directory: <ProjectDir>/build/device
+2. Go to Clion Preferences -> Build, Execution, Deployment -> CMake
+3. Add two profiles
+    1. "Simulator"
+        - Name: Simulator
+        - Build type: Debug
+        - CMake options: -DPROJECT_NAME=CardoBlast
+        - Build directory: <ProjectDir>/build/simulator
+    2. "Device"
+        - Name: Device
+        - Build type: Debug
+        - CMake options: -DPROJECT_NAME="CardoBlast" -DCMAKE_TOOLCHAIN_FILE=/Users/sergio.prada/Developer/PlaydateSDK/C_API/buildsupport/arm.cmake
+        - Build directory: <ProjectDir>/build/device
+4. Open Run/Debug Configurations
+5. Add a new configuration
+    - Name: CardoBlast
+    - Target: CardoBlast
+    - Executable: (~/Developer/PlaydateSDK/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator)
+    - Program arguments: <ProjectDir>/CardoBlast.pdx
+
+#### Screenshot Win references:
+![CLion Config A](./imgs/clion_cmake_win_config_a.png)
+![CLion Config B](./imgs/clion_cmake_win_config_b.png)
+
 
 
 ## Credits
@@ -38,7 +43,11 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 
 ## Disclaimer
 
-This repository incorporates the submodule [playdate-cpp](https://github.com/nstbayless/playdate-cpp). Please refer to its README for guidance on configuration and setup. This project has been developed and tested on a Mac M1, running Sonoma 14.15.
+This repository incorporates the submodule [playdate-cpp](https://github.com/nstbayless/playdate-cpp). Please refer to its README for guidance on configuration and setup. 
+
+I tested this one:
+- Mac M1, running Sonoma 14.15.
+- Win 11
 
 ## Additional requirements to the official guide
 - PLaydate SDK path Environment variable is required!

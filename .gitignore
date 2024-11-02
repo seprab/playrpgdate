@@ -1,5 +1,7 @@
 *.pdx
+*.dll
 build/
 .idea/
 .DS_Store
 .vscode/
+.sentry-native/
