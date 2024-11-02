@@ -2,7 +2,6 @@
 #define ITEM_H
 
 #include <string>
-#include <pd_api/pd_api_json.h>
 #include <pd_api.h>
 #include "Entity.h"
 
