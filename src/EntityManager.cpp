@@ -50,6 +50,7 @@ PlaydateAPI* EntityManager::GetPD() {
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName)
 {
+    pd->system->logToConsole("Loading %s data from %s", EntityToString<T>().c_str(), fileName);
     auto* fileStat = new FileStat;
     pd->file->stat(fileName, fileStat);
     SDFile* file = pd->file->open(fileName, kFileRead);
@@ -65,74 +66,84 @@ void EntityManager::LoadJSON(const char* fileName)
         return;
     }
     pd->file->close(file);
-    char* charBuffer = static_cast<char*>(buffer);
 
+
+    char* charBuffer = static_cast<char*>(buffer);
     jsmn_parser p;
     jsmntok_t t[128]; //* We expect no more than 128 JSON tokens *//*
     jsmn_init(&p);
     int r = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
 
 
-    if(std::is_same<T, Item>::value)
+    if(std::is_same_v<T, Item>)
     {
+        //TODO: Can I use the DecodeJson as a static method? instead of creating an object
         Item dummy{};
-        auto* items = static_cast<std::vector<Item>*>(dummy.DecodeJson(charBuffer, t, r));
+        void* decodedJson = dummy.DecodeJson(charBuffer, t, r);
+        auto* items = static_cast<std::vector<Item>*>(decodedJson);
         for (Item item : *items)
         {
             data[item.GetID()] = &item;
         }
     }
-    else if(std::is_same<T, Area>::value)
+    else if(std::is_same_v<T, Area>)
     {
         //TODO: I'm working on validating the area deserialization
         Area dummy{};
-        dummy.DecodeJson(charBuffer, t, r);
+        void* decodedJson = dummy.DecodeJson(charBuffer, t, r);
+        auto* areas = static_cast<std::vector<Area>*>(decodedJson);
+
         //auto areas = Area::DecodeJson(charBuffer, t, r);
         //for (auto& area : *areas)
         //{
         //    data[area.GetID()] = &area;
         //}
     }
-    /*else if(std::is_same<T, Weapon>::value)
+    else if(std::is_same_v<T, Weapon>)
     {
-        auto weapons = Weapon::DecodeJson(charBuffer, t, r);
-        for (auto& weapon : *weapons)
-        {
-            data[weapon.GetID()] = &weapon;
-        }
+        //TODO: Not implemented
+        // auto weapons = Weapon::DecodeJson(charBuffer, t, r);
+        // for (auto& weapon : *weapons)
+        // {
+        //     data[weapon.GetID()] = &weapon;
+        // }
     }
-    else if(std::is_same<T, Armor>::value)
+    else if(std::is_same_v<T, Armor>)
     {
-        auto armors = Armor::DecodeJson(charBuffer, t, r);
-        for (auto& armor : *armors)
-        {
-            data[armor.GetID()] = &armor;
-        }
+        //TODO: Not implemented
+        // auto armors = Armor::DecodeJson(charBuffer, t, r);
+        // for (auto& armor : *armors)
+        // {
+        //     data[armor.GetID()] = &armor;
+        // }
     }
-    else if(std::is_same<T, Creature>::value)
+    else if(std::is_same_v<T, Creature>)
     {
-        auto creatures = Creature::DecodeJson(charBuffer, t, r);
-        for (auto& creature : *creatures)
-        {
-            data[creature.GetID()] = &creature;
-        }
+        //TODO: Not implemented
+        // auto creatures = Creature::DecodeJson(charBuffer, t, r);
+        // for (auto& creature : *creatures)
+        // {
+        //     data[creature.GetID()] = &creature;
+        // }
     }
-    else if(std::is_same<T, Area>::value)
+    else if(std::is_same_v<T, Area>)
     {
-        auto areas = Area::DecodeJson(charBuffer, t, r);
-        for (auto& area : *areas)
-        {
-            data[area.GetID()] = &area;
-        }
+        //TODO: Not implemented
+        // auto areas = Area::DecodeJson(charBuffer, t, r);
+        // for (auto& area : *areas)
+        // {
+        //     data[area.GetID()] = &area;
+        // }
     }
-    else if(std::is_same<T, Door>::value)
+    else if(std::is_same_v<T, Door>)
     {
-        auto doors = Door::DecodeJson(charBuffer, t, r);
-        for (auto& door : *doors)
-        {
-            data[door.GetID()] = &door;
-        }
-    }*/
+        //TODO: Not implemented
+        // auto doors = Door::DecodeJson(charBuffer, t, r);
+        // for (auto& door : *doors)
+        // {
+        //     data[door.GetID()] = &door;
+        // }
+    }
 }
 
 template <typename T>

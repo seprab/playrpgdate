@@ -4,10 +4,11 @@ char* Utils::Subchar(const char* source, int start, int end)
 {
     int length = end - start;
     //allocating the memory for the name equals the length of the target + 1 for the null terminator
-    char* sub = new char[length];
+    char* subchar = new char[length+1];
     for(int i = 0; i < length; i++)
     {
-        sub[i] = source[start + i];
+        subchar[i] = source[start + i];
     }
-    return sub;
+    subchar[length] = '\0'; //null terminator
+    return subchar;
 }

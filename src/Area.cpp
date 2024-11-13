@@ -49,16 +49,17 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
             Inventory decodedInventory{};
             std::vector<Creature*> decodedCreatures{};
 
-            int endOfObject = tokens[i].end;
+            int endOfObject = tokens[i].end; //get the end of the Area object
+            i++; //move into the first property of the Area object. Otherwise, the while is invalid
             while(tokens[i].end < endOfObject)
             {
-                i++;
                 if(tokens[i].type != JSMN_STRING) continue;
                 char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
 
                 if(strcmp(parseProperty, "name") == 0)
                 {
                     decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
+                    i+=2; //move to the next property
                 }
                 else if(strcmp(parseProperty, "dialogue") == 0)
                 {
@@ -131,6 +132,10 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
                 }
             }
             decodedAreas->emplace_back(0, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
+        }
+        else
+        {
+            EntityManager::GetInstance()->GetPD()->system->logToConsole("Error: Json object is formatted incorrectly");
         }
     }
     return decodedAreas;
