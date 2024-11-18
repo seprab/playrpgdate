@@ -33,7 +33,25 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 ![CLion Config A](./imgs/clion_cmake_win_config_a.png)
 ![CLion Config B](./imgs/clion_cmake_win_config_b.png)
 
+### Personal Next Steps
+Deserialization of Area is going good. I reached the point where I start deserializing the doors
+from the area description, but I cannot continue because doors must already been deserialized in
+the Entity manager. For clarity:
+- In ()[src/GameManager.cpp] I am commanding to deserialize ()[Source/data/areas.json] first.
+- And in ()[src/Area.cpp] I am stuck at doors mapping in entity manager. line 83.
+- So, before that, I must deserialize and add mapping in EntityManager.data;
+-  doors in ()[src/GameManager.cpp] line 18.
+-  items in ()[src/GameManager.cpp] line 19. Also, armors and weapons?
+-  creatures in ()[src/GameManager.cpp] line 20.
+-  And areas in the end
 
+Yet, I need to define the ids of everything before continuing. For example:
+- IDs in range [100, 200] for items
+- IDs in range [200, 300] for armors
+- IDs in range [300, 400] for weapons
+- IDs in range [400, 500] for creatures
+- IDs in range [500, 600] for areas
+- IDs in range [600, 700] for doors
 
 ## Credits
 - [UtilForever RPG](https://github.com/utilForever/SimpleRPG-Text/tree/master).

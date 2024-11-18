@@ -37,14 +37,15 @@ std::vector<Creature>& Area::GetCreature()
     return creatures;
 }
 
-void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+{
     auto decodedAreas = new std::vector<Area>();
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type == JSMN_OBJECT)
         {
             char* decodedName{};
-            Dialogue decodedDialogue{};
+            Dialogue decodedDialogue;
             std::vector<Door*> decodedDoors{};
             Inventory decodedInventory{};
             std::vector<Creature*> decodedCreatures{};
@@ -53,9 +54,12 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
             i++; //move into the first property of the Area object. Otherwise, the while is invalid
             while(tokens[i].end < endOfObject)
             {
-                if(tokens[i].type != JSMN_STRING) continue;
+                if(tokens[i].type != JSMN_STRING)
+                {
+                    i++;
+                    continue;
+                }
                 char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-
                 if(strcmp(parseProperty, "name") == 0)
                 {
                     decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
@@ -64,16 +68,18 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
                 else if(strcmp(parseProperty, "dialogue") == 0)
                 {
                     i++; //move into the dialogue token
-                    char* dialogueBuffer = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-                    decodedDialogue = Dialogue(dialogueBuffer);
+                    decodedDialogue = Dialogue(buffer, tokens, i);
                 }
                 else if(strcmp(parseProperty, "doors") == 0)
                 {
                     i++; //move into the doors array token
-                    int numOfDoors = (tokens[i].size);
+                    int numOfDoors = tokens[i].size;
+                    i++; //either move to the first element of the array or move to the next property
+                    if (numOfDoors == 0) continue;
                     for (int j = 0; j < numOfDoors; j++)
                     {
-                        int decodedDoor = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
+                        char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
+                        int decodedDoor = std::stoi(door);
                         decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntity<Door>(decodedDoor));
                     }
                     i=i+numOfDoors;

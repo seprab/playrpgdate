@@ -1,8 +1,52 @@
-{
-	"door_01_02": {
+[
+	{
+		"id": 1111,
 		"description": "sturdy wooden door",
-		"areas": ["area_01", "area_02"],
+		"areas": [
+			"area_01",
+			"area_02"
+		],
 		"locked": 1,
 		"key": "item_iron_key"
+	},
+	{
+		"id": 1112,
+		"description": "rusty iron door",
+		"areas": [
+			"area_01",
+			"area_03"
+		],
+		"locked": 0,
+		"key": ""
+	},
+	{
+		"id": 1113,
+		"description": "heavy stone door",
+		"areas": [
+			"area_01",
+			"area_04"
+		],
+		"locked": 0,
+		"key": ""
+	},
+	{
+		"id": 1114,
+		"description": "sturdy wooden door",
+		"areas": [
+			"area_02",
+			"area_01"
+		],
+		"locked": 0,
+		"key": ""
+	},
+	{
+		"id": 1115,
+		"description": "rusty iron door",
+		"areas": [
+			"area_02",
+			"area_03"
+		],
+		"locked": 1,
+		"key": "item_iron"
 	}
-}
+]

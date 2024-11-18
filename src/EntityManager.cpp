@@ -30,7 +30,6 @@ EntityManager* EntityManager::GetInstance()
 {
     return instance;
 }
-
 EntityManager::~EntityManager()
 {
     for (auto& entity : data)
@@ -42,7 +41,6 @@ EntityManager::~EntityManager()
         }
     }
 }
-
 PlaydateAPI* EntityManager::GetPD() {
     return pd;
 }
@@ -54,14 +52,16 @@ void EntityManager::LoadJSON(const char* fileName)
     auto* fileStat = new FileStat;
     pd->file->stat(fileName, fileStat);
     SDFile* file = pd->file->open(fileName, kFileRead);
-    if(file==nullptr) {
+    if(file==nullptr)
+    {
         pd->system->logToConsole("Error opening the file %s: %s", fileName, pd->file->geterr());
         return;
     }
     //allocate memory for the buffer before reading data into it.
     void* buffer = new char[fileStat->size + 1]; // +1 for the null terminator
     int readResult = pd->file->read(file, buffer, fileStat->size);
-    if(readResult < 0) {
+    if(readResult < 0)
+    {
         pd->system->logToConsole("Error reading the file %s: %s", fileName, pd->file->geterr());
         return;
     }
@@ -72,14 +72,13 @@ void EntityManager::LoadJSON(const char* fileName)
     jsmn_parser p;
     jsmntok_t t[128]; //* We expect no more than 128 JSON tokens *//*
     jsmn_init(&p);
-    int r = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
-
+    const int tokenNumber = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
 
     if(std::is_same_v<T, Item>)
     {
         //TODO: Can I use the DecodeJson as a static method? instead of creating an object
         Item dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, r);
+        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
         auto* items = static_cast<std::vector<Item>*>(decodedJson);
         for (Item item : *items)
         {
@@ -90,7 +89,7 @@ void EntityManager::LoadJSON(const char* fileName)
     {
         //TODO: I'm working on validating the area deserialization
         Area dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, r);
+        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
         auto* areas = static_cast<std::vector<Area>*>(decodedJson);
 
         //auto areas = Area::DecodeJson(charBuffer, t, r);
@@ -126,15 +125,6 @@ void EntityManager::LoadJSON(const char* fileName)
         //     data[creature.GetID()] = &creature;
         // }
     }
-    else if(std::is_same_v<T, Area>)
-    {
-        //TODO: Not implemented
-        // auto areas = Area::DecodeJson(charBuffer, t, r);
-        // for (auto& area : *areas)
-        // {
-        //     data[area.GetID()] = &area;
-        // }
-    }
     else if(std::is_same_v<T, Door>)
     {
         //TODO: Not implemented
@@ -152,12 +142,12 @@ T* EntityManager::GetEntity(unsigned int id)
     return dynamic_cast<T*>(data.at(id));
 }
 
-template Item* EntityManager::GetEntity<Item>(unsigned int id);
-template Weapon* EntityManager::GetEntity<Weapon>(unsigned int id);
-template Armor* EntityManager::GetEntity<Armor>(unsigned int id);
-template Creature* EntityManager::GetEntity<Creature>(unsigned int id);
-template Area* EntityManager::GetEntity<Area>(unsigned int id);
-template Door* EntityManager::GetEntity<Door>(unsigned int id);
+template<> Item* EntityManager::GetEntity<Item>(const unsigned int id) {return dynamic_cast<Item*>(data.at(id));}
+template<> Weapon* EntityManager::GetEntity<Weapon>(const unsigned int id) {return dynamic_cast<Weapon*>(data.at(id));}
+template<> Armor* EntityManager::GetEntity<Armor>(const unsigned int id) {return dynamic_cast<Armor*>(data.at(id));}
+template<> Creature* EntityManager::GetEntity<Creature>(const unsigned int id) {return dynamic_cast<Creature*>(data.at(id));}
+template<> Area* EntityManager::GetEntity<Area>(const unsigned int id) {return dynamic_cast<Area*>(data.at(id));}
+template<> Door* EntityManager::GetEntity<Door>(const unsigned int id) {return dynamic_cast<Door*>(data.at(id));}
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
 template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }

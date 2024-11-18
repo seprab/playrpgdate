@@ -5,22 +5,28 @@
 #include <vector>
 #include <iostream>
 #include "jsmn.h"
-
+struct Choice
+{
+    const char* text;
+    int action;
+    int target;
+};
 class Dialogue
 {
-private:
-    char* description;
-    std::vector<char*> choices;
-
 public:
-    Dialogue();
-    Dialogue(char* _description, std::vector<char*> _choices);
-    Dialogue(char *buffer);
+    Dialogue() = default;
+    Dialogue(char* _description, std::vector<Choice> _choices);
+    Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesIndex);
 
-    void AddChoice(char* choice);
+    void AddChoice(Choice choice);
     unsigned int Size();
 
     int Activate();
+
+private:
+    char* description;
+    std::vector<Choice> choices;
+
 };
 
 #endif

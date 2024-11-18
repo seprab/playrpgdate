@@ -1,46 +1,57 @@
 [
 	{
-		"name" : "area_01",
+		"name":"area_01",
 		"dialogue":
 		{
 			"description": "You are in room 1",
-			"choices": []
-		},
-		"doors": ["door_01_02"],
-		"inventory":
-		{
-			"items":
+			"choices":
 			[
-				[101, 5],
-				[102, 1],
-				[130, 1],
-				[140, 1]
-			],
-			"weapons": [],
-			"armor": []
+				{
+					"choice": "Go to room 2",
+					"action": 0,
+					"target": 2
+				},
+				{
+					"choice": "Get the key",
+					"action": 1,
+					"target": 25
+				},
+				{
+					"choice": "Get blessing",
+					"action": 2,
+					"target": 54
+				}
+			]
 		},
-		"creatures": []
+		"doors":[1111,1112,1113],
+		"items":
+		[
+			[101, 5],
+			[102, 1],
+			[130, 1],
+			[140, 1]
+		],
+		"weapons": [],
+		"armor": [],
+		"creatures":[]
 	},
 	{
-		"name" : "area_02",
+		"name":"area_02",
 		"dialogue":
 		{
 			"description": "You are in room 2",
 			"choices": []
 		},
-		"doors": ["door_01_02"],
-		"inventory":
-		{
-			"items":
-			[
-				[101, 5],
-				[102, 1],
-				[130, 1],
-				[140, 1]
-			],
-			"weapons": [],
-			"armor": []
-		},
+		"doors":[1114,1115],
+		"items":
+		[
+			[101, 5],
+			[102, 1],
+			[130, 1],
+			[140, 1]
+		],
+		"weapons": [],
+		"armor": [],
 		"creatures":
 		[
 			2049,
