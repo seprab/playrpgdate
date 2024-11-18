@@ -37,13 +37,13 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 Deserialization of Area is going good. I reached the point where I start deserializing the doors
 from the area description, but I cannot continue because doors must already been deserialized in
 the Entity manager. For clarity:
-- In ()[src/GameManager.cpp] I am commanding to deserialize ()[Source/data/areas.json] first.
-- And in ()[src/Area.cpp] I am stuck at doors mapping in entity manager. line 83.
+- In [GameManager](src/GameManager.cpp) I am commanding to deserialize [areas](Source/data/areas.json) first.
+- And in [Area](src/Area.cpp) I am stuck at doors mapping in entity manager. line 83.
 - So, before that, I must deserialize and add mapping in EntityManager.data;
--  doors in ()[src/GameManager.cpp] line 18.
--  items in ()[src/GameManager.cpp] line 19. Also, armors and weapons?
--  creatures in ()[src/GameManager.cpp] line 20.
--  And areas in the end
+  - doors in [GameManager](src/GameManager.cpp) line 18.
+  - items in [GameManager](src/GameManager.cpp) line 19. Also, armors and weapons?
+  - creatures in [GameManager](src/GameManager.cpp) line 20.
+  - And areas in the end
 
 Yet, I need to define the ids of everything before continuing. For example:
 - IDs in range [100, 200] for items
