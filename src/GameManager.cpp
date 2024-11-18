@@ -15,6 +15,9 @@ GameManager::GameManager(PlaydateAPI* api)
         pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     pd->system->logToConsole("Hello World!");
+    EntityManager::GetInstance(api)->LoadJSON<Item>("data/items.json");
+    EntityManager::GetInstance(api)->LoadJSON<Door>("data/doors.json");
+    EntityManager::GetInstance(api)->LoadJSON<Weapon>("data/weapons.json");
     EntityManager::GetInstance(api)->LoadJSON<Area>("data/areas.json");
 }
 void GameManager::Update()

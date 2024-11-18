@@ -1,13 +1,15 @@
-{
-	"weapon_dagger": {
+[
+	{
+		"id": 500,
 		"name": "Dagger",
 		"damage": 2,
 		"description": "A small blade, probably made of iron. Keep the sharp end away from your body."
 	},
 
-	"weapon_rat_claw": {
+	{
+		"id": 501,
 		"name": "_rat_claw",
 		"damage": 1,
-		"description": ""
+		"description": "A small claw, probably from a rat. It's not very sharp."
 	}
-}
+]

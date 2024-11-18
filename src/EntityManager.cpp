@@ -76,7 +76,6 @@ void EntityManager::LoadJSON(const char* fileName)
 
     if(std::is_same_v<T, Item>)
     {
-        //TODO: Can I use the DecodeJson as a static method? instead of creating an object
         Item dummy{};
         void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
         auto* items = static_cast<std::vector<Item>*>(decodedJson);
@@ -127,12 +126,13 @@ void EntityManager::LoadJSON(const char* fileName)
     }
     else if(std::is_same_v<T, Door>)
     {
-        //TODO: Not implemented
-        // auto doors = Door::DecodeJson(charBuffer, t, r);
-        // for (auto& door : *doors)
-        // {
-        //     data[door.GetID()] = &door;
-        // }
+        Door dummy{};
+        void* decodedDoors = dummy.DecodeJson(charBuffer, t, tokenNumber);
+        auto* doors = static_cast<std::vector<Door>*>(decodedDoors);
+        for (Door door : *doors)
+        {
+            data[door.GetID()] = &door;
+        }
     }
 }
 

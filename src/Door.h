@@ -12,22 +12,18 @@ class EntityManager;
 class Door : public Entity
 {
 private:
-    std::string description;
-    int locked;
-    Item* key;
-    std::pair<std::string, std::string> areas;
+    bool locked;
+    int key;
+    std::pair<int, int> areas;
 
 public:
-    Door(unsigned int _id, std::string _description, int _locked, Item* _key = nullptr, std::pair<std::string, std::string> _areas = std::make_pair("", ""));
+    Door()=default;
+    Door(int _id, bool _locked, int _keyId, int _areaA, int _areaB);
 
-    std::string GetDescription();
     int GetLocked() const;
     void SetLocked(int _locked);
-
-    Item* GetKey();
-
-    std::pair<std::string, std::string> GetArea();
-    void SetArea(std::pair<std::string, std::string> _areas);
+    int GetKey();
+    std::pair<int, int> GetAreas();
     void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 };
 
