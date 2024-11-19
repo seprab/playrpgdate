@@ -19,6 +19,7 @@ GameManager::GameManager(PlaydateAPI* api)
     EntityManager::GetInstance(api)->LoadJSON<Door>("data/doors.json");
     EntityManager::GetInstance(api)->LoadJSON<Weapon>("data/weapons.json");
     EntityManager::GetInstance(api)->LoadJSON<Armor>("data/armors.json");
+    EntityManager::GetInstance(api)->LoadJSON<Creature>("data/creatures.json");
     EntityManager::GetInstance(api)->LoadJSON<Area>("data/areas.json");
 }
 void GameManager::Update()

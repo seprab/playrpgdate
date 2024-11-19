@@ -1,12 +1,18 @@
 [
 	{
 		"id": 500,
+		"name": "Nothing",
+		"damage": 0,
+		"description": "You have nothing in your hands. You should probably find something to defend yourself with"
+	},
+	{
+		"id": 501,
 		"name": "Dagger",
 		"damage": 2,
 		"description": "A small blade, probably made of iron. Keep the sharp end away from your body."
 	},
 	{
-		"id": 501,
+		"id": 502,
 		"name": "Rat Claw",
 		"damage": 1,
 		"description": "A small claw, probably from a rat. It's not very sharp."

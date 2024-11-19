@@ -1,5 +1,11 @@
 [
 	{
+		"id": 400,
+		"name": "None",
+		"defense": 0,
+		"description": "No armor at all. You're completely unprotected."
+	},
+	{
 		"id": 401,
 		"name": "Leather Armor",
 		"defense": 1,

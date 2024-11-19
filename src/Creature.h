@@ -16,53 +16,50 @@ class Door;
 class Creature : public Entity
 {
 private:
-    std::string name;
+    char* name{};
+    float hp{};
+    float maxHP{};
+    int strength{};
+    int agility{};
+    int constitution{};
+    float evasion{};
+    unsigned int xp{};
+    int weapon{};
+    int armor{};
 
-    int hp;
-    int maxHP;
-    int strength;
-    int agility;
-    double evasion;
-    unsigned int xp;
-
-    Inventory* inventory;
-
-    Weapon* equippedWeapon;
-    Armor* equippedArmor;
-
-    std::string currentArea;
+    Inventory* inventory{};
+    Weapon* equippedWeapon{};
+    Armor* equippedArmor{};
 
 public:
-    Creature(unsigned int _id, std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp);
-    std::string GetName();
-
-    int GetHP();
-    void SetHP(int _hp);
-    int GetMaxHP();
-    void SetMaxHP(int _maxHP);
-    int GetStrength();
+    Creature()=default;
+    Creature(unsigned int _id, char* _name, float _maxHp, int _strength, int _agility,
+             int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
+    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    char* GetName();
+    float GetHP() const;
+    void SetHP(float _hp);
+    float GetMaxHP() const;
+    void SetMaxHP(float _maxHP);
+    int GetStrength() const;
     void SetStrength(int _strength);
-    int GetAgility();
+    int GetAgility() const;
     void SetAgility(int _agility);
-
-    unsigned int GetXP();
+    int GetConstitution() const;
+    void SetConstitution(int _constitution);
+    float GetEvasion() const;
+    void SetEvasion(float _evasion);
+    unsigned int GetXP() const;
 
     Inventory* GetInventory();
-
     Weapon* GetEquippedWeapon();
     Armor* GetEquippedArmor();
-
-    std::string GetCurrentArea();
-    void SetCurrentArea(std::string _currentArea);
 
     void EquipWeapon(Weapon* weapon);
     void EquipArmor(Armor* armor);
 
-    Area* GetAreaPointer(EntityManager* manager);
-
     int Attack(Creature* target);
-
-    int Traverse(Door* door);
+    int TraverseDoor(Door* door);
 };
 
 #endif
