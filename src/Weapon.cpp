@@ -11,8 +11,8 @@ Weapon::Weapon(unsigned int _id, char* _name, char* _description, int _damage)
 
 }
 
-int Weapon::GetDamage() {
-    return 0;
+int Weapon::GetDamage() const {
+    return damage;
 }
 
 void *Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
@@ -22,10 +22,10 @@ void *Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
 
-        unsigned int decodedId{};
-        char* decodedName{};
-        int decodedDamage{};
-        char* decodedDescription{};
+        unsigned int decodedId{0};
+        char* decodedName{nullptr};
+        int decodedDamage{-1};
+        char* decodedDescription{nullptr};
 
         while(i<tokens[size].end)
         {
@@ -60,7 +60,7 @@ void *Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
             {
                 i++;
             }
-            if (decodedId!=0 && decodedDamage!=0 && decodedDescription != nullptr && decodedName != nullptr)
+            if (decodedId!=0 && decodedDamage!=-1 && decodedDescription != nullptr && decodedName != nullptr)
             {
                 Weapon decodedWeapon {decodedId, decodedName, decodedDescription, decodedDamage};
                 weapons_decoded->emplace_back(decodedWeapon);

@@ -1,0 +1,44 @@
+[
+	{
+		"id": 401,
+		"name": "Leather Armor",
+		"defense": 1,
+		"description": "Armor made from tanned animal hide. It smells a bit funny, but it'd do the job."
+	},
+	{
+		"id": 402,
+		"name": "Chainmail Armor",
+		"defense": 2,
+		"description": "Armor made from interlocking metal rings. It's a bit heavy, but it's very effective."
+	},
+	{
+		"id": 403,
+		"name": "Plate Armor",
+		"defense": 3,
+		"description": "Armor made from large metal plates. It's very heavy, but it's the best protection you can get."
+	},
+	{
+		"id": 404,
+		"name": "Cloth Armor",
+		"defense": 0,
+		"description": "Armor made from woven cloth. It's not very protective, but it's light and comfortable."
+	},
+	{
+		"id": 405,
+		"name": "Robes",
+		"defense": 0,
+		"description": "Flowing robes made from fine silk. They're not very protective, but they look very fancy."
+	},
+	{
+		"id": 406,
+		"name": "Tunic",
+		"defense": 0,
+		"description": "A simple tunic made from rough cloth. It's not very protective, but it's better than nothing."
+	},
+	{
+		"id": 407,
+		"name": "Shirt",
+		"defense": 0,
+		"description": "A simple shirt made from soft cotton. It's not very protective, but it's comfortable."
+	}
+]

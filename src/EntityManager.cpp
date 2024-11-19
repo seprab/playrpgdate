@@ -109,12 +109,13 @@ void EntityManager::LoadJSON(const char* fileName)
     }
     else if(std::is_same_v<T, Armor>)
     {
-        //TODO: Not implemented
-        // auto armors = Armor::DecodeJson(charBuffer, t, r);
-        // for (auto& armor : *armors)
-        // {
-        //     data[armor.GetID()] = &armor;
-        // }
+        Armor dummy{};
+        void* decodedArmors = dummy.DecodeJson(charBuffer, t, tokenNumber);
+        auto* armors = static_cast<std::vector<Armor>*>(decodedArmors);
+        for (Armor armor : *armors)
+        {
+            data[armor.GetID()] = &armor;
+        }
     }
     else if(std::is_same_v<T, Creature>)
     {

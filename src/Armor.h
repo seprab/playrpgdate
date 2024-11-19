@@ -9,13 +9,13 @@ class EntityManager;
 class Armor : public Item
 {
 private:
-    int defense;
+    int defense=0;
 
 public:
-    Armor(unsigned int _id, std::string _name, std::string _description, int _defense);
-
-    int GetDefense();
-
+    Armor()=default;
+    Armor(unsigned int _id, char* _name, char* _description, int _defense);
+    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    [[nodiscard]] int GetDefense() const;
 };
 
 #endif
