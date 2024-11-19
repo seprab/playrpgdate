@@ -12,10 +12,10 @@ private:
     int damage;
 
 public:
-    Weapon(unsigned int _id, std::string _name, std::string _description, int _damage);
-
+    Weapon()=default;
+    Weapon(unsigned int _id, char* _name, char* _description, int _damage);
+    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
     int GetDamage();
-
 };
 
 #endif

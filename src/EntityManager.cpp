@@ -99,12 +99,13 @@ void EntityManager::LoadJSON(const char* fileName)
     }
     else if(std::is_same_v<T, Weapon>)
     {
-        //TODO: Not implemented
-        // auto weapons = Weapon::DecodeJson(charBuffer, t, r);
-        // for (auto& weapon : *weapons)
-        // {
-        //     data[weapon.GetID()] = &weapon;
-        // }
+        Weapon dummy{};
+        void* decodedWeapons = dummy.DecodeJson(charBuffer, t, tokenNumber);
+        auto* weapons = static_cast<std::vector<Weapon>*>(decodedWeapons);
+        for (Weapon weapon : *weapons)
+        {
+            data[weapon.GetID()] = &weapon;
+        }
     }
     else if(std::is_same_v<T, Armor>)
     {

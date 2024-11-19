@@ -9,7 +9,7 @@
 #include "Utils.h"
 
 
-Door::Door(int _id, bool _locked, int _keyId, int _areaA, int _areaB)
+Door::Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB)
         : Entity(_id), locked(_locked), key(_keyId), areas(std::make_pair(_areaA, _areaB))
 {
 
@@ -42,7 +42,7 @@ void *Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
 
-        int decodedId{};
+        unsigned int decodedId{};
         int decodedKey{};
         bool decodedLocked{};
         int decodedAreaA{};

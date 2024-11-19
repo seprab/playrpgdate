@@ -5,10 +5,9 @@
 		"damage": 2,
 		"description": "A small blade, probably made of iron. Keep the sharp end away from your body."
 	},
-
 	{
 		"id": 501,
-		"name": "_rat_claw",
+		"name": "Rat Claw",
 		"damage": 1,
 		"description": "A small claw, probably from a rat. It's not very sharp."
 	}

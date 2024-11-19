@@ -18,7 +18,7 @@ private:
 
 public:
     Door()=default;
-    Door(int _id, bool _locked, int _keyId, int _areaA, int _areaB);
+    Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB);
 
     int GetLocked() const;
     void SetLocked(int _locked);
