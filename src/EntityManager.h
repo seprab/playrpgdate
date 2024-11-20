@@ -13,17 +13,16 @@ private:
     static PlaydateAPI* pd;
     std::map<unsigned int, Entity*> data;
 
-    // Private constructor
-    explicit EntityManager(PlaydateAPI* pdApi);
 
 public:
+    explicit EntityManager(PlaydateAPI* pdApi);
+
     // Deleted copy constructor and assignment operator
     EntityManager(const EntityManager&) = delete;
     EntityManager& operator=(const EntityManager&) = delete;
 
     // Method to get the instance of the class
     static EntityManager* GetInstance();
-    static EntityManager* GetInstance(PlaydateAPI* pdApi);
 
     ~EntityManager();
 

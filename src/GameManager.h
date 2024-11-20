@@ -9,6 +9,7 @@ class GameManager {
 
 public:
     explicit GameManager(PlaydateAPI* api);
+    ~GameManager();
     void Update();
     static constexpr int TEXT_WIDTH = 86;
     static constexpr int TEXT_HEIGHT = 16;

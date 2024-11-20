@@ -15,12 +15,7 @@ GameManager::GameManager(PlaydateAPI* api)
         pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     pd->system->logToConsole("Initialize asset manager");
-    EntityManager::GetInstance(api)->LoadJSON<Item>("data/items.json");
-    EntityManager::GetInstance(api)->LoadJSON<Door>("data/doors.json");
-    EntityManager::GetInstance(api)->LoadJSON<Weapon>("data/weapons.json");
-    EntityManager::GetInstance(api)->LoadJSON<Armor>("data/armors.json");
-    EntityManager::GetInstance(api)->LoadJSON<Creature>("data/creatures.json");
-    EntityManager::GetInstance(api)->LoadJSON<Area>("data/areas.json");
+    new EntityManager(api);
 }
 void GameManager::Update()
 {
@@ -42,4 +37,10 @@ void GameManager::Update()
     }
 
     pd->system->drawFPS(0,0);
+}
+
+GameManager::~GameManager()
+{
+    delete EntityManager::GetInstance();
+    pd->system->logToConsole("GameManager destroyed");
 }

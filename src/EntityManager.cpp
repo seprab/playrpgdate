@@ -16,15 +16,20 @@ PlaydateAPI* EntityManager::pd = nullptr;
 
 EntityManager::EntityManager(PlaydateAPI* api)
 {
-    pd = api;
-}
-EntityManager* EntityManager::GetInstance(PlaydateAPI* pdApi)
-{
-    if (instance == nullptr)
+    if (instance!= nullptr)
     {
-        instance = new EntityManager(pdApi);
+        pd->system->logToConsole("EntityManager was already initialized. This is a bug");
+        return;
     }
-    return instance;
+    pd = api;
+    instance = this;
+
+    LoadJSON<Item>("data/items.json");
+    LoadJSON<Door>("data/doors.json");
+    LoadJSON<Weapon>("data/weapons.json");
+    LoadJSON<Armor>("data/armors.json");
+    LoadJSON<Creature>("data/creatures.json");
+    LoadJSON<Area>("data/areas.json");
 }
 EntityManager* EntityManager::GetInstance()
 {
