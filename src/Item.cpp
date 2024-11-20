@@ -9,6 +9,12 @@ Entity(_id), name(itemName), description(itemDescription)
 {
     EntityManager::GetInstance()->GetPD()->system->logToConsole("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
 }
+Item::Item(const Item &item)
+        : Entity(item) {
+    name = item.name;
+    description = item.description;
+
+}
 const char* Item::GetName() const
 {
     return name;
@@ -44,3 +50,5 @@ void* Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
     }
     return items_decoded;
 }
+
+

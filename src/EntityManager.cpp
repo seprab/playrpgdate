@@ -22,6 +22,7 @@ EntityManager::EntityManager(PlaydateAPI* api)
         return;
     }
     pd = api;
+    pd->system->logToConsole("Initialize Entity Manager");
     instance = this;
 
     LoadJSON<Item>("data/items.json");
@@ -86,21 +87,18 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* items = static_cast<std::vector<Item>*>(decodedJson);
         for (Item item : *items)
         {
-            data[item.GetID()] = &item;
+            data[item.GetID()] = new Item(item);
         }
     }
     else if(std::is_same_v<T, Area>)
     {
-        //TODO: I'm working on validating the area deserialization
         Area dummy{};
         void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
         auto* areas = static_cast<std::vector<Area>*>(decodedJson);
-
-        //auto areas = Area::DecodeJson(charBuffer, t, r);
-        //for (auto& area : *areas)
-        //{
-        //    data[area.GetID()] = &area;
-        //}
+        for (auto& area : *areas)
+        {
+            data[area.GetID()] = new Area(area);
+        }
     }
     else if(std::is_same_v<T, Weapon>)
     {
@@ -109,7 +107,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* weapons = static_cast<std::vector<Weapon>*>(decodedWeapons);
         for (Weapon weapon : *weapons)
         {
-            data[weapon.GetID()] = &weapon;
+            data[weapon.GetID()] = new Weapon(weapon);
         }
     }
     else if(std::is_same_v<T, Armor>)
@@ -119,7 +117,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* armors = static_cast<std::vector<Armor>*>(decodedArmors);
         for (Armor armor : *armors)
         {
-            data[armor.GetID()] = &armor;
+            data[armor.GetID()] = new Armor(armor);
         }
     }
     else if(std::is_same_v<T, Creature>)
@@ -129,7 +127,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* creatures = static_cast<std::vector<Creature>*>(decodedCreatures);
         for (Creature creature : *creatures)
         {
-            data[creature.GetID()] = &creature;
+            data[creature.GetID()] = new Creature(creature);
         }
     }
     else if(std::is_same_v<T, Door>)
@@ -139,7 +137,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* doors = static_cast<std::vector<Door>*>(decodedDoors);
         for (Door door : *doors)
         {
-            data[door.GetID()] = &door;
+            data[door.GetID()] = new Door(door);
         }
     }
 }
@@ -150,12 +148,13 @@ T* EntityManager::GetEntity(unsigned int id)
     return dynamic_cast<T*>(data.at(id));
 }
 
-template<> Item* EntityManager::GetEntity<Item>(const unsigned int id) {return dynamic_cast<Item*>(data.at(id));}
-template<> Weapon* EntityManager::GetEntity<Weapon>(const unsigned int id) {return dynamic_cast<Weapon*>(data.at(id));}
-template<> Armor* EntityManager::GetEntity<Armor>(const unsigned int id) {return dynamic_cast<Armor*>(data.at(id));}
-template<> Creature* EntityManager::GetEntity<Creature>(const unsigned int id) {return dynamic_cast<Creature*>(data.at(id));}
-template<> Area* EntityManager::GetEntity<Area>(const unsigned int id) {return dynamic_cast<Area*>(data.at(id));}
-template<> Door* EntityManager::GetEntity<Door>(const unsigned int id) {return dynamic_cast<Door*>(data.at(id));}
+template<> Item* EntityManager::GetEntity<Item>(const unsigned int id) {return dynamic_cast<Item*>(data.find(id)->second);}
+template<> Weapon* EntityManager::GetEntity<Weapon>(const unsigned int id) {return dynamic_cast<Weapon*>(data.find(id)->second);}
+template<> Armor* EntityManager::GetEntity<Armor>(const unsigned int id) {return dynamic_cast<Armor*>(data.find(id)->second);}
+template<> Creature* EntityManager::GetEntity<Creature>(const unsigned int id) {return dynamic_cast<Creature*>(data.find(id)->second);}
+template<> Area* EntityManager::GetEntity<Area>(const unsigned int id) {return dynamic_cast<Area*>(data.find(id)->second);}
+template<> Door* EntityManager::GetEntity<Door>(const unsigned int id){ return dynamic_cast<Door*>(data.find(id)->second);}
+
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
 template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }

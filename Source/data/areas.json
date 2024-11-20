@@ -1,5 +1,6 @@
 [
 	{
+		"id": 9000,
 		"name":"area_01",
 		"dialogue":
 		{
@@ -36,6 +37,7 @@
 		"creatures":[]
 	},
 	{
+		"id": 9001,
 		"name":"area_02",
 		"dialogue":
 		{

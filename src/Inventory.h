@@ -3,6 +3,7 @@
 
 #include <list>
 #include <utility>
+#include <vector>
 #include "EntityManager.h"
 
 class Item;
@@ -12,28 +13,17 @@ class Armor;
 class Inventory
 {
 private:
-    std::list<std::pair<Item*, int>> items;
+    std::vector<Item*> items;
 
 public:
     Inventory();
 
-    void Add(Item* itemToAdd, int count);
-    void Remove(Item* itemToRemove, int count);
+    void Add(int itemId, int count=1);
+    Item* Remove(int itemId);
 
-    int Count(Item* itemToCount);
-    template <typename T>
-    int Count(unsigned int pos);
-
-    template <typename T>
-    T* Get(unsigned int pos);
-
-    int Print(bool label = false);
-    template <typename T>
-    int Print(bool label = false);
-
+    int Count(int itemId);
+    int Print(bool label = true);
     void Clear();
-
-    void Merge(Inventory* inventory);
 };
 
 #endif

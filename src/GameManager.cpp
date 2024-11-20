@@ -14,7 +14,6 @@ GameManager::GameManager(PlaydateAPI* api)
     if (font == nullptr)
         pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
-    pd->system->logToConsole("Initialize asset manager");
     new EntityManager(api);
 }
 void GameManager::Update()

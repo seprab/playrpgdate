@@ -44,6 +44,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
     {
         if (tokens[i].type == JSMN_OBJECT)
         {
+            int decodedId{};
             char* decodedName{};
             Dialogue decodedDialogue;
             std::vector<Door*> decodedDoors{};
@@ -60,7 +61,12 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                     continue;
                 }
                 char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-                if(strcmp(parseProperty, "name") == 0)
+                if(strcmp(parseProperty, "id") == 0)
+                {
+                    decodedId = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
+                    i+=2; //move to the next property
+                }
+                else if(strcmp(parseProperty, "name") == 0)
                 {
                     decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
                     i+=2; //move to the next property
@@ -96,7 +102,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                         int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
                         EntityManager::GetInstance()->GetPD()->system->logToConsole("Item ID: %d, Item Count: %d", itemID, itemCount);
-                        decodedInventory.Add(EntityManager::GetInstance()->GetEntity<Item>(itemID), itemCount);
+                        decodedInventory.Add(itemID, itemCount);
                     }
                 }
                 else if(strcmp(parseProperty, "weapons") == 0)
@@ -109,7 +115,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                         if(tokens[i].type != JSMN_ARRAY) continue;
                         int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        decodedInventory.Add(EntityManager::GetInstance()->GetEntity<Item>(itemID), itemCount);
+                        decodedInventory.Add(itemID, itemCount);
                     }
                 }
                 else if(strcmp(parseProperty, "armor") == 0)
@@ -122,7 +128,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                         if(tokens[i].type != JSMN_ARRAY) continue;
                         int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        decodedInventory.Add(EntityManager::GetInstance()->GetEntity<Item>(itemID), itemCount);
+                        decodedInventory.Add(itemID, itemCount);
                     }
                 }
                 else if(strcmp(parseProperty, "creatures") == 0)
@@ -136,13 +142,10 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                     }
                     i=i+numOfCreatures;
                 }
+                else i++;
             }
-            decodedAreas->emplace_back(0, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
-        }
-        else
-        {
-            EntityManager::GetInstance()->GetPD()->system->logToConsole("Error: Json object is formatted incorrectly");
+            decodedAreas->emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
         }
     }
-    return decodedAreas;
+    return decodedAreas; //TODO: The area is not holding the correct ref to doors, items, creatures, etc.
 }
