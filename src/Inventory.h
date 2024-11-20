@@ -1,9 +1,7 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include <list>
 #include <utility>
-#include <vector>
 #include "EntityManager.h"
 
 class Item;
@@ -13,13 +11,13 @@ class Armor;
 class Inventory
 {
 private:
-    std::vector<Item*> items;
+    std::vector<std::unique_ptr<Item>> items;
 
 public:
     Inventory();
 
     void Add(int itemId, int count=1);
-    Item* Remove(int itemId);
+    std::unique_ptr<Item> Remove(int itemId);
 
     int Count(int itemId);
     int Print(bool label = true);

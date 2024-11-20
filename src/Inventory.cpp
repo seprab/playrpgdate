@@ -33,13 +33,12 @@ void Inventory::Add(int itemId, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        Item* itemRef = EntityManager::GetInstance()->GetEntity<Item>(itemId);
-        Item* itemCopy(itemRef);
-        items.push_back(itemCopy);
+        std::unique_ptr<Item> item = EntityManager::GetInstance()->GetEntityCopy<Item>(itemId);
+        items.push_back(std::move(item));
     }
 }
 
-Item* Inventory::Remove(int itemId)
+std::unique_ptr<Item> Inventory::Remove(int itemId)
 {
     int index = -1;
     for (int j=0; j<items.size(); j++)
@@ -55,8 +54,8 @@ Item* Inventory::Remove(int itemId)
         EntityManager::GetInstance()->GetPD()->system->logToConsole("Item not found in inventory. Expected?");
         return nullptr;
     }
-    Item* outItem = items[index];
-    items.erase(items.begin() + index);
+    std::unique_ptr outItem = std::move(items[index]);
+    items.erase(items.begin() + index); //Validate if this is really required
     return outItem;
 }
 

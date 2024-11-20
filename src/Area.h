@@ -1,8 +1,6 @@
 #ifndef AREA_H
 #define AREA_H
 
-#include <vector>
-#include <string>
 #include "Entity.h"
 #include "Inventory.h"
 #include "Creature.h"

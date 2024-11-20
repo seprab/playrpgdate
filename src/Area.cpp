@@ -1,6 +1,4 @@
 #include <utility>
-#include <vector>
-#include <string>
 #include "Area.h"
 #include "Door.h"
 #include "Entity.h"
@@ -86,7 +84,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                     {
                         char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
                         int decodedDoor = std::stoi(door);
-                        decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntity<Door>(decodedDoor));
+                        //decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Door>(decodedDoor));
                     }
                     i=i+numOfDoors;
                 }
@@ -138,13 +136,13 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                     for (int j = 0; j < numOfCreatures; j++)
                     {
                         int creatureId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
-                        decodedCreatures.emplace_back(EntityManager::GetInstance()->GetEntity<Creature>(creatureId));
+                        //decodedCreatures.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Creature>(creatureId));
                     }
                     i=i+numOfCreatures;
                 }
                 else i++;
             }
-            decodedAreas->emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
+            //decodedAreas->emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
         }
     }
     return decodedAreas; //TODO: The area is not holding the correct ref to doors, items, creatures, etc.

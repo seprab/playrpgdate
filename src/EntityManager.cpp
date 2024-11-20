@@ -40,11 +40,7 @@ EntityManager::~EntityManager()
 {
     for (auto& entity : data)
     {
-        if (entity.second != nullptr)
-        {
-            delete entity.second;
-            entity.second = nullptr;
-        }
+        entity.second = nullptr;
     }
 }
 PlaydateAPI* EntityManager::GetPD() {
@@ -87,7 +83,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* items = static_cast<std::vector<Item>*>(decodedJson);
         for (Item item : *items)
         {
-            data[item.GetID()] = new Item(item);
+            data[item.GetID()] = std::make_unique<Item>(item);
         }
     }
     else if(std::is_same_v<T, Area>)
@@ -97,7 +93,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* areas = static_cast<std::vector<Area>*>(decodedJson);
         for (auto& area : *areas)
         {
-            data[area.GetID()] = new Area(area);
+            data[area.GetID()] = std::make_unique<Area>(area);
         }
     }
     else if(std::is_same_v<T, Weapon>)
@@ -107,7 +103,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* weapons = static_cast<std::vector<Weapon>*>(decodedWeapons);
         for (Weapon weapon : *weapons)
         {
-            data[weapon.GetID()] = new Weapon(weapon);
+            data[weapon.GetID()] = std::make_unique<Weapon>(weapon);
         }
     }
     else if(std::is_same_v<T, Armor>)
@@ -117,7 +113,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* armors = static_cast<std::vector<Armor>*>(decodedArmors);
         for (Armor armor : *armors)
         {
-            data[armor.GetID()] = new Armor(armor);
+            data[armor.GetID()] = std::make_unique<Armor>(armor);
         }
     }
     else if(std::is_same_v<T, Creature>)
@@ -127,7 +123,7 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* creatures = static_cast<std::vector<Creature>*>(decodedCreatures);
         for (Creature creature : *creatures)
         {
-            data[creature.GetID()] = new Creature(creature);
+            data[creature.GetID()] = std::make_unique<Creature>(creature);
         }
     }
     else if(std::is_same_v<T, Door>)
@@ -137,24 +133,17 @@ void EntityManager::LoadJSON(const char* fileName)
         auto* doors = static_cast<std::vector<Door>*>(decodedDoors);
         for (Door door : *doors)
         {
-            data[door.GetID()] = new Door(door);
+            data[door.GetID()] = std::make_unique<Door>(door);
         }
     }
 }
 
 template <typename T>
-T* EntityManager::GetEntity(unsigned int id)
+std::unique_ptr<T> EntityManager::GetEntityCopy(unsigned int id)
 {
-    return dynamic_cast<T*>(data.at(id));
+    auto copyT = std::make_unique<T>(data.find(id)->second);
+    return std::move(copyT);
 }
-
-template<> Item* EntityManager::GetEntity<Item>(const unsigned int id) {return dynamic_cast<Item*>(data.find(id)->second);}
-template<> Weapon* EntityManager::GetEntity<Weapon>(const unsigned int id) {return dynamic_cast<Weapon*>(data.find(id)->second);}
-template<> Armor* EntityManager::GetEntity<Armor>(const unsigned int id) {return dynamic_cast<Armor*>(data.find(id)->second);}
-template<> Creature* EntityManager::GetEntity<Creature>(const unsigned int id) {return dynamic_cast<Creature*>(data.find(id)->second);}
-template<> Area* EntityManager::GetEntity<Area>(const unsigned int id) {return dynamic_cast<Area*>(data.find(id)->second);}
-template<> Door* EntityManager::GetEntity<Door>(const unsigned int id){ return dynamic_cast<Door*>(data.find(id)->second);}
-
 
 template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
 template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }
@@ -162,11 +151,4 @@ template <> std::string EntityManager::EntityToString<Armor>() { return "armor";
 template <> std::string EntityManager::EntityToString<Creature>() { return "creature"; }
 template <> std::string EntityManager::EntityToString<Area>() { return "area"; }
 template <> std::string EntityManager::EntityToString<Door>() { return "door"; }
-
-template void EntityManager::LoadJSON<Item>(const char*);
-template void EntityManager::LoadJSON<Weapon>(const char*);
-template void EntityManager::LoadJSON<Armor>(const char*);
-template void EntityManager::LoadJSON<Creature>(const char*);
-template void EntityManager::LoadJSON<Area>(const char*);
-template void EntityManager::LoadJSON<Door>(const char*);
 

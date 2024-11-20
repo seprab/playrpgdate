@@ -1,7 +1,6 @@
 #ifndef ENTITY_MANAGER_H
 #define ENTITY_MANAGER_H
 
-#include <string>
 #include <map>
 #include <pd_api.h>
 #include "Entity.h"
@@ -11,7 +10,7 @@ class EntityManager
 private:
     static EntityManager* instance;
     static PlaydateAPI* pd;
-    std::map<unsigned int, Entity*> data;
+    std::map<unsigned int, std::unique_ptr<Entity>> data;
 
 
 public:
@@ -35,7 +34,7 @@ public:
     std::string EntityToString();
 
     template <typename T>
-    T* GetEntity(unsigned int id);
+    std::unique_ptr<T> GetEntityCopy(unsigned int id);
 };
 
 #endif
