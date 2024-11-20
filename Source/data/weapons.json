@@ -16,5 +16,23 @@
 		"name": "Rat Claw",
 		"damage": 1,
 		"description": "A small claw, probably from a rat. It's not very sharp."
+	},
+	{
+		"id": 503,
+		"name": "Royal Rat Claw",
+		"damage": 3,
+		"description": "A larger, sharper claw from a Rat King."
+	},
+	{
+		"id": 504,
+		"name": "Giant Royal Claw",
+		"damage": 4,
+		"description": "An enormous claw from a Giant Rat King."
+	},
+	{
+		"id": 505,
+		"name": "Divine Rat Claw",
+		"damage": 5,
+		"description": "A glowing claw infused with divine rat energy."
 	}
 ]

@@ -58,5 +58,29 @@
 		"xp": 20,
 		"weapon": 505,
 		"armor": 404
+	},
+	{
+		"id": 2047,
+		"name": "Cave Rat",
+		"hp": 4,
+		"str": 6,
+		"agi": 4,
+		"con": 2,
+		"evasion": 0.02,
+		"xp": 1,
+		"weapon": 501,
+		"armor": 400
+	},
+	{
+		"id": 2049,
+		"name": "Shadow Rat",
+		"hp": 6,
+		"str": 8,
+		"agi": 6,
+		"con": 3,
+		"evasion": 0.04,
+		"xp": 2,
+		"weapon": 502,
+		"armor": 401
 	}
 ]

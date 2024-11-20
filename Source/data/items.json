@@ -48,5 +48,15 @@
         "id": 109,
         "name": "Dragon Egg",
         "description": "A rare and precious dragon egg"
+    },
+    {
+        "id": 130,
+        "name": "Bronze Key",
+        "description": "An old bronze key with intricate patterns"
+    },
+    {
+        "id": 140,
+        "name": "Rusty Key",
+        "description": "A weathered key showing signs of age"
     }
 ]

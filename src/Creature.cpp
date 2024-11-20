@@ -99,6 +99,7 @@ void *Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
             decodedWeapon!=-1 && decodedArmor!=-1)
             {
                 Creature decodedCreature {decodedId, decodedName, decodedMaxHp, decodedStrength, decodedAgility, decodedConstitution, decodedEvasion, decodedXp, decodedWeapon, decodedArmor};
+                //TODO: I need to set the inventory, armor and weapon.
                 creatures_decoded->emplace_back(decodedCreature);
                 i--;
                 break;
