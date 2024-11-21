@@ -1,5 +1,5 @@
 #include "GameManager.h"
-#include "Area.h"
+#include "Log.h";
 
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
@@ -8,11 +8,12 @@ GameManager::GameManager(PlaydateAPI* api)
 , y((240 - TEXT_HEIGHT) / 2)
 , dx(1) , dy(2)
 {
+    Log::playdateApi = pd;
     const char* err;
     font = pd->graphics->loadFont(fontpath.c_str(), &err);
 
     if (font == nullptr)
-        pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
+        Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     new EntityManager(api);
 }
@@ -41,5 +42,5 @@ void GameManager::Update()
 GameManager::~GameManager()
 {
     delete EntityManager::GetInstance();
-    pd->system->logToConsole("GameManager destroyed");
+    Log::Info("GameManager destroyed");
 }

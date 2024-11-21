@@ -1,4 +1,5 @@
 #include <utility>
+#include <vector>
 
 #include "Door.h"
 #include "Entity.h"
@@ -88,7 +89,9 @@ std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         }
         doors_decoded.emplace_back(decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB);
     }
-    return std::make_shared<std::vector<Door>>(doors_decoded);
+    //return std::make_shared<std::vector<Door>>(doors_decoded);
+    //return doors_decoded;
+    return std::static_pointer_cast<void>(std::make_shared<std::vector<Door>>(doors_decoded)); //TODO: This is failing working here
 }
 
 

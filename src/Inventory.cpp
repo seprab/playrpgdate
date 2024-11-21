@@ -1,6 +1,7 @@
 #include "Inventory.h"
 #include "Item.h"
 #include "EntityManager.h"
+#include "Log.h"
 
 Inventory::Inventory() = default;
 Inventory::Inventory(const Inventory &other) {
@@ -37,9 +38,15 @@ void Inventory::Add(unsigned int itemId, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        std::shared_ptr<Item> item =  EntityManager::GetInstance()->GetEntityCopy<Item>(itemId);
-        items.emplace_back(item);
-        EntityManager::GetInstance()->GetPD()->system->logToConsole("Added %s to inventory.", item->GetName());
+        std::shared_ptr<void> item =  EntityManager::GetInstance()->GetEntity(itemId);
+
+        if (item == nullptr)
+        {
+            Log::Error("Door with ID %d not found", itemId);
+            continue;
+        }
+        items.push_back(std::static_pointer_cast<Item>(item));
+        //Log::Info("Added %s to inventory.", items.end()->GetName()); TODO: Fix this
     }
 }
 

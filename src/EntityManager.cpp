@@ -7,6 +7,7 @@
 #include "Area.h"
 #include "Door.h"
 #include "jsmn.h"
+#include "Log.h"
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;
@@ -16,11 +17,11 @@ EntityManager::EntityManager(PlaydateAPI* api)
 {
     if (instance!= nullptr)
     {
-        pd->system->logToConsole("EntityManager was already initialized. This is a bug");
+        Log::Info("EntityManager was already initialized. This is a bug");
         return;
     }
     pd = api;
-    pd->system->logToConsole("Initialize Entity Manager");
+    Log::Info("Initialize Entity Manager");
     instance = this;
 
     LoadJSON<Item>("data/items.json");
@@ -45,16 +46,27 @@ PlaydateAPI* EntityManager::GetPD() {
     return pd;
 }
 
+std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
+{
+    auto it = data.find(id);
+    if(it!=data.end())
+    {
+        return it->second;
+        //std::dynamic_pointer_cast<T>(it->second);
+    }
+    return nullptr;
+}
+
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName)
 {
-    pd->system->logToConsole("Loading data from %s", fileName);
+    Log::Info("Loading data from %s", fileName);
     auto* fileStat = new FileStat;
     pd->file->stat(fileName, fileStat);
     SDFile* file = pd->file->open(fileName, kFileRead);
     if(file==nullptr)
     {
-        pd->system->logToConsole("Error opening the file %s: %s", fileName, pd->file->geterr());
+        Log::Info("Error opening the file %s: %s", fileName, pd->file->geterr());
         return;
     }
     //allocate memory for the buffer before reading data into it.
@@ -62,7 +74,7 @@ void EntityManager::LoadJSON(const char* fileName)
     int readResult = pd->file->read(file, buffer, fileStat->size);
     if(readResult < 0)
     {
-        pd->system->logToConsole("Error reading the file %s: %s", fileName, pd->file->geterr());
+        Log::Info("Error reading the file %s: %s", fileName, pd->file->geterr());
         return;
     }
     pd->file->close(file);
@@ -83,20 +95,3 @@ void EntityManager::LoadJSON(const char* fileName)
         data[item.GetId()] = std::make_shared<T>(item);
     }
 }
-
-template <typename T>
-std::shared_ptr<T> EntityManager::GetEntityCopy(unsigned int id)
-{
-    auto it = data.find(id);
-    if(it!=data.end())
-    {
-        return std::dynamic_pointer_cast<T>(it->second);
-    }
-    return nullptr;
-}
-
-//Adding the definitions below for avoiding linking errors. NEVER DELETE THIS
-std::shared_ptr<Item> EntityManager::GetItem(unsigned int id){return GetEntityCopy<Item>(id);}
-std::shared_ptr<Door> EntityManager::GetDoor(unsigned int id){return GetEntityCopy<Door>(id);}
-std::shared_ptr<Creature> EntityManager::GetCreature(unsigned int id){return GetEntityCopy<Creature>(id);}
-

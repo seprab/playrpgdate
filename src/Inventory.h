@@ -2,6 +2,8 @@
 #define INVENTORY_H
 
 #include <utility>
+#include <vector>
+
 #include "EntityManager.h"
 
 class Item;

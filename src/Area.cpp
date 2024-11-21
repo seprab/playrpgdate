@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Inventory.h"
 #include "Dialogue.h"
+#include "Log.h"
 #include "Utils.h"
 
 Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<std::shared_ptr<Creature>> _creatures)
@@ -73,7 +74,13 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                     {
                         char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
                         int decodedDoor = std::stoi(door);
-                        decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Door>(decodedDoor));
+                        auto originalInstance = EntityManager::GetInstance()->GetEntity(decodedDoor);
+                        if (originalInstance == nullptr)
+                        {
+                            Log::Error("Door with ID %d not found", decodedDoor);
+                            continue;
+                        }
+                        decodedDoors.push_back(std::static_pointer_cast<Door>(originalInstance));
                     }
                     i=i+numOfDoors;
                 }
@@ -81,14 +88,14 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                 {
                     i++; //move into the inventory array token
                     int endOfItems = tokens[i].end;
-                    EntityManager::GetInstance()->GetPD()->system->logToConsole("Start of items:");
+                    Log::Info("Start of items:");
                     while(tokens[i].end < endOfItems)
                     {
                         i++;
                         if(tokens[i].type != JSMN_ARRAY) continue;
                         unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        EntityManager::GetInstance()->GetPD()->system->logToConsole("Item ID: %d, Item Count: %d", itemID, itemCount);
+                        Log::Info("Item ID: %d, Item Count: %d", itemID, itemCount);
                         decodedInventory.Add(itemID, itemCount);
                     }
                 }
@@ -125,7 +132,14 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                     for (int j = 0; j < numOfCreatures; j++)
                     {
                         int creatureId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
-                        decodedCreatures.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Creature>(creatureId));
+
+                        auto originalInstance = EntityManager::GetInstance()->GetEntity(creatureId);
+                        if (originalInstance == nullptr)
+                        {
+                            Log::Error("Door with ID %d not found", creatureId);
+                            continue;
+                        }
+                        decodedCreatures.push_back(std::static_pointer_cast<Creature>(originalInstance));
                     }
                     i=i+numOfCreatures;
                 }

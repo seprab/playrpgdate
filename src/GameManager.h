@@ -15,11 +15,10 @@ public:
     static constexpr int TEXT_HEIGHT = 16;
 
 private:
-    PlaydateAPI* pd;
     std::string fontpath;
     LCDFont* font;
     int x, y, dx, dy;
-
+    PlaydateAPI* pd;
 };
 
 
