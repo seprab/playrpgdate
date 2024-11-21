@@ -6,7 +6,7 @@
 #include "Dialogue.h"
 #include "Utils.h"
 
-Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<Creature*> _creatures)
+Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<std::shared_ptr<Creature>> _creatures)
 : Entity(_id), name(_name), dialogue(std::move(_dialogue)), items(std::move(_items))
 {
     for (auto creature : _creatures)
@@ -36,7 +36,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
             std::shared_ptr<Dialogue> decodedDialogue;
             std::vector<std::shared_ptr<Door>> decodedDoors{};
             Inventory decodedInventory{};
-            std::vector<Creature*> decodedCreatures{};
+            std::vector<std::shared_ptr<Creature>> decodedCreatures;
 
             int endOfObject = tokens[i].end; //get the end of the Area object
             i++; //move into the first property of the Area object. Otherwise, the while is invalid
@@ -73,7 +73,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                     {
                         char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
                         int decodedDoor = std::stoi(door);
-                        //decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Door>(decodedDoor));
+                        decodedDoors.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Door>(decodedDoor));
                     }
                     i=i+numOfDoors;
                 }
@@ -125,7 +125,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                     for (int j = 0; j < numOfCreatures; j++)
                     {
                         int creatureId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
-                        //decodedCreatures.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Creature>(creatureId));
+                        decodedCreatures.emplace_back(EntityManager::GetInstance()->GetEntityCopy<Creature>(creatureId));
                     }
                     i=i+numOfCreatures;
                 }

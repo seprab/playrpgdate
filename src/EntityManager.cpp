@@ -90,9 +90,13 @@ std::shared_ptr<T> EntityManager::GetEntityCopy(unsigned int id)
     auto it = data.find(id);
     if(it!=data.end())
     {
-        auto copyT = std::make_shared<T>(it->second);
-        return std::move(copyT);
+        return std::dynamic_pointer_cast<T>(it->second);
     }
-
     return nullptr;
 }
+
+//Adding the definitions below for avoiding linking errors. NEVER DELETE THIS
+std::shared_ptr<Item> EntityManager::GetItem(unsigned int id){return GetEntityCopy<Item>(id);}
+std::shared_ptr<Door> EntityManager::GetDoor(unsigned int id){return GetEntityCopy<Door>(id);}
+std::shared_ptr<Creature> EntityManager::GetCreature(unsigned int id){return GetEntityCopy<Creature>(id);}
+

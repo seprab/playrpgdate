@@ -37,10 +37,9 @@ void Inventory::Add(unsigned int itemId, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        //TODO: GetEntityCopy is not working. Need to fix this.
-        //EntityManager::GetInstance()->GetEntityCopy<Item>(itemId);
-        //std::shared_ptr<Item> item =  EntityManager::GetInstance()->GetEntityCopy<Item>(itemId);
-        //items.emplace_back(item);
+        std::shared_ptr<Item> item =  EntityManager::GetInstance()->GetEntityCopy<Item>(itemId);
+        items.emplace_back(item);
+        EntityManager::GetInstance()->GetPD()->system->logToConsole("Added %s to inventory.", item->GetName());
     }
 }
 

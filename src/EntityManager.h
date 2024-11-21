@@ -6,6 +6,11 @@
 #include <pd_api.h>
 #include "Entity.h"
 #include "Item.h"
+#include "Door.h"
+#include "Inventory.h"
+#include "Creature.h"
+
+
 
 class EntityManager
 {
@@ -34,6 +39,10 @@ public:
 
     template <typename T>
     std::shared_ptr<T> GetEntityCopy(unsigned int id);
+
+    std::shared_ptr<Item> GetItem(unsigned int id);
+    std::shared_ptr<Door> GetDoor(unsigned int id);
+    std::shared_ptr<Creature> GetCreature(unsigned int id);
 };
 
 #endif

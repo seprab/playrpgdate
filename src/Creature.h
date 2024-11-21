@@ -53,6 +53,7 @@ public:
     void SetEvasion(float _evasion);
     unsigned int GetXP() const;
 
+
     Inventory* GetInventory();
     Weapon* GetEquippedWeapon();
     Armor* GetEquippedArmor();
