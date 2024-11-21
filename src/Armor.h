@@ -14,8 +14,12 @@ private:
 public:
     Armor()=default;
     Armor(unsigned int _id, char* _name, char* _description, int _defense);
-    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    Armor(const Armor& other);
+    Armor(Armor&& other) noexcept;
+
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
     [[nodiscard]] int GetDefense() const;
+    int GetDefense();
 };
 
 #endif

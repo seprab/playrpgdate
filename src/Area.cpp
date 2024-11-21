@@ -6,46 +6,35 @@
 #include "Dialogue.h"
 #include "Utils.h"
 
-Area::Area(unsigned int _id, char* _name, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures)
-        : Entity(_id), name(_name), dialogue(std::move(_dialogue)), items(std::move(_items))
+Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<Creature*> _creatures)
+: Entity(_id), name(_name), dialogue(std::move(_dialogue)), items(std::move(_items))
 {
     for (auto creature : _creatures)
     {
         _creatures.push_back(creature);
     }
 }
-
-Dialogue Area::GetDialogue()
+Area::Area(const Area &other)
+        : Entity(other.GetId()), name(other.name), dialogue(other.dialogue), items(other.items), creatures(other.creatures)
 {
-    return dialogue;
+
 }
-
-Inventory& Area::GetItem()
+Area::Area(Area &&other) noexcept
+        : Entity(other.GetId()), name(other.name), dialogue(other.dialogue), items(other.items), creatures(other.creatures)
 {
-    return items;
+
 }
-
-std::vector<Door*> Area::GetDoor()
+std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
 {
-    return doors;
-}
-
-std::vector<Creature>& Area::GetCreature()
-{
-    return creatures;
-}
-
-void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
-{
-    auto decodedAreas = new std::vector<Area>();
+    std::vector<Area> decodedAreas;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type == JSMN_OBJECT)
         {
             int decodedId{};
             char* decodedName{};
-            Dialogue decodedDialogue;
-            std::vector<Door*> decodedDoors{};
+            std::shared_ptr<Dialogue> decodedDialogue;
+            std::vector<std::shared_ptr<Door>> decodedDoors{};
             Inventory decodedInventory{};
             std::vector<Creature*> decodedCreatures{};
 
@@ -72,7 +61,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                 else if(strcmp(parseProperty, "dialogue") == 0)
                 {
                     i++; //move into the dialogue token
-                    decodedDialogue = Dialogue(buffer, tokens, i);
+                    decodedDialogue = std::make_shared<Dialogue>(buffer, tokens, i);
                 }
                 else if(strcmp(parseProperty, "doors") == 0)
                 {
@@ -97,7 +86,7 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                     {
                         i++;
                         if(tokens[i].type != JSMN_ARRAY) continue;
-                        int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
+                        unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
                         int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
                         EntityManager::GetInstance()->GetPD()->system->logToConsole("Item ID: %d, Item Count: %d", itemID, itemCount);
                         decodedInventory.Add(itemID, itemCount);
@@ -142,8 +131,8 @@ void* Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                 }
                 else i++;
             }
-            //decodedAreas->emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
+            decodedAreas.emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
         }
     }
-    return decodedAreas; //TODO: The area is not holding the correct ref to doors, items, creatures, etc.
+    return std::make_shared<std::vector<Area>>(decodedAreas);
 }

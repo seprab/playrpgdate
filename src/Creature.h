@@ -33,9 +33,11 @@ private:
 
 public:
     Creature()=default;
+    Creature(const Creature& other);
+    Creature(Creature&& other) noexcept;
     Creature(unsigned int _id, char* _name, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
-    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
     char* GetName();
     float GetHP() const;
     void SetHP(float _hp);

@@ -10,13 +10,22 @@ Armor::Armor(unsigned int _id, char *_name, char *_description, int _defense)
 {
 
 }
+Armor::Armor(const Armor &other)
+: Item(other), defense(other.GetDefense())
+{
 
+}
+Armor::Armor(Armor &&other) noexcept
+: Item(other), defense(other.GetDefense())
+{
+
+}
 int Armor::GetDefense() const {
     return defense;
 }
 
-void *Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
-    auto Armors_decoded = new std::vector<Armor>();
+std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+    std::vector<Armor> Armors_decoded;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
@@ -61,12 +70,15 @@ void *Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
             }
             if (decodedId!=0 && decodedDefense!=-1 && decodedDescription != nullptr && decodedName != nullptr)
             {
-                Armor decodedArmor {decodedId, decodedName, decodedDescription, decodedDefense};
-                Armors_decoded->emplace_back(decodedArmor);
+                Armors_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDefense);
                 i--;
                 break;
             }
         }
     }
-    return Armors_decoded;
+    return std::make_shared<std::vector<Armor>>(Armors_decoded);
+}
+
+int Armor::GetDefense() {
+    return defense;
 }

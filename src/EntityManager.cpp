@@ -1,5 +1,3 @@
-#include <string>
-#include <vector>
 #include <pd_api/pd_api_file.h>
 #include "EntityManager.h"
 #include "Item.h"
@@ -50,7 +48,7 @@ PlaydateAPI* EntityManager::GetPD() {
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName)
 {
-    pd->system->logToConsole("Loading %s data from %s", EntityToString<T>().c_str(), fileName);
+    pd->system->logToConsole("Loading data from %s", fileName);
     auto* fileStat = new FileStat;
     pd->file->stat(fileName, fileStat);
     SDFile* file = pd->file->open(fileName, kFileRead);
@@ -76,79 +74,25 @@ void EntityManager::LoadJSON(const char* fileName)
     jsmn_init(&p);
     const int tokenNumber = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
 
-    if(std::is_same_v<T, Item>)
+    T dummy{};
+    dummy.DecodeJson(charBuffer, t, tokenNumber);
+    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
+    auto items = static_cast<std::vector<T>*>(decodedJson.get());
+    for (T item : *items)
     {
-        Item dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* items = static_cast<std::vector<Item>*>(decodedJson);
-        for (Item item : *items)
-        {
-            data[item.GetID()] = std::make_unique<Item>(item);
-        }
-    }
-    else if(std::is_same_v<T, Area>)
-    {
-        Area dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* areas = static_cast<std::vector<Area>*>(decodedJson);
-        for (auto& area : *areas)
-        {
-            data[area.GetID()] = std::make_unique<Area>(area);
-        }
-    }
-    else if(std::is_same_v<T, Weapon>)
-    {
-        Weapon dummy{};
-        void* decodedWeapons = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* weapons = static_cast<std::vector<Weapon>*>(decodedWeapons);
-        for (Weapon weapon : *weapons)
-        {
-            data[weapon.GetID()] = std::make_unique<Weapon>(weapon);
-        }
-    }
-    else if(std::is_same_v<T, Armor>)
-    {
-        Armor dummy{};
-        void* decodedArmors = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* armors = static_cast<std::vector<Armor>*>(decodedArmors);
-        for (Armor armor : *armors)
-        {
-            data[armor.GetID()] = std::make_unique<Armor>(armor);
-        }
-    }
-    else if(std::is_same_v<T, Creature>)
-    {
-        Creature dummy{};
-        void* decodedCreatures = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* creatures = static_cast<std::vector<Creature>*>(decodedCreatures);
-        for (Creature creature : *creatures)
-        {
-            data[creature.GetID()] = std::make_unique<Creature>(creature);
-        }
-    }
-    else if(std::is_same_v<T, Door>)
-    {
-        Door dummy{};
-        void* decodedDoors = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* doors = static_cast<std::vector<Door>*>(decodedDoors);
-        for (Door door : *doors)
-        {
-            data[door.GetID()] = std::make_unique<Door>(door);
-        }
+        data[item.GetId()] = std::make_shared<T>(item);
     }
 }
 
 template <typename T>
-std::unique_ptr<T> EntityManager::GetEntityCopy(unsigned int id)
+std::shared_ptr<T> EntityManager::GetEntityCopy(unsigned int id)
 {
-    auto copyT = std::make_unique<T>(data.find(id)->second);
-    return std::move(copyT);
+    auto it = data.find(id);
+    if(it!=data.end())
+    {
+        auto copyT = std::make_shared<T>(it->second);
+        return std::move(copyT);
+    }
+
+    return nullptr;
 }
-
-template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
-template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }
-template <> std::string EntityManager::EntityToString<Armor>() { return "armor"; }
-template <> std::string EntityManager::EntityToString<Creature>() { return "creature"; }
-template <> std::string EntityManager::EntityToString<Area>() { return "area"; }
-template <> std::string EntityManager::EntityToString<Door>() { return "door"; }
-

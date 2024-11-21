@@ -15,6 +15,12 @@ Item::Item(const Item &item)
     description = item.description;
 
 }
+Item::Item(Item &&item) noexcept
+: Entity(item)
+{
+    name = item.name;
+    description = item.description;
+}
 const char* Item::GetName() const
 {
     return name;
@@ -24,9 +30,9 @@ const char* Item::GetDescription() const
     return description;
 }
 
-void* Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
 {
-    auto items_decoded = new std::vector<Item>();
+    std::vector<Item> items_decoded;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type == JSMN_OBJECT)
@@ -45,10 +51,10 @@ void* Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
                 else if(strcmp(parseProperty, "name") == 0) decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
                 else if(strcmp(parseProperty, "description") == 0) decodedDescription = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
             };
-            items_decoded->emplace_back(decodedId, decodedName, decodedDescription);
+            items_decoded.emplace_back(decodedId, decodedName, decodedDescription);
         }
     }
-    return items_decoded;
+    return std::make_shared<std::vector<Item>>(items_decoded);
 }
 
 

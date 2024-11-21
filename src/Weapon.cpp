@@ -11,13 +11,23 @@ Weapon::Weapon(unsigned int _id, char* _name, char* _description, int _damage)
 
 }
 
+Weapon::Weapon(const Weapon &other)
+: Item(other), damage(other.damage)
+{
+
+}
+Weapon::Weapon(Weapon &&other) noexcept
+: Item(other), damage(other.damage)
+{
+
+}
 int Weapon::GetDamage() const {
     return damage;
 }
 
-void *Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
 {
-    auto weapons_decoded = new std::vector<Weapon>();
+    std::vector<Weapon> weapons_decoded;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
@@ -62,12 +72,11 @@ void *Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
             }
             if (decodedId!=0 && decodedDamage!=-1 && decodedDescription != nullptr && decodedName != nullptr)
             {
-                Weapon decodedWeapon {decodedId, decodedName, decodedDescription, decodedDamage};
-                weapons_decoded->emplace_back(decodedWeapon);
+                weapons_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDamage);
                 i--;
                 break;
             }
         }
     }
-    return weapons_decoded;
+    return std::make_shared<std::vector<Weapon>>(weapons_decoded);
 }

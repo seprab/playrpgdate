@@ -17,6 +17,8 @@ public:
     Dialogue() = default;
     Dialogue(char* _description, std::vector<Choice> _choices);
     Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesIndex);
+    Dialogue(const Dialogue& other);
+    Dialogue(Dialogue&& other) noexcept;
 
     void AddChoice(Choice choice);
     unsigned int Size();

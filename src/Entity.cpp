@@ -13,6 +13,6 @@ id(_id)
 Entity::~Entity()
 = default;
 
-unsigned int Entity::GetID() const {
+unsigned int Entity::GetId() const {
     return id;
 }

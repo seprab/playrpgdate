@@ -14,20 +14,18 @@ class Area : public Entity
 {
 private:
     char* name;
-    Dialogue dialogue;
+    std::shared_ptr<Dialogue> dialogue;
     Inventory items;
-    std::vector<Door*> doors;
-    std::vector<Creature> creatures;
+    std::vector<std::shared_ptr<Door>> doors;
+    std::vector<std::shared_ptr<Creature>> creatures;
 
 public:
     Area() = default;
-    Area(unsigned int _id, char* _name, Dialogue _dialogue, Inventory _items, std::vector<Creature*> _creatures);
+    Area(const Area& other);
+    Area(Area&& other) noexcept;
+    Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<Creature*> _creatures);
 
-    Dialogue GetDialogue();
-    Inventory& GetItem();
-    std::vector<Door*> GetDoor();
-    std::vector<Creature>& GetCreature();
-    void* DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
 };
 
