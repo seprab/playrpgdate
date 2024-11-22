@@ -13,6 +13,8 @@ public:
     static void Error(const char* message, Args... args);
 
 private:
+    static const char* infoPrefix;
+    static const char* errorPrefix;
     static PlaydateAPI* playdateApi;
 };
 

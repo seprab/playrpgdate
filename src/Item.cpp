@@ -2,12 +2,13 @@
 #include "Item.h"
 #include "EntityManager.h"
 #include "Utils.h"
+#include "Log.h"
 
 
 Item::Item(unsigned int _id, char* itemName, char* itemDescription) :
 Entity(_id), name(itemName), description(itemDescription)
 {
-    EntityManager::GetInstance()->GetPD()->system->logToConsole("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
+    Log::Info("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
 }
 Item::Item(const Item &item)
         : Entity(item) {

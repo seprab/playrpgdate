@@ -1,12 +1,12 @@
 #include "GameManager.h"
-#include "Log.h";
+#include "Log.h"
 
 GameManager::GameManager(PlaydateAPI* api)
-: pd(api)
-, fontpath("/System/Fonts/Asheville-Sans-14-Bold.pft")
+: fontpath("/System/Fonts/Asheville-Sans-14-Bold.pft")
 , x((400 - TEXT_WIDTH) / 2)
 , y((240 - TEXT_HEIGHT) / 2)
-, dx(1) , dy(2)
+, dx(1)
+, dy(2) , pd(api)
 {
     Log::Initialize(pd);
     const char* err;

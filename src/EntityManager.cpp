@@ -21,7 +21,6 @@ EntityManager::EntityManager(PlaydateAPI* api)
         return;
     }
     pd = api;
-    Log::Info("Initialize Entity Manager");
     instance = this;
 
     LoadJSON<Item>("data/items.json");
@@ -52,7 +51,6 @@ std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
     if(it!=data.end())
     {
         return it->second;
-        //std::dynamic_pointer_cast<T>(it->second);
     }
     return nullptr;
 }
