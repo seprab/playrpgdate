@@ -8,7 +8,7 @@ GameManager::GameManager(PlaydateAPI* api)
 , y((240 - TEXT_HEIGHT) / 2)
 , dx(1) , dy(2)
 {
-    Log::playdateApi = pd;
+    Log::Initialize(pd);
     const char* err;
     font = pd->graphics->loadFont(fontpath.c_str(), &err);
 
