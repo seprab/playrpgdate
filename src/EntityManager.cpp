@@ -23,12 +23,12 @@ EntityManager::EntityManager(PlaydateAPI* api)
     pd = api;
     instance = this;
 
-    LoadJSON<Item>("data/items.json");
-    LoadJSON<Door>("data/doors.json");
-    LoadJSON<Weapon>("data/weapons.json");
-    LoadJSON<Armor>("data/armors.json");
-    LoadJSON<Creature>("data/creatures.json");
-    LoadJSON<Area>("data/areas.json");
+    LoadJSON<Item>("data/items.json", 128);
+    LoadJSON<Door>("data/doors.json", 64);
+    LoadJSON<Weapon>("data/weapons.json", 64);
+    LoadJSON<Armor>("data/armors.json", 128);
+    LoadJSON<Creature>("data/creatures.json", 512);
+    LoadJSON<Area>("data/areas.json", 128);
 }
 EntityManager* EntityManager::GetInstance()
 {
@@ -55,8 +55,15 @@ std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
     return nullptr;
 }
 
+/// <summary>
+/// Load the JSON file and decode it into the appropriate type.
+/// I have added limitOfTokens as a parameter to avoid the jsmn parser from running out of tokens.
+/// The value depends on the number of elements of the JSON file.
+/// I tried increasing this value automatically leading to unexpected behaviours.
+/// So, It's better to manually try the best fit and adjust it from here
+/// </summary>
 template <typename T>
-void EntityManager::LoadJSON(const char* fileName)
+void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
 {
     Log::Info("Loading data from %s", fileName);
     auto* fileStat = new FileStat;
@@ -77,16 +84,36 @@ void EntityManager::LoadJSON(const char* fileName)
     }
     pd->file->close(file);
 
-
     char* charBuffer = static_cast<char*>(buffer);
-    jsmn_parser p;
-    jsmntok_t t[128]; //* We expect no more than 128 JSON tokens *//*
-    jsmn_init(&p);
-    const int tokenNumber = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
+    jsmn_parser parser;
+    jsmn_init(&parser);
+    DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);
+}
+template <typename T>
+int EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
+{
+    jsmntok_t t[tokenLimit];
+    int calculatedTokens = jsmn_parse(parser, charBuffer, len, t, tokenLimit);
+    Log::Info("Number of tokens: %d", calculatedTokens);
+    if (calculatedTokens < 0)
+    {
+        switch (calculatedTokens)
+        {
+            case jsmnerr::JSMN_ERROR_INVAL:
+                Log::Error("bad token, JSON string is corrupted");
+                break;
+            case jsmnerr::JSMN_ERROR_NOMEM:
+                Log::Error("not enough tokens, JSON string is too large");
+                break;
+            case jsmnerr::JSMN_ERROR_PART:
+                Log::Error("JSON string is too short, expecting more JSON data");
+                break;
+        }
+        return calculatedTokens;
+    }
 
     T dummy{};
-    dummy.DecodeJson(charBuffer, t, tokenNumber);
-    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
+    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens);
     auto items = static_cast<std::vector<T>*>(decodedJson.get());
     for (T item : *items)
     {

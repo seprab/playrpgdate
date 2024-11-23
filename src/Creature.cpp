@@ -4,6 +4,7 @@
 #include <vector>
 #include "Creature.h"
 #include "Utils.h"
+#include "Log.h"
 
 Creature::Creature(unsigned int _id, char *_name, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
@@ -23,7 +24,8 @@ Creature::Creature(Creature &&other) noexcept
 {
 }
 
-std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+{
     std::vector<Creature> creatures_decoded;
     for (int i = 0; i < size; i++)
     {
@@ -109,6 +111,7 @@ std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int 
             {
                 //TODO: I need to set the inventory, armor and weapon.
                 creatures_decoded.emplace_back(decodedId, decodedName, decodedMaxHp, decodedStrength, decodedAgility, decodedConstitution, decodedEvasion, decodedXp, decodedWeapon, decodedArmor);
+                Log::Info("Creature ID: %d, name %s", decodedId, decodedName);
                 i--;
                 break;
             }

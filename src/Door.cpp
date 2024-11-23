@@ -5,6 +5,7 @@
 #include "Entity.h"
 #include "EntityManager.h"
 #include "Utils.h"
+#include "Log.h"
 
 
 Door::Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB)
@@ -88,8 +89,9 @@ std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size
             if (decodedId!=0 && decodedKey!=0 && decodedAreaA!=0 && decodedAreaB!=0) break;
         }
         doors_decoded.emplace_back(decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB);
+        Log::Info("Door ID: %d", decodedId);
     }
-    return std::static_pointer_cast<void>(std::make_shared<std::vector<Door>>(doors_decoded)); //TODO: This is failing working here
+    return std::make_shared<std::vector<Door>>(doors_decoded);
 }
 
 

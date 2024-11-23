@@ -46,7 +46,7 @@ void Inventory::Add(unsigned int itemId, int count)
             continue;
         }
         items.push_back(std::static_pointer_cast<Item>(item));
-        //Log::Info("Added %s to inventory.", items.end()->GetName()); TODO: Fix this
+        Log::Info("Added %s to inventory.", items.back()->GetName());
     }
 }
 
