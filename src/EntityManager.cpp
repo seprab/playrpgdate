@@ -1,5 +1,3 @@
-#include <string>
-#include <vector>
 #include <pd_api/pd_api_file.h>
 #include "EntityManager.h"
 #include "Item.h"
@@ -9,6 +7,7 @@
 #include "Area.h"
 #include "Door.h"
 #include "jsmn.h"
+#include "Log.h"
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;
@@ -18,19 +17,18 @@ EntityManager::EntityManager(PlaydateAPI* api)
 {
     if (instance!= nullptr)
     {
-        pd->system->logToConsole("EntityManager was already initialized. This is a bug");
+        Log::Info("EntityManager was already initialized. This is a bug");
         return;
     }
     pd = api;
-    pd->system->logToConsole("Initialize Entity Manager");
     instance = this;
 
-    LoadJSON<Item>("data/items.json");
-    LoadJSON<Door>("data/doors.json");
-    LoadJSON<Weapon>("data/weapons.json");
-    LoadJSON<Armor>("data/armors.json");
-    LoadJSON<Creature>("data/creatures.json");
-    LoadJSON<Area>("data/areas.json");
+    LoadJSON<Item>("data/items.json", 128);
+    LoadJSON<Door>("data/doors.json", 64);
+    LoadJSON<Weapon>("data/weapons.json", 64);
+    LoadJSON<Armor>("data/armors.json", 128);
+    LoadJSON<Creature>("data/creatures.json", 512);
+    LoadJSON<Area>("data/areas.json", 128);
 }
 EntityManager* EntityManager::GetInstance()
 {
@@ -40,27 +38,40 @@ EntityManager::~EntityManager()
 {
     for (auto& entity : data)
     {
-        if (entity.second != nullptr)
-        {
-            delete entity.second;
-            entity.second = nullptr;
-        }
+        entity.second = nullptr;
     }
 }
 PlaydateAPI* EntityManager::GetPD() {
     return pd;
 }
 
-template <typename T>
-void EntityManager::LoadJSON(const char* fileName)
+std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
 {
-    pd->system->logToConsole("Loading %s data from %s", EntityToString<T>().c_str(), fileName);
+    auto it = data.find(id);
+    if(it!=data.end())
+    {
+        return it->second;
+    }
+    return nullptr;
+}
+
+/// <summary>
+/// Load the JSON file and decode it into the appropriate type.
+/// I have added limitOfTokens as a parameter to avoid the jsmn parser from running out of tokens.
+/// The value depends on the number of elements of the JSON file.
+/// I tried increasing this value automatically leading to unexpected behaviours.
+/// So, It's better to manually try the best fit and adjust it from here
+/// </summary>
+template <typename T>
+void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
+{
+    Log::Info("Loading data from %s", fileName);
     auto* fileStat = new FileStat;
     pd->file->stat(fileName, fileStat);
     SDFile* file = pd->file->open(fileName, kFileRead);
     if(file==nullptr)
     {
-        pd->system->logToConsole("Error opening the file %s: %s", fileName, pd->file->geterr());
+        Log::Info("Error opening the file %s: %s", fileName, pd->file->geterr());
         return;
     }
     //allocate memory for the buffer before reading data into it.
@@ -68,105 +79,44 @@ void EntityManager::LoadJSON(const char* fileName)
     int readResult = pd->file->read(file, buffer, fileStat->size);
     if(readResult < 0)
     {
-        pd->system->logToConsole("Error reading the file %s: %s", fileName, pd->file->geterr());
+        Log::Info("Error reading the file %s: %s", fileName, pd->file->geterr());
         return;
     }
     pd->file->close(file);
 
-
     char* charBuffer = static_cast<char*>(buffer);
-    jsmn_parser p;
-    jsmntok_t t[128]; //* We expect no more than 128 JSON tokens *//*
-    jsmn_init(&p);
-    const int tokenNumber = jsmn_parse(&p, charBuffer, fileStat->size, t, 128);
-
-    if(std::is_same_v<T, Item>)
-    {
-        Item dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* items = static_cast<std::vector<Item>*>(decodedJson);
-        for (Item item : *items)
-        {
-            data[item.GetID()] = new Item(item);
-        }
-    }
-    else if(std::is_same_v<T, Area>)
-    {
-        Area dummy{};
-        void* decodedJson = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* areas = static_cast<std::vector<Area>*>(decodedJson);
-        for (auto& area : *areas)
-        {
-            data[area.GetID()] = new Area(area);
-        }
-    }
-    else if(std::is_same_v<T, Weapon>)
-    {
-        Weapon dummy{};
-        void* decodedWeapons = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* weapons = static_cast<std::vector<Weapon>*>(decodedWeapons);
-        for (Weapon weapon : *weapons)
-        {
-            data[weapon.GetID()] = new Weapon(weapon);
-        }
-    }
-    else if(std::is_same_v<T, Armor>)
-    {
-        Armor dummy{};
-        void* decodedArmors = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* armors = static_cast<std::vector<Armor>*>(decodedArmors);
-        for (Armor armor : *armors)
-        {
-            data[armor.GetID()] = new Armor(armor);
-        }
-    }
-    else if(std::is_same_v<T, Creature>)
-    {
-        Creature dummy{};
-        void* decodedCreatures = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* creatures = static_cast<std::vector<Creature>*>(decodedCreatures);
-        for (Creature creature : *creatures)
-        {
-            data[creature.GetID()] = new Creature(creature);
-        }
-    }
-    else if(std::is_same_v<T, Door>)
-    {
-        Door dummy{};
-        void* decodedDoors = dummy.DecodeJson(charBuffer, t, tokenNumber);
-        auto* doors = static_cast<std::vector<Door>*>(decodedDoors);
-        for (Door door : *doors)
-        {
-            data[door.GetID()] = new Door(door);
-        }
-    }
+    jsmn_parser parser;
+    jsmn_init(&parser);
+    DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);
 }
-
 template <typename T>
-T* EntityManager::GetEntity(unsigned int id)
+int EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
-    return dynamic_cast<T*>(data.at(id));
+    jsmntok_t t[tokenLimit];
+    int calculatedTokens = jsmn_parse(parser, charBuffer, len, t, tokenLimit);
+    Log::Info("Number of tokens: %d", calculatedTokens);
+    if (calculatedTokens < 0)
+    {
+        switch (calculatedTokens)
+        {
+            case jsmnerr::JSMN_ERROR_INVAL:
+                Log::Error("bad token, JSON string is corrupted");
+                break;
+            case jsmnerr::JSMN_ERROR_NOMEM:
+                Log::Error("not enough tokens, JSON string is too large");
+                break;
+            case jsmnerr::JSMN_ERROR_PART:
+                Log::Error("JSON string is too short, expecting more JSON data");
+                break;
+        }
+        return calculatedTokens;
+    }
+
+    T dummy{};
+    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens);
+    auto items = static_cast<std::vector<T>*>(decodedJson.get());
+    for (T item : *items)
+    {
+        data[item.GetId()] = std::make_shared<T>(item);
+    }
 }
-
-template<> Item* EntityManager::GetEntity<Item>(const unsigned int id) {return dynamic_cast<Item*>(data.find(id)->second);}
-template<> Weapon* EntityManager::GetEntity<Weapon>(const unsigned int id) {return dynamic_cast<Weapon*>(data.find(id)->second);}
-template<> Armor* EntityManager::GetEntity<Armor>(const unsigned int id) {return dynamic_cast<Armor*>(data.find(id)->second);}
-template<> Creature* EntityManager::GetEntity<Creature>(const unsigned int id) {return dynamic_cast<Creature*>(data.find(id)->second);}
-template<> Area* EntityManager::GetEntity<Area>(const unsigned int id) {return dynamic_cast<Area*>(data.find(id)->second);}
-template<> Door* EntityManager::GetEntity<Door>(const unsigned int id){ return dynamic_cast<Door*>(data.find(id)->second);}
-
-
-template <> std::string EntityManager::EntityToString<Item>() { return "item"; }
-template <> std::string EntityManager::EntityToString<Weapon>() { return "weapon"; }
-template <> std::string EntityManager::EntityToString<Armor>() { return "armor"; }
-template <> std::string EntityManager::EntityToString<Creature>() { return "creature"; }
-template <> std::string EntityManager::EntityToString<Area>() { return "area"; }
-template <> std::string EntityManager::EntityToString<Door>() { return "door"; }
-
-template void EntityManager::LoadJSON<Item>(const char*);
-template void EntityManager::LoadJSON<Weapon>(const char*);
-template void EntityManager::LoadJSON<Armor>(const char*);
-template void EntityManager::LoadJSON<Creature>(const char*);
-template void EntityManager::LoadJSON<Area>(const char*);
-template void EntityManager::LoadJSON<Door>(const char*);
-

@@ -1,17 +1,17 @@
 #ifndef ENTITY_MANAGER_H
 #define ENTITY_MANAGER_H
 
-#include <string>
 #include <map>
+#include <memory>
 #include <pd_api.h>
-#include "Entity.h"
+#include "jsmn.h"
 
 class EntityManager
 {
 private:
     static EntityManager* instance;
     static PlaydateAPI* pd;
-    std::map<unsigned int, Entity*> data;
+    std::map<unsigned int, std::shared_ptr<void>> data;
 
 
 public:
@@ -29,13 +29,12 @@ public:
     PlaydateAPI* GetPD();
 
     template <typename T>
-    void LoadJSON(const char* fileName);
+    void LoadJSON(const char* fileName, int limitOfTokens = 128);
 
     template <typename T>
-    std::string EntityToString();
+    int DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit);
 
-    template <typename T>
-    T* GetEntity(unsigned int id);
+    std::shared_ptr<void> GetEntity(unsigned int id);
 };
 
 #endif

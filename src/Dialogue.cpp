@@ -7,7 +7,16 @@ Dialogue::Dialogue(char* _description, std::vector<Choice> _choices)
 {
 
 }
+Dialogue::Dialogue(const Dialogue &other)
+: description(other.description), choices(other.choices)
+{
 
+}
+Dialogue::Dialogue(Dialogue &&other) noexcept
+: description(other.description), choices(other.choices)
+{
+
+}
 void Dialogue::AddChoice(Choice choice)
 {
     choices.push_back(choice);
@@ -89,3 +98,5 @@ Dialogue::Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesInde
     choices = _choices;
     choicesIndex--; //decrement the index to point to the end of the dialogue object
 }
+
+

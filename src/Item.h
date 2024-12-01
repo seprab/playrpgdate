@@ -13,10 +13,11 @@ public:
     Item() = default;
     Item(unsigned int _id, char *itemName, char *itemDescription);
     Item(const Item &item);
+    Item(Item &&item) noexcept;
 
     [[nodiscard]] const char * GetName() const;
     [[nodiscard]] const char * GetDescription() const;
-    void* DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
 private:
     char* name{};

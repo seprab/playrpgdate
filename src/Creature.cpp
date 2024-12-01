@@ -4,6 +4,7 @@
 #include <vector>
 #include "Creature.h"
 #include "Utils.h"
+#include "Log.h"
 
 Creature::Creature(unsigned int _id, char *_name, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
@@ -14,8 +15,18 @@ Creature::Creature(unsigned int _id, char *_name, float _maxHp, int _strength, i
 
 }
 
-void *Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
-    auto creatures_decoded = new std::vector<Creature>();
+Creature::Creature(const Creature &other)
+: Entity(other), name(other.name), maxHP(other.GetMaxHP()), strength(other.GetStrength()), agility(other.GetAgility())
+{
+}
+Creature::Creature(Creature &&other) noexcept
+: Entity(other), name(other.name), maxHP(other.GetMaxHP()), strength(other.GetStrength()), agility(other.GetAgility())
+{
+}
+
+std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+{
+    std::vector<Creature> creatures_decoded;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
@@ -31,7 +42,7 @@ void *Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
         int decodedWeapon{-1};
         int decodedArmor{-1};
 
-        while(i<tokens[size].end)
+        while(i<tokens[0].end)
         {
             if (tokens[i].type != JSMN_STRING)
             {
@@ -98,15 +109,15 @@ void *Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
             decodedAgility!=-1 && decodedConstitution!=-1 && decodedEvasion!=-1 && decodedXp!=0 &&
             decodedWeapon!=-1 && decodedArmor!=-1)
             {
-                Creature decodedCreature {decodedId, decodedName, decodedMaxHp, decodedStrength, decodedAgility, decodedConstitution, decodedEvasion, decodedXp, decodedWeapon, decodedArmor};
                 //TODO: I need to set the inventory, armor and weapon.
-                creatures_decoded->emplace_back(decodedCreature);
+                creatures_decoded.emplace_back(decodedId, decodedName, decodedMaxHp, decodedStrength, decodedAgility, decodedConstitution, decodedEvasion, decodedXp, decodedWeapon, decodedArmor);
+                Log::Info("Creature ID: %d, name %s", decodedId, decodedName);
                 i--;
                 break;
             }
         }
     }
-    return creatures_decoded;
+    return std::make_shared<std::vector<Creature>>(creatures_decoded);
 }
 
 char *Creature::GetName() {
@@ -192,3 +203,5 @@ int Creature::Attack(Creature *target) {
 int Creature::TraverseDoor(Door *door) {
     return 0;
 }
+
+

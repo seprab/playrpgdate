@@ -7,7 +7,7 @@
  * You can use STL containers! Be careful with some stdlib objects which rely
  * on an OS though, those will cause your app to crash on launch.
  */
-std::unique_ptr<GameManager> gameManager;
+std::shared_ptr<GameManager> gameManager;
 
 
 /**
@@ -52,7 +52,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
     if (event == kEventInit)
     {
         pd->display->setRefreshRate(20);
-        gameManager = std::make_unique<GameManager>(pd);
+        gameManager = std::make_shared<GameManager>(pd);
 
         // and sets the tick function to be called on update to turn off the
         // typical 'Lua'-ness.

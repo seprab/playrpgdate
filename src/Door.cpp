@@ -1,12 +1,11 @@
-#include <string>
 #include <utility>
 #include <vector>
 
 #include "Door.h"
-#include "Item.h"
 #include "Entity.h"
 #include "EntityManager.h"
 #include "Utils.h"
+#include "Log.h"
 
 
 Door::Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB)
@@ -14,8 +13,15 @@ Door::Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB)
 {
 
 }
-
-int Door::GetLocked() const
+Door::Door(Door &other)
+: Entity(other.GetId()), locked(other.GetLocked()), key(other.GetKey()), areas(other.GetAreas())
+{
+}
+Door::Door(Door &&other) noexcept
+:Entity(other.GetId()), locked(other.GetLocked()), key(other.GetKey()), areas(other.GetAreas())
+{
+}
+bool Door::GetLocked() const
 {
     return locked;
 }
@@ -35,9 +41,9 @@ std::pair<int, int> Door::GetAreas()
     return areas;
 }
 
-void *Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
 {
-    auto doors_decoded = new std::vector<Door>();
+    std::vector<Door> doors_decoded;
     for (int i = 0; i < size; i++)
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
@@ -48,7 +54,7 @@ void *Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
         int decodedAreaA{};
         int decodedAreaB{};
 
-        while(i<tokens[size].end)
+        while(i<tokens[0].end)
         {
             if (tokens[i].type != JSMN_STRING)
             {
@@ -82,9 +88,11 @@ void *Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
 
             if (decodedId!=0 && decodedKey!=0 && decodedAreaA!=0 && decodedAreaB!=0) break;
         }
-        Door decodedDoor {decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB};
-        doors_decoded->emplace_back(decodedDoor);
+        doors_decoded.emplace_back(decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB);
+        Log::Info("Door ID: %d", decodedId);
     }
-    return doors_decoded;
+    return std::make_shared<std::vector<Door>>(doors_decoded);
 }
+
+
 

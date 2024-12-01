@@ -1,25 +1,25 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include <list>
 #include <utility>
 #include <vector>
+
 #include "EntityManager.h"
 
 class Item;
-class Weapon;
-class Armor;
 
 class Inventory
 {
 private:
-    std::vector<Item*> items;
+    std::vector<std::shared_ptr<Item>> items;
 
 public:
     Inventory();
+    Inventory(const Inventory& other);
+    Inventory(Inventory&& other) noexcept;
 
-    void Add(int itemId, int count=1);
-    Item* Remove(int itemId);
+    void Add(unsigned int itemId, int count=1);
+    std::shared_ptr<Item> Remove(int itemId);
 
     int Count(int itemId);
     int Print(bool label = true);

@@ -16,6 +16,7 @@ private:
 
 public:
     Player();
+    Player(const Player& other) = default;
     Player(std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp, unsigned int _level, std::string _className);
     std::string GetClassName();
     unsigned int GetLevel();

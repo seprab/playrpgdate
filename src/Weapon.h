@@ -13,8 +13,10 @@ private:
 
 public:
     Weapon()=default;
+    Weapon(const Weapon& other);
+    Weapon(Weapon&& other) noexcept;
     Weapon(unsigned int _id, char* _name, char* _description, int _damage);
-    void * DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
     int GetDamage() const;
 };
 

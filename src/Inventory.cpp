@@ -1,11 +1,16 @@
-#include <iostream>
 #include "Inventory.h"
 #include "Item.h"
+#include "EntityManager.h"
+#include "Log.h"
 
-Inventory::Inventory() {
+Inventory::Inventory() = default;
+Inventory::Inventory(const Inventory &other) {
 
 }
 
+Inventory::Inventory(Inventory &&other) noexcept {
+
+}
 int Inventory::Print(bool label)
 {
     if (items.empty())
@@ -29,22 +34,28 @@ void Inventory::Clear()
     items.clear();
 }
 
-void Inventory::Add(int itemId, int count)
+void Inventory::Add(unsigned int itemId, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        Item* itemRef = EntityManager::GetInstance()->GetEntity<Item>(itemId);
-        Item* itemCopy(itemRef);
-        items.push_back(itemCopy);
+        std::shared_ptr<void> item =  EntityManager::GetInstance()->GetEntity(itemId);
+
+        if (item == nullptr)
+        {
+            Log::Error("Item with ID %d not found", itemId);
+            continue;
+        }
+        items.push_back(std::static_pointer_cast<Item>(item));
+        //Log::Info("Added %s to inventory.", items.back()->GetName());
     }
 }
 
-Item* Inventory::Remove(int itemId)
+std::shared_ptr<Item> Inventory::Remove(int itemId)
 {
     int index = -1;
     for (int j=0; j<items.size(); j++)
     {
-        if (items[j]->GetID() == itemId)
+        if (items[j]->GetId() == itemId)
         {
             index = j;
             break;
@@ -55,8 +66,8 @@ Item* Inventory::Remove(int itemId)
         EntityManager::GetInstance()->GetPD()->system->logToConsole("Item not found in inventory. Expected?");
         return nullptr;
     }
-    Item* outItem = items[index];
-    items.erase(items.begin() + index);
+    std::shared_ptr outItem = std::move(items[index]);
+    items.erase(items.begin() + index); //Validate if this is really required
     return outItem;
 }
 
@@ -65,10 +76,12 @@ int Inventory::Count(int itemId)
     int count = 0;
     for (auto & item : items)
     {
-        if (item->GetID() == itemId)
+        if (item->GetId() == itemId)
         {
             count++;
         }
     }
     return count;
 }
+
+
