@@ -13,14 +13,14 @@ private:
 
 public:
     Door()=default;
-    Door(Door& other);
-    Door(Door&& other) noexcept ;
+    Door(const Door& other);
+    Door(const Door&& other) noexcept ;
     Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB);
 
     [[nodiscard]] bool GetLocked() const;
     void SetLocked(int _locked);
-    int GetKey();
-    std::pair<int, int> GetAreas();
+    int GetKey() const;
+    [[nodiscard]] std::pair<int, int> GetAreas() const;
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 };
 

@@ -8,6 +8,7 @@
 #include "Door.h"
 #include "jsmn.h"
 #include "Log.h"
+#include "Dialogue.h"
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;

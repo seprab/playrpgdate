@@ -1,6 +1,5 @@
 #include <utility>
 #include <vector>
-
 #include "Door.h"
 #include "Entity.h"
 #include "EntityManager.h"
@@ -13,11 +12,11 @@ Door::Door(unsigned int _id, bool _locked, int _keyId, int _areaA, int _areaB)
 {
 
 }
-Door::Door(Door &other)
+Door::Door(const Door &other)
 : Entity(other.GetId()), locked(other.GetLocked()), key(other.GetKey()), areas(other.GetAreas())
 {
 }
-Door::Door(Door &&other) noexcept
+Door::Door(const Door &&other) noexcept
 :Entity(other.GetId()), locked(other.GetLocked()), key(other.GetKey()), areas(other.GetAreas())
 {
 }
@@ -31,12 +30,12 @@ void Door::SetLocked(int _locked)
     locked = _locked;
 }
 
-int Door::GetKey()
+int Door::GetKey() const
 {
     return key;
 }
 
-std::pair<int, int> Door::GetAreas()
+std::pair<int, int> Door::GetAreas() const
 {
     return areas;
 }

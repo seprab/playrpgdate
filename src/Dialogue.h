@@ -26,7 +26,7 @@ public:
     int Activate();
 
 private:
-    char* description;
+    char* description{};
     std::vector<Choice> choices;
 
 };
