@@ -42,7 +42,7 @@ std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int 
         int decodedWeapon{-1};
         int decodedArmor{-1};
 
-        while(i<tokens[size].end)
+        while(i<tokens[0].end)
         {
             if (tokens[i].type != JSMN_STRING)
             {

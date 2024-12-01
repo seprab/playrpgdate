@@ -14,6 +14,7 @@ Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, I
     {
         _creatures.push_back(creature);
     }
+    Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
 Area::Area(const Area &other)
         : Entity(other.GetId()), name(other.name), dialogue(other.dialogue), items(other.items), creatures(other.creatures)
@@ -87,56 +88,66 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                 else if(strcmp(parseProperty, "items") == 0)
                 {
                     i++; //move into the inventory array token
-                    int endOfItems = tokens[i].end;
-                    Log::Info("Start of items:");
-                    while(tokens[i].end < endOfItems)
+                    int numberItems = tokens[i].size;
+                    i++; //either move to the first element of the array or move to the next property
+                    for (int j=0; j<numberItems; j++)
                     {
-                        i++;
-                        if(tokens[i].type != JSMN_ARRAY) continue;
-                        unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                        int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        Log::Info("Item ID: %d, Item Count: %d", itemID, itemCount);
-                        decodedInventory.Add(itemID, itemCount);
+                        char* item = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
+                        unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
+                        decodedInventory.Add(itemID, 1);
                     }
+                    i=i+numberItems;
                 }
                 else if(strcmp(parseProperty, "weapons") == 0)
                 {
-                    i++; //move into the weapons array token
-                    int endOfItems = tokens[i].end;
-                    while(tokens[i].end < endOfItems)
+                    i++; //move into the armor array token
+                    int numOfWeapons = tokens[i].size;
+                    i++; //either move to the first element of the array or move to the next property
+
+                    for (int j = 0; j < numOfWeapons; j++)
                     {
-                        i++;
-                        if(tokens[i].type != JSMN_ARRAY) continue;
-                        int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                        int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        decodedInventory.Add(itemID, itemCount);
+                        int weaponId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
+                        auto originalInstance = EntityManager::GetInstance()->GetEntity(weaponId);
+                        if (originalInstance == nullptr)
+                        {
+                            Log::Error("Armor with ID %d not found", weaponId);
+                            continue;
+                        }
+                        decodedInventory.Add(weaponId, 1);
                     }
+                    i=i+numOfWeapons;
                 }
                 else if(strcmp(parseProperty, "armor") == 0)
                 {
                     i++; //move into the armor array token
-                    int endOfItems = tokens[i].end;
-                    while(tokens[i].end < endOfItems)
+                    int numOfItems = tokens[i].size;
+                    i++; //either move to the first element of the array or move to the next property
+
+                    for (int j = 0; j < numOfItems; j++)
                     {
-                        i++;
-                        if(tokens[i].type != JSMN_ARRAY) continue;
-                        int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                        int itemCount = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                        decodedInventory.Add(itemID, itemCount);
+                        int armorId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
+                        auto originalInstance = EntityManager::GetInstance()->GetEntity(armorId);
+                        if (originalInstance == nullptr)
+                        {
+                            Log::Error("Armor with ID %d not found", armorId);
+                            continue;
+                        }
+                        decodedInventory.Add(armorId, 1);
                     }
+                    i=i+numOfItems;
                 }
                 else if(strcmp(parseProperty, "creatures") == 0)
                 {
                     i++; //move into the creatures array token
                     int numOfCreatures = tokens[i].size;
+                    i++; //either move to the first element of the array or move to the next property
                     for (int j = 0; j < numOfCreatures; j++)
                     {
                         int creatureId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
-
                         auto originalInstance = EntityManager::GetInstance()->GetEntity(creatureId);
                         if (originalInstance == nullptr)
                         {
-                            Log::Error("Door with ID %d not found", creatureId);
+                            Log::Error("Creature with ID %d not found", creatureId);
                             continue;
                         }
                         decodedCreatures.push_back(std::static_pointer_cast<Creature>(originalInstance));
@@ -146,6 +157,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                 else i++;
             }
             decodedAreas.emplace_back(decodedId, decodedName, decodedDialogue, decodedInventory, decodedCreatures);
+            i--; //move back to the end of the Area object
         }
     }
     return std::make_shared<std::vector<Area>>(decodedAreas);

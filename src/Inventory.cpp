@@ -42,11 +42,11 @@ void Inventory::Add(unsigned int itemId, int count)
 
         if (item == nullptr)
         {
-            Log::Error("Door with ID %d not found", itemId);
+            Log::Error("Item with ID %d not found", itemId);
             continue;
         }
         items.push_back(std::static_pointer_cast<Item>(item));
-        Log::Info("Added %s to inventory.", items.back()->GetName());
+        //Log::Info("Added %s to inventory.", items.back()->GetName());
     }
 }
 

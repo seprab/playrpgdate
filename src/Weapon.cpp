@@ -37,7 +37,7 @@ std::shared_ptr<void> Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int si
         int decodedDamage{-1};
         char* decodedDescription{nullptr};
 
-        while(i<tokens[size].end)
+        while(i<tokens[0].end)
         {
             if (tokens[i].type != JSMN_STRING)
             {

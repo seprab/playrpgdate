@@ -4,6 +4,7 @@
 #include <vector>
 #include "Armor.h"
 #include "Utils.h"
+#include "Log.h"
 
 Armor::Armor(unsigned int _id, char *_name, char *_description, int _defense)
 : Item(_id, _name, _description), defense(_defense)
@@ -35,7 +36,7 @@ std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int siz
         int decodedDefense{-1};
         char* decodedDescription{nullptr};
 
-        while(i<tokens[size].end)
+        while(i<tokens[0].end)
         {
             if (tokens[i].type != JSMN_STRING)
             {
