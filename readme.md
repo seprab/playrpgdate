@@ -29,29 +29,18 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
     - Executable: (~/Developer/PlaydateSDK/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator)
     - Program arguments: <ProjectDir>/CardoBlast.pdx
 
-#### Screenshot Win references:
+#### Screenshot Win/OSX references:
 ![CLion Config A](./imgs/clion_cmake_win_config_a.png)
+
+#### Specific Win reference:
 ![CLion Config B](./imgs/clion_cmake_win_config_b.png)
 
-### Personal Next Steps
-Deserialization of Area is going good. I reached the point where I start deserializing the doors
-from the area description, but I cannot continue because doors must already been deserialized in
-the Entity manager. For clarity:
-- In [GameManager](src/GameManager.cpp) I am commanding to deserialize [areas](Source/data/areas.json) first.
-- And in [Area](src/Area.cpp) I am stuck at doors mapping in entity manager. line 83.
-- So, before that, I must deserialize and add mapping in EntityManager.data;
-  - doors in [GameManager](src/GameManager.cpp) line 18.
-  - items in [GameManager](src/GameManager.cpp) line 19. Also, armors and weapons?
-  - creatures in [GameManager](src/GameManager.cpp) line 20.
-  - And areas in the end
+#### Specific OSX reference:
+![CLion Config A](./imgs/clion_cmake_osx_config_b.png)
 
-Yet, I need to define the ids of everything before continuing. For example:
-- IDs in range [100, 200] for items
-- IDs in range [200, 300] for armors
-- IDs in range [300, 400] for weapons
-- IDs in range [400, 500] for creatures
-- IDs in range [500, 600] for areas
-- IDs in range [600, 700] for doors
+### Personal Next Steps
+- I need to explain in here the mapping of IDs.
+- Start creating the player mechanics.
 
 ## Credits
 - [UtilForever RPG](https://github.com/utilForever/SimpleRPG-Text/tree/master).
