@@ -1,6 +1,6 @@
 # CardoBlast
 
-Attempting to create an text-based RPG for the playdate using c++.
+Attempting to create a text-based RPG for the playdate using c++.
 
 ## How to build
 I work with this either with Terminal or CLion
@@ -57,7 +57,7 @@ I tested this one:
 - Win 11
 
 ## Additional requirements to the official guide
-- PLaydate SDK path Environment variable is required!
+- Playdate SDK path Environment variable is required!
 
 ## Troubleshooting
 

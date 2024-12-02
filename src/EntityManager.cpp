@@ -37,7 +37,7 @@ EntityManager* EntityManager::GetInstance()
 }
 EntityManager::~EntityManager()
 {
-    for (auto& entity : data)
+    for (std::pair<const unsigned, std::shared_ptr<void>>& entity : data)
     {
         entity.second = nullptr;
     }
@@ -91,7 +91,7 @@ void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
     DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);
 }
 template <typename T>
-int EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
+void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
     jsmntok_t t[tokenLimit];
     int calculatedTokens = jsmn_parse(parser, charBuffer, len, t, tokenLimit);
@@ -100,17 +100,20 @@ int EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_
     {
         switch (calculatedTokens)
         {
-            case jsmnerr::JSMN_ERROR_INVAL:
-                Log::Error("bad token, JSON string is corrupted");
-                break;
-            case jsmnerr::JSMN_ERROR_NOMEM:
-                Log::Error("not enough tokens, JSON string is too large");
-                break;
-            case jsmnerr::JSMN_ERROR_PART:
-                Log::Error("JSON string is too short, expecting more JSON data");
-                break;
+        case jsmnerr::JSMN_ERROR_INVAL:
+            Log::Error("bad token, JSON string is corrupted");
+            break;
+        case jsmnerr::JSMN_ERROR_NOMEM:
+            Log::Error("not enough tokens, JSON string is too large");
+            break;
+        case jsmnerr::JSMN_ERROR_PART:
+            Log::Error("JSON string is too short, expecting more JSON data");
+            break;
+        default:
+            Log::Error("Unknown error parsing JSON");
+            break;
         }
-        return calculatedTokens;
+        return;
     }
 
     T dummy{};

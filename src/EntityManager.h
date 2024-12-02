@@ -26,13 +26,13 @@ public:
 
     ~EntityManager();
 
-    PlaydateAPI* GetPD();
+    static PlaydateAPI* GetPD();
 
     template <typename T>
     void LoadJSON(const char* fileName, int limitOfTokens = 128);
 
     template <typename T>
-    int DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit);
+    void DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit);
 
     std::shared_ptr<void> GetEntity(unsigned int id);
 };
