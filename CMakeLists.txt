@@ -12,9 +12,12 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 # system, which might looks something like this:
 #
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/playdate-cpp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/playdate-cpp-extensions)
 
 # Now we can declare our application
 add_playdate_application(${PROJECT_NAME})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC pdcpp)
 
 #use the file(GLOB ...) command in CMake to collect all the source files in a directory and then add them to your target
 file(GLOB SOURCES

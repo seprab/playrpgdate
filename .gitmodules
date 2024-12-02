@@ -1,3 +1,6 @@
 [submodule "playdate-cpp"]
 	path = playdate-cpp
 	url = git@github.com:nstbayless/playdate-cpp.git
+[submodule "playdate-cpp-extensions"]
+	path = playdate-cpp-extensions
+	url = git@github.com:metaphaseaudio/playdate-cpp-extensions.git

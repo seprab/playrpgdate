@@ -1,13 +1,14 @@
 #include <memory>
 #include <string>
-#include "pdcpp/pdnewlib.h"
+#include "../playdate-cpp/inc/pdcpp/pdnewlib.h"
+#include "../playdate-cpp-extensions/inc/pdcpp/core/GlobalPlaydateAPI.h"
 #include "GameManager.h"
 
 /**
  * You can use STL containers! Be careful with some stdlib objects which rely
  * on an OS though, those will cause your app to crash on launch.
  */
-std::shared_ptr<GameManager> gameManager;
+std::unique_ptr<GameManager> gameManager;
 
 
 /**
@@ -35,7 +36,7 @@ extern "C" {
  * allocate and free the `gameManager` handler accordingly.
  *
  * You only need this `_WINDLL` block if you want to run this on a simulator on
- * a windows machine, but for the sake of broad compatibility, we'll leave it
+ * a Windows machine, but for the sake of broad compatibility, we'll leave it
  * here.
  */
 #ifdef _WINDLL
@@ -51,8 +52,11 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
     // Initialization just creates our "game" object
     if (event == kEventInit)
     {
+        //Initialize extension library for cpp
+        pdcpp::GlobalPlaydateAPI::initialize(pd);
+
         pd->display->setRefreshRate(20);
-        gameManager = std::make_shared<GameManager>(pd);
+        gameManager = std::make_unique<GameManager>(pd);
 
         // and sets the tick function to be called on update to turn off the
         // typical 'Lua'-ness.
