@@ -7,7 +7,7 @@
 
 class EntityManager;
 
-class Player : public Creature
+class Player final : public Creature
 {
 private:
     std::string className;

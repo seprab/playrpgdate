@@ -10,7 +10,7 @@ class EntityManager;
 class Door;
 class Creature;
 
-class Area : public Entity
+class Area final : public Entity
 {
 private:
     char* name{};

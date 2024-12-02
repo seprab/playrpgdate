@@ -6,7 +6,7 @@
 
 class EntityManager;
 
-class Weapon : public Item
+class Weapon final : public Item
 {
 private:
     int damage=0;

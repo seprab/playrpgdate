@@ -6,7 +6,7 @@
 
 class EntityManager;
 
-class Armor : public Item
+class Armor final : public Item
 {
 private:
     int defense=0;

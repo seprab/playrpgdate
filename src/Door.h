@@ -4,7 +4,7 @@
 #include <utility>
 #include "Entity.h"
 
-class Door : public Entity
+class Door final : public Entity
 {
 private:
     bool locked{};

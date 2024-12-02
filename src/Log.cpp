@@ -12,9 +12,9 @@ template<typename... Args>
 void Log::Info(const char* message, Args... args) {
     if (playdateApi)
     {
-        size_t len1 = strlen(infoPrefix);
-        size_t len2 = strlen(message);
-        size_t totalLen = len1 + len2;
+        const size_t len1 = strlen(infoPrefix);
+        const size_t len2 = strlen(message);
+        const size_t totalLen = len1 + len2;
 
         auto result = new char[totalLen + 1];
         strcpy(result, infoPrefix);

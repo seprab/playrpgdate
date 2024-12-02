@@ -92,8 +92,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                     i++; //either move to the first element of the array or move to the next property
                     for (int j=0; j<numberItems; j++)
                     {
-                        char* item = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
-                        unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
+                        const unsigned int itemID = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
                         decodedInventory.Add(itemID, 1);
                     }
                     i=i+numberItems;
