@@ -11,20 +11,20 @@ Inventory::Inventory(const Inventory &other) {
 Inventory::Inventory(Inventory &&other) noexcept {
 
 }
-int Inventory::Print(bool label)
+int Inventory::Print(const bool label) const
 {
     if (items.empty())
     {
-        EntityManager::GetInstance()->GetPD()->system->logToConsole("Inventory is empty.");
+        Log::Info("Inventory is empty.");
         return 0;
     }
     if (label)
     {
-        EntityManager::GetInstance()->GetPD()->system->logToConsole("Inventory:");
+        Log::Info("Inventory:");
     }
     for (auto & item : items)
     {
-        EntityManager::GetInstance()->GetPD()->system->logToConsole(item->GetName());
+        Log::Info(item->GetName());
     }
     return items.size();
 }
@@ -34,7 +34,7 @@ void Inventory::Clear()
     items.clear();
 }
 
-void Inventory::Add(unsigned int itemId, int count)
+void Inventory::Add(const unsigned int itemId, const int count)
 {
     for (int i = 0; i < count; i++)
     {
@@ -63,7 +63,7 @@ std::shared_ptr<Item> Inventory::Remove(int itemId)
     }
     if (index == -1)
     {
-        EntityManager::GetInstance()->GetPD()->system->logToConsole("Item not found in inventory. Expected?");
+        Log::Info("Item not found in inventory. Expected?");
         return nullptr;
     }
     std::shared_ptr outItem = std::move(items[index]);
@@ -74,7 +74,7 @@ std::shared_ptr<Item> Inventory::Remove(int itemId)
 int Inventory::Count(int itemId)
 {
     int count = 0;
-    for (auto & item : items)
+    for (std::shared_ptr<Item>& item : items)
     {
         if (item->GetId() == itemId)
         {

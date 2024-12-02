@@ -22,7 +22,7 @@ public:
     std::shared_ptr<Item> Remove(int itemId);
 
     int Count(int itemId);
-    int Print(bool label = true);
+    int Print(bool label = true) const;
     void Clear();
 };
 

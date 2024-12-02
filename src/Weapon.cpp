@@ -10,12 +10,6 @@ Weapon::Weapon(unsigned int _id, char* _name, char* _description, int _damage)
 {
 
 }
-
-Weapon::Weapon(const Weapon &other)
-: Item(other), damage(other.damage)
-{
-
-}
 Weapon::Weapon(Weapon &&other) noexcept
 : Item(other), damage(other.damage)
 {
