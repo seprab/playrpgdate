@@ -85,7 +85,7 @@ void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
     }
     pd->file->close(file);
 
-    char* charBuffer = static_cast<char*>(buffer);
+    const auto charBuffer = static_cast<char*>(buffer);
     jsmn_parser parser;
     jsmn_init(&parser);
     DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);

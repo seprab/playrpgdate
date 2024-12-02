@@ -16,7 +16,7 @@ void Log::Info(const char* message, Args... args) {
         size_t len2 = strlen(message);
         size_t totalLen = len1 + len2;
 
-        char* result = new char[totalLen + 1];
+        auto result = new char[totalLen + 1];
         strcpy(result, infoPrefix);
         strcat(result, message);
         playdateApi->system->logToConsole(result, args...);
@@ -31,7 +31,7 @@ void Log::Error(const char* message, Args... args) {
         size_t len2 = strlen(message);
         size_t totalLen = len1 + len2;
 
-        char* result = new char[totalLen + 1];
+        auto result = new char[totalLen + 1];
         strcpy(result, errorPrefix);
         strcat(result, message);
         playdateApi->system->error(result, args...);
