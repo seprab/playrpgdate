@@ -10,7 +10,7 @@
 Area::Area(unsigned int _id, char* _name, std::shared_ptr<Dialogue> _dialogue, Inventory _items, std::vector<std::shared_ptr<Creature>> _creatures)
 : Entity(_id), name(_name), dialogue(std::move(_dialogue)), items(std::move(_items))
 {
-    for (auto creature : _creatures)
+    for (const std::shared_ptr<Creature>& creature : _creatures)
     {
         _creatures.push_back(creature);
     }
@@ -22,7 +22,7 @@ Area::Area(const Area &other)
 
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), name(other.name), dialogue(other.dialogue), items(other.items), creatures(other.creatures)
+        : Entity(other.GetId()), name(other.name), dialogue(std::move(other.dialogue)), items(other.items), creatures(other.creatures)
 {
 
 }
@@ -40,7 +40,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
             Inventory decodedInventory{};
             std::vector<std::shared_ptr<Creature>> decodedCreatures;
 
-            int endOfObject = tokens[i].end; //get the end of the Area object
+            const int endOfObject = tokens[i].end; //get the end of the Area object
             i++; //move into the first property of the Area object. Otherwise, the while is invalid
             while(tokens[i].end < endOfObject)
             {

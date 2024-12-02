@@ -4,7 +4,7 @@
 
 #include "Entity.h"
 
-Entity::Entity(unsigned int _id):
+Entity::Entity(const unsigned int _id):
 id(_id)
 {
 

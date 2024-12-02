@@ -32,7 +32,7 @@ public:
     void LoadJSON(const char* fileName, int limitOfTokens = 128);
 
     template <typename T>
-    void DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit);
+    void DecodeJson(jsmn_parser *parser, char *charBuffer, size_t len, int tokenLimit);
 
     std::shared_ptr<void> GetEntity(unsigned int id);
 };

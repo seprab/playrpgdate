@@ -13,7 +13,7 @@ class Creature;
 class Area : public Entity
 {
 private:
-    char* name;
+    char* name{};
     std::shared_ptr<Dialogue> dialogue;
     Inventory items;
     std::vector<std::shared_ptr<Door>> doors;

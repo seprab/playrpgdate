@@ -1,14 +1,10 @@
 #include <cstring>
+#include <utility>
 #include "Dialogue.h"
 #include "Utils.h"
 
 Dialogue::Dialogue(char* _description, std::vector<Choice> _choices)
-        : description(_description), choices(_choices)
-{
-
-}
-Dialogue::Dialogue(const Dialogue &other)
-: description(other.description), choices(other.choices)
+        : description(_description), choices(std::move(_choices))
 {
 
 }
@@ -22,17 +18,17 @@ void Dialogue::AddChoice(Choice choice)
     choices.push_back(choice);
 }
 
-unsigned int Dialogue::Size()
+unsigned int Dialogue::Size() const
 {
     return choices.size();
 }
 
-int Dialogue::Activate()
+int Dialogue::Activate() const
 {
     std::cout << description << std::endl;
 
     unsigned int number = 1;
-    for (auto choice : choices)
+    for (const Choice choice : choices)
         std::cout << number++ << ": " << choice.text << std::endl;
 
     unsigned int userInput = 0;

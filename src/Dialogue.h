@@ -17,13 +17,13 @@ public:
     Dialogue() = default;
     Dialogue(char* _description, std::vector<Choice> _choices);
     Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesIndex);
-    Dialogue(const Dialogue& other);
+    Dialogue(const Dialogue& other)=default;
     Dialogue(Dialogue&& other) noexcept;
 
     void AddChoice(Choice choice);
-    unsigned int Size();
+    unsigned int Size() const;
 
-    int Activate();
+    int Activate() const;
 
 private:
     char* description{};

@@ -6,7 +6,7 @@
 #include "Utils.h"
 #include "Log.h"
 
-Armor::Armor(unsigned int _id, char *_name, char *_description, int _defense)
+Armor::Armor(const unsigned int _id, char *_name, char *_description, const int _defense)
 : Item(_id, _name, _description), defense(_defense)
 {
 
@@ -78,8 +78,4 @@ std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int siz
         }
     }
     return std::make_shared<std::vector<Armor>>(Armors_decoded);
-}
-
-int Armor::GetDefense() {
-    return defense;
 }

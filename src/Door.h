@@ -7,8 +7,8 @@
 class Door : public Entity
 {
 private:
-    bool locked;
-    int key;
+    bool locked{};
+    int key{};
     std::pair<int, int> areas;
 
 public:
@@ -19,7 +19,7 @@ public:
 
     [[nodiscard]] bool GetLocked() const;
     void SetLocked(int _locked);
-    int GetKey() const;
+    [[nodiscard]] int GetKey() const;
     [[nodiscard]] std::pair<int, int> GetAreas() const;
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 };

@@ -19,7 +19,6 @@ public:
 
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
     [[nodiscard]] int GetDefense() const;
-    int GetDefense();
 };
 
 #endif
