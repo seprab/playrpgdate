@@ -21,3 +21,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# python3 convert-to-grayscale.py /path/to/input/folder /path/to/output/folder
