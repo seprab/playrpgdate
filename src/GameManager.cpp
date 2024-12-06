@@ -16,6 +16,7 @@ GameManager::GameManager(PlaydateAPI* api)
         Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     new EntityManager(api);
+
 }
 void GameManager::Update()
 {

@@ -15,13 +15,8 @@ public:
     Item(const Item &item);
     Item(Item &&item) noexcept;
 
-    [[nodiscard]] const char * GetName() const;
-    [[nodiscard]] const char * GetDescription() const;
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
-private:
-    char* name{};
-    char* description{};
 };
 
 #endif

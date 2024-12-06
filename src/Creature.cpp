@@ -8,20 +8,26 @@
 
 Creature::Creature(unsigned int _id, char *_name, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
-                   : Entity(_id), name(_name), maxHP(_maxHp), strength(_strength), agility(_agility),
+                   : Entity(_id), strength(_strength), agility(_agility),
                    constitution(_constitution), evasion(_evasion), xp(_xp), weapon(_weapon), armor(_armor)
                    {
-    hp=maxHP;
+                       SetName(_name);
+                       SetHP(_maxHp);
+                       SetMaxHP(_maxHp);
 
 }
 
 Creature::Creature(const Creature &other)
-: Entity(other), name(other.name), maxHP(other.GetMaxHP()), strength(other.GetStrength()), agility(other.GetAgility())
+: Entity(other), strength(other.GetStrength()), agility(other.GetAgility())
 {
+    SetHP(other.GetHP());
+    SetMaxHP(other.GetMaxHP());
 }
 Creature::Creature(Creature &&other) noexcept
-: Entity(other), name(other.name), maxHP(other.GetMaxHP()), strength(other.GetStrength()), agility(other.GetAgility())
+: Entity(other), strength(other.GetStrength()), agility(other.GetAgility())
 {
+    SetHP(other.GetHP());
+    SetMaxHP(other.GetMaxHP());
 }
 
 std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
@@ -118,26 +124,6 @@ std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int 
         }
     }
     return std::make_shared<std::vector<Creature>>(creatures_decoded);
-}
-
-char *Creature::GetName() {
-    return name;
-}
-
-float Creature::GetHP() const {
-    return hp;
-}
-
-void Creature::SetHP(float _hp) {
-    hp = _hp;
-}
-
-float Creature::GetMaxHP() const {
-    return maxHP;
-}
-
-void Creature::SetMaxHP(float _maxHP) {
-    maxHP = _maxHP;
 }
 
 int Creature::GetStrength() const {

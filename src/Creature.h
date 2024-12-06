@@ -14,9 +14,6 @@ class Door;
 class Creature : public Entity
 {
 private:
-    char* name{};
-    float hp{};
-    float maxHP{};
     int strength{};
     int agility{};
     int constitution{};
@@ -36,11 +33,8 @@ public:
     Creature(unsigned int _id, char* _name, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
-    char* GetName();
-    [[nodiscard]] float GetHP() const;
-    void SetHP(float _hp);
-    [[nodiscard]] float GetMaxHP() const;
-    void SetMaxHP(float _maxHP);
+
+
     [[nodiscard]] int GetStrength() const;
     void SetStrength(int _strength);
     [[nodiscard]] int GetAgility() const;

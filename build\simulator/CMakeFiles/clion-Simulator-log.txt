@@ -1,0 +1,7 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -DPROJECT_NAME=CardoBlast -G Ninja -S /Users/sergio.prada/Projects/playdate-rpg -B /Users/sergio.prada/Projects/playdate-rpg/build\simulator
+-- Playdate SDK Path: /Users/sergio.prada/Developer/PlaydateSDK
+-- Adding playdate application CardoBlast
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/sergio.prada/Projects/playdate-rpg/build/simulator
+CMake File API: /Users/sergio.prada/Projects/playdate-rpg/build\simulator: no reply dir found

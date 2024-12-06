@@ -6,29 +6,19 @@
 
 
 Item::Item(unsigned int _id, char* itemName, char* itemDescription) :
-Entity(_id), name(itemName), description(itemDescription)
+Entity(_id)
 {
+    SetName(itemName);
+    SetDescription(itemDescription);
     Log::Info("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
 }
 Item::Item(const Item &item)
         : Entity(item) {
-    name = item.name;
-    description = item.description;
-
 }
 Item::Item(Item &&item) noexcept
 : Entity(item)
 {
-    name = item.name;
-    description = item.description;
-}
-const char* Item::GetName() const
-{
-    return name;
-}
-const char* Item::GetDescription() const
-{
-    return description;
+
 }
 
 std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
