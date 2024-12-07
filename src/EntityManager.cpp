@@ -28,7 +28,7 @@ EntityManager::EntityManager(PlaydateAPI* api)
     LoadJSON<Door>("data/doors.json", 64);
     LoadJSON<Weapon>("data/weapons.json", 64);
     LoadJSON<Armor>("data/armors.json", 128);
-    LoadJSON<Creature>("data/creatures.json", 512);
+    LoadJSON<Creature>("data/creatures.json", 2300);
     LoadJSON<Area>("data/areas.json", 128);
 }
 EntityManager* EntityManager::GetInstance()
@@ -104,8 +104,11 @@ void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size
             Log::Error("bad token, JSON string is corrupted");
             break;
         case jsmnerr::JSMN_ERROR_NOMEM:
-            Log::Error("not enough tokens, JSON string is too large");
+        {
+            int expectedTokens = jsmn_parse(parser, charBuffer, len, nullptr, 0);
+            Log::Error("not enough tokens, JSON string is too large. It should be above: %i", expectedTokens);
             break;
+        }
         case jsmnerr::JSMN_ERROR_PART:
             Log::Error("JSON string is too short, expecting more JSON data");
             break;
