@@ -16,7 +16,7 @@ GameManager::GameManager(PlaydateAPI* api)
         Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     new EntityManager(api);
-
+    player = new Player();
 }
 void GameManager::Update()
 {
@@ -36,6 +36,8 @@ void GameManager::Update()
     {
         dy = -dy;
     }
+
+    player->Tick();
 
     pd->system->drawFPS(0,0);
 }

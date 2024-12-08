@@ -4,6 +4,7 @@
 #include <string>
 #include "pdcpp/pdnewlib.h"
 #include "EntityManager.h"
+#include "Player.h"
 
 class GameManager {
 
@@ -19,6 +20,7 @@ private:
     LCDFont* font;
     int x, y, dx, dy;
     PlaydateAPI* pd;
+    Player* player;
 };
 
 

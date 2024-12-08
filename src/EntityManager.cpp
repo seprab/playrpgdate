@@ -24,12 +24,15 @@ EntityManager::EntityManager(PlaydateAPI* api)
     pd = api;
     instance = this;
 
+    // Load the JSON files
     LoadJSON<Item>("data/items.json", 128);
     LoadJSON<Door>("data/doors.json", 64);
     LoadJSON<Weapon>("data/weapons.json", 64);
     LoadJSON<Armor>("data/armors.json", 128);
     LoadJSON<Creature>("data/creatures.json", 2300);
     LoadJSON<Area>("data/areas.json", 128);
+
+
 }
 EntityManager* EntityManager::GetInstance()
 {
