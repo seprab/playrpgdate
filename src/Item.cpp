@@ -31,18 +31,17 @@ std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size
             int decodedId{};
             char* decodedName{};
             char* decodedDescription{};
-            int numOfProperties = i + (tokens[i].size * 2); //*2 because of key value pairs
-            while(i<numOfProperties)
-            {
-                i++;
-                if(tokens[i].type != JSMN_STRING) continue;
-                char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
 
-                if(strcmp(parseProperty, "id") == 0) decodedId = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                else if(strcmp(parseProperty, "name") == 0) decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-                else if(strcmp(parseProperty, "description") == 0) decodedDescription = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-            };
+            const char* objects[] = {"id", "name", "description"};
+            for (const char* & object : objects)
+            {
+                char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+                if(strcmp(object, "id") == 0) decodedId = atoi(value);
+                else if(strcmp(object, "name") == 0) decodedName = value;
+                else if(strcmp(object, "description") == 0) decodedDescription = value;
+            }
             items_decoded.emplace_back(decodedId, decodedName, decodedDescription);
+            i+=(tokens[i].size*2);
         }
     }
     return std::make_shared<std::vector<Item>>(items_decoded);
