@@ -1,5 +1,10 @@
 
+#include <cstring>
+#include <cstdlib>
+#include <type_traits>
 #include "Utils.h"
+#include "Log.h"
+
 char* Utils::Subchar(const char* source, int start, int end)
 {
     const int length = end - start;
@@ -11,4 +16,23 @@ char* Utils::Subchar(const char* source, int start, int end)
     }
     subchar[length] = '\0'; //null terminator
     return subchar;
+}
+
+char* Utils::ValueDecoder(char *buffer, jsmntok_t *tokens, int start, int finish, const char *property) {
+    char* parseProperty;
+    for (int i = start; i < finish; i++)
+    {
+        if (tokens[i].type != JSMN_STRING)
+        {
+            continue;
+        }
+        parseProperty = Subchar(buffer, tokens[i].start, tokens[i].end);
+        if(strcmp(parseProperty, property) == 0)
+        {
+            char* value = Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
+            return value;
+        }
+    }
+    Log::Error("Property %s not found", property);
+    return nullptr;
 }

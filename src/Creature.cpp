@@ -6,14 +6,15 @@
 #include "Utils.h"
 #include "Log.h"
 
-Creature::Creature(unsigned int _id, char *_name, float _maxHp, int _strength, int _agility, int _constitution,
+Creature::Creature(unsigned int _id, char *_name, char* image, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
                    : Entity(_id), strength(_strength), agility(_agility),
                    constitution(_constitution), evasion(_evasion), xp(_xp), weapon(_weapon), armor(_armor)
                    {
-                       SetName(_name);
-                       SetHP(_maxHp);
-                       SetMaxHP(_maxHp);
+    SetImagePath(image);
+    SetName(_name);
+    SetHP(_maxHp);
+    SetMaxHP(_maxHp);
 
 }
 
@@ -37,91 +38,37 @@ std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int 
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
 
-        unsigned int decodedId{0};
-        char* decodedName{nullptr};
-        float decodedMaxHp{-1};
-        int decodedStrength{-1};
-        int decodedAgility{-1};
-        int decodedConstitution{-1};
-        float decodedEvasion{-1};
-        unsigned int decodedXp{0};
-        int decodedWeapon{-1};
-        int decodedArmor{-1};
+        unsigned int decodedId; char* decodedName; char* decodedPath; float decodedMaxHp; int decodedStrength;
+        int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
+        int decodedWeapon; int decodedArmor;
 
-        while(i<tokens[0].end)
+        const char* objects[11] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor"};
+        for (int j = 0; j < 11; j++)
         {
-            if (tokens[i].type != JSMN_STRING)
-            {
-                i++;
-                continue;
-            }
-            char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
+            // doing (tokens[i].size*2) because the object size returns the number of elements inside.
+            // for example:
+            // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
+            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), objects[j]);
 
-            if(strcmp(parseProperty, "id") == 0)
-            {
-                decodedId = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "name") == 0)
-            {
-                decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "hp") == 0)
-            {
-                decodedMaxHp = atof(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "str") == 0)
-            {
-                decodedStrength = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "agi") == 0)
-            {
-                decodedAgility = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "con") == 0)
-            {
-                decodedConstitution = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "evasion") == 0)
-            {
-                decodedEvasion = atof(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "xp") == 0)
-            {
-                decodedXp = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "weapon") == 0)
-            {
-                decodedWeapon = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "armor") == 0)
-            {
-                decodedArmor = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else
-            {
-                i++;
-            }
-            if (decodedId!=0 && decodedName != nullptr && decodedMaxHp!=-1 && decodedStrength!=-1 &&
-            decodedAgility!=-1 && decodedConstitution!=-1 && decodedEvasion!=-1 && decodedXp!=0 &&
-            decodedWeapon!=-1 && decodedArmor!=-1)
-            {
-                //TODO: I need to set the inventory, armor and weapon.
-                creatures_decoded.emplace_back(decodedId, decodedName, decodedMaxHp, decodedStrength, decodedAgility, decodedConstitution, decodedEvasion, decodedXp, decodedWeapon, decodedArmor);
-                Log::Info("Creature ID: %d, name %s", decodedId, decodedName);
-                i--;
-                break;
-            }
+            if(strcmp(objects[j], "id") == 0) decodedId = atoi(value);
+            else if(strcmp(objects[j], "name") == 0) decodedName = value;
+            else if(strcmp(objects[j], "image") == 0) decodedPath = value;
+            else if(strcmp(objects[j], "hp") == 0) decodedMaxHp = atof(value);
+            else if(strcmp(objects[j], "str") == 0) decodedStrength = atoi(value);
+            else if(strcmp(objects[j], "agi") == 0) decodedAgility = atoi(value);
+            else if(strcmp(objects[j], "con") == 0) decodedConstitution = atoi(value);
+            else if(strcmp(objects[j], "evasion") == 0) decodedEvasion = atof(value);
+            else if(strcmp(objects[j], "xp") == 0) decodedXp = std::stoi(value);
+            else if(strcmp(objects[j], "weapon") == 0) decodedWeapon = atoi(value);
+            else if(strcmp(objects[j], "armor") == 0) decodedArmor = atoi(value);
+            else Log::Error("Unknown property %s", objects[j]);
         }
+        creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
+                                       decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
+                                       decodedWeapon, decodedArmor);
+        Log::Info("Creature ID: %d, name %s", decodedId, decodedName);
+
+        i+=(tokens[i].size*2);
     }
     return std::make_shared<std::vector<Creature>>(creatures_decoded);
 }
