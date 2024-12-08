@@ -53,42 +53,19 @@ std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         int decodedAreaA{};
         int decodedAreaB{};
 
-        while(i<tokens[0].end)
+        const char* objects[] = {"id", "area_a", "area_b", "key", "locked"};
+        for (const char* & object : objects)
         {
-            if (tokens[i].type != JSMN_STRING)
-            {
-                i++;
-                continue;
-            }
-            char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-
-            if(strcmp(parseProperty, "id") == 0)
-            {
-                decodedId = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i++;
-            }
-            else if(strcmp(parseProperty, "key") == 0)
-            {
-                decodedKey = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i++;
-            }
-            else if(strcmp(parseProperty, "locked") == 0)
-            {
-                char* lockedChar = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-                decodedLocked = strcmp(lockedChar, "true") == 0;
-                i++;
-            }
-            else if(strcmp(parseProperty, "areas") == 0)
-            {
-                decodedAreaA = std::stoi(Utils::Subchar(buffer, tokens[i+2].start, tokens[i+2].end));
-                decodedAreaB = std::stoi(Utils::Subchar(buffer, tokens[i+3].start, tokens[i+3].end));
-                i+=3;
-            }
-
-            if (decodedId!=0 && decodedKey!=0 && decodedAreaA!=0 && decodedAreaB!=0) break;
+            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            else if(strcmp(object, "key") == 0) decodedKey = atoi(value);
+            else if(strcmp(object, "locked") == 0) decodedLocked = strcmp(value, "true") == 0;
+            else if(strcmp(object, "area_a") == 0) decodedAreaA = atoi(value);
+            else if(strcmp(object, "area_b") == 0) decodedAreaB = atoi(value);
         }
         doors_decoded.emplace_back(decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB);
         Log::Info("Door ID: %d", decodedId);
+        i+=(tokens[i].size*2);
     }
     return std::make_shared<std::vector<Door>>(doors_decoded);
 }
