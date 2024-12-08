@@ -31,51 +31,18 @@ std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int siz
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
 
-        unsigned int decodedId{0};
-        char* decodedName{nullptr};
-        int decodedDefense{-1};
-        char* decodedDescription{nullptr};
-
-        while(i<tokens[0].end)
+        unsigned int decodedId{}; char* decodedName{}; int decodedDefense{}; char* decodedDescription{};
+        const char* objects[] = {"id", "name", "defense", "description"};
+        for (const char* & object : objects)
         {
-            if (tokens[i].type != JSMN_STRING)
-            {
-                i++;
-                continue;
-            }
-            char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-
-            if(strcmp(parseProperty, "id") == 0)
-            {
-                decodedId = std::stoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "name") == 0)
-            {
-                decodedName = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "defense") == 0)
-            {
-                decodedDefense = atoi(Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end));
-                i+=2;
-            }
-            else if(strcmp(parseProperty, "description") == 0)
-            {
-                decodedDescription = Utils::Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-                i+=2;
-            }
-            else
-            {
-                i++;
-            }
-            if (decodedId!=0 && decodedDefense!=-1 && decodedDescription != nullptr && decodedName != nullptr)
-            {
-                Armors_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDefense);
-                i--;
-                break;
-            }
+            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            else if(strcmp(object, "name") == 0) decodedName = value;
+            else if(strcmp(object, "defense") == 0) decodedDefense = atoi(value);
+            else if(strcmp(object, "description") == 0) decodedDescription = value;
         }
+        Armors_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDefense);
+        i+=(tokens[i].size*2);
     }
     return std::make_shared<std::vector<Armor>>(Armors_decoded);
 }

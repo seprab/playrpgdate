@@ -42,26 +42,26 @@ std::shared_ptr<void> Creature::DecodeJson(char *buffer, jsmntok_t *tokens, int 
         int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
         int decodedWeapon; int decodedArmor;
 
-        const char* objects[11] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor"};
-        for (int j = 0; j < 11; j++)
+        const char* objects[] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor"};
+        for (const char* & object : objects)
         {
             // doing (tokens[i].size*2) because the object size returns the number of elements inside.
             // for example:
             // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
-            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), objects[j]);
+            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
 
-            if(strcmp(objects[j], "id") == 0) decodedId = atoi(value);
-            else if(strcmp(objects[j], "name") == 0) decodedName = value;
-            else if(strcmp(objects[j], "image") == 0) decodedPath = value;
-            else if(strcmp(objects[j], "hp") == 0) decodedMaxHp = atof(value);
-            else if(strcmp(objects[j], "str") == 0) decodedStrength = atoi(value);
-            else if(strcmp(objects[j], "agi") == 0) decodedAgility = atoi(value);
-            else if(strcmp(objects[j], "con") == 0) decodedConstitution = atoi(value);
-            else if(strcmp(objects[j], "evasion") == 0) decodedEvasion = atof(value);
-            else if(strcmp(objects[j], "xp") == 0) decodedXp = std::stoi(value);
-            else if(strcmp(objects[j], "weapon") == 0) decodedWeapon = atoi(value);
-            else if(strcmp(objects[j], "armor") == 0) decodedArmor = atoi(value);
-            else Log::Error("Unknown property %s", objects[j]);
+            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            else if(strcmp(object, "name") == 0) decodedName = value;
+            else if(strcmp(object, "image") == 0) decodedPath = value;
+            else if(strcmp(object, "hp") == 0) decodedMaxHp = atof(value);
+            else if(strcmp(object, "str") == 0) decodedStrength = atoi(value);
+            else if(strcmp(object, "agi") == 0) decodedAgility = atoi(value);
+            else if(strcmp(object, "con") == 0) decodedConstitution = atoi(value);
+            else if(strcmp(object, "evasion") == 0) decodedEvasion = atof(value);
+            else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
+            else if(strcmp(object, "weapon") == 0) decodedWeapon = atoi(value);
+            else if(strcmp(object, "armor") == 0) decodedArmor = atoi(value);
+            else Log::Error("Unknown property %s", object);
         }
         creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
                                        decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
