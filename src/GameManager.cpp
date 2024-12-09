@@ -18,7 +18,7 @@ void GameManager::Update()
 {
     pd->graphics->clear(kColorWhite);
     pd->graphics->setFont(font);
-    pd->graphics->drawText("Center", strlen("Center"), kASCIIEncoding, (int)(400 - strlen("Center")) / 2, (int)((240 - 16) / 2));
+    pd->graphics->drawText("o", strlen("o"), kASCIIEncoding, 0, 0);
 
     player->Tick();
 
