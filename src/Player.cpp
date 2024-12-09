@@ -13,7 +13,8 @@ Player::Player(): level(0)
     SetStrength(10);
     SetAgility(5);
     SetEvasion(0.1);
-    SetMovementScale(2.0f);
+    SetMovementScale(5.0f);
+    SetPosition(std::pair<int,int>(200, 0));
 
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();

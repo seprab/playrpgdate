@@ -2,11 +2,7 @@
 #include "Log.h"
 
 GameManager::GameManager(PlaydateAPI* api)
-: fontpath("/System/Fonts/Asheville-Sans-14-Bold.pft")
-, x((400 - TEXT_WIDTH) / 2)
-, y((240 - TEXT_HEIGHT) / 2)
-, dx(1)
-, dy(2) , pd(api)
+: fontpath("/System/Fonts/Asheville-Sans-14-Bold.pft"), pd(api)
 {
     Log::Initialize(pd);
     const char* err;
@@ -22,22 +18,30 @@ void GameManager::Update()
 {
     pd->graphics->clear(kColorWhite);
     pd->graphics->setFont(font);
-    pd->graphics->drawText("SepraB!", strlen("Hello World!"), kASCIIEncoding, x, y);
-
-    x += dx;
-    y += dy;
-
-    if ( x < 0 || x > LCD_COLUMNS - TEXT_WIDTH )
-    {
-        dx = -dx;
-    }
-
-    if ( y < 0 || y > LCD_ROWS - TEXT_HEIGHT )
-    {
-        dy = -dy;
-    }
+    pd->graphics->drawText("Center", strlen("Center"), kASCIIEncoding, (int)(400 - strlen("Center")) / 2, (int)((240 - 16) / 2));
 
     player->Tick();
+
+    // Calculate camera position
+    float cameraSpeed = 0.2f; // Adjust for smoothness
+    currentCameraOffset.first = currentCameraOffset.first + (player->GetPosition().first - currentCameraOffset.first) * cameraSpeed;
+    currentCameraOffset.second = currentCameraOffset.second + (player->GetPosition().second - currentCameraOffset.second)  * cameraSpeed;
+
+    // Move the camera to calculated position
+    pd->graphics->setDrawOffset(-currentCameraOffset.first + 200, -currentCameraOffset.second + 120);
+
+
+    // From here, I should start drawing the game UI. Otherwise, the camera will move the UI as well.
+
+    // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
+    const char* resultX = std::to_string(currentCameraOffset.first).c_str();
+    const char* resultY = std::to_string(currentCameraOffset.second).c_str();
+    //pd->graphics->drawRect(currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15, kColorBlack);
+    //pd->graphics->drawRect(currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15, kColorBlack);
+    pd->graphics->drawTextInRect(resultX, strlen(resultX), kASCIIEncoding, currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
+    pd->graphics->drawTextInRect(resultY, strlen(resultY), kASCIIEncoding, currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
+
+
 
     pd->system->drawFPS(0,0);
 }
