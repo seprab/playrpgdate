@@ -5,6 +5,7 @@
 #include "pdcpp/pdnewlib.h"
 #include "EntityManager.h"
 #include "Player.h"
+#include "Map.h"
 
 class GameManager {
 
@@ -19,6 +20,7 @@ private:
     int x{0}, y{0};
     PlaydateAPI* pd;
     Player* player;
+    Map* map;
     std::pair<int,int> currentCameraOffset = {0,0};
 };
 

@@ -9,6 +9,7 @@
 #include "jsmn.h"
 #include "Log.h"
 #include "Dialogue.h"
+#include "Utils.h"
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;
@@ -69,26 +70,8 @@ std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
 {
-    Log::Info("Loading data from %s", fileName);
-    auto* fileStat = new FileStat;
-    pd->file->stat(fileName, fileStat);
-    SDFile* file = pd->file->open(fileName, kFileRead);
-    if(file==nullptr)
-    {
-        Log::Info("Error opening the file %s: %s", fileName, pd->file->geterr());
-        return;
-    }
-    //allocate memory for the buffer before reading data into it.
-    void* buffer = new char[fileStat->size + 1]; // +1 for the null terminator
-    int readResult = pd->file->read(file, buffer, fileStat->size);
-    if(readResult < 0)
-    {
-        Log::Info("Error reading the file %s: %s", fileName, pd->file->geterr());
-        return;
-    }
-    pd->file->close(file);
-
-    const auto charBuffer = static_cast<char*>(buffer);
+    auto fileStat = new FileStat;
+    const auto charBuffer = Utils::ReadBufferFromJSON(fileName, limitOfTokens, fileStat);
     jsmn_parser parser;
     jsmn_init(&parser);
     DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);
@@ -97,30 +80,7 @@ template <typename T>
 void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
     jsmntok_t t[tokenLimit];
-    int calculatedTokens = jsmn_parse(parser, charBuffer, len, t, tokenLimit);
-    Log::Info("Number of tokens: %d", calculatedTokens);
-    if (calculatedTokens < 0)
-    {
-        switch (calculatedTokens)
-        {
-        case jsmnerr::JSMN_ERROR_INVAL:
-            Log::Error("bad token, JSON string is corrupted");
-            break;
-        case jsmnerr::JSMN_ERROR_NOMEM:
-        {
-            int expectedTokens = jsmn_parse(parser, charBuffer, len, nullptr, 0);
-            Log::Error("not enough tokens, JSON string is too large. It should be above: %i", expectedTokens);
-            break;
-        }
-        case jsmnerr::JSMN_ERROR_PART:
-            Log::Error("JSON string is too short, expecting more JSON data");
-            break;
-        default:
-            Log::Error("Unknown error parsing JSON");
-            break;
-        }
-        return;
-    }
+    int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
 
     T dummy{};
     std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens);

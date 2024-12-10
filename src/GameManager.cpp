@@ -13,6 +13,7 @@ GameManager::GameManager(PlaydateAPI* api)
 
     new EntityManager(api);
     player = new Player();
+    map = new Map();
 }
 void GameManager::Update()
 {
