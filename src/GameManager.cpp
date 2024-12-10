@@ -14,6 +14,7 @@ GameManager::GameManager(PlaydateAPI* api)
     new EntityManager(api);
     player = new Player();
     map = new Map();
+    map->LoadFromFile("data/samplemap.json", 7510);
 }
 void GameManager::Update()
 {

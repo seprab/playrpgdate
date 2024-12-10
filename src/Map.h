@@ -23,7 +23,7 @@ private:
 public:
     Map() = default;
     ~Map() = default;
-    void LoadFromFile(const char* filename);
+    void LoadFromFile(const char* fileName, int limitOfTokens);
     void Render();
     bool CheckCollision(int x, int y);
 };
