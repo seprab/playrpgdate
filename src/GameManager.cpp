@@ -14,7 +14,9 @@ GameManager::GameManager(PlaydateAPI* api)
     new EntityManager(api);
     player = new Player();
     map = new Map();
-    map->LoadFromFile("data/samplemap.json", 7510);
+    map->LoadLayers("data/samplemap.json", 7510);
+    map->LoadImageTable("images/maps/gray/tilesetworld.pdt");
+    map->SetMapScale(1);
 }
 void GameManager::Update()
 {
@@ -22,6 +24,8 @@ void GameManager::Update()
     pd->graphics->setFont(font);
     pd->graphics->drawText("o", strlen("o"), kASCIIEncoding, 0, 0);
 
+
+    map->Render(player->GetPosition().first, player->GetPosition().second, 180);
     player->Tick();
 
     // Calculate camera position
@@ -29,9 +33,9 @@ void GameManager::Update()
     currentCameraOffset.first = currentCameraOffset.first + (player->GetPosition().first - currentCameraOffset.first) * cameraSpeed;
     currentCameraOffset.second = currentCameraOffset.second + (player->GetPosition().second - currentCameraOffset.second)  * cameraSpeed;
 
+
     // Move the camera to calculated position
     pd->graphics->setDrawOffset(-currentCameraOffset.first + 200, -currentCameraOffset.second + 120);
-
 
     // From here, I should start drawing the game UI. Otherwise, the camera will move the UI as well.
 
