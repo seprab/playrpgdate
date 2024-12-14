@@ -19,15 +19,15 @@ GameManager::GameManager(PlaydateAPI* api)
     map->SetMapScale(1);
 
     player = new Player();
-    player->SetPosition(std::pair<int,int>(89*map->GetTileWidth(), 136*map->GetTileHeight()));
+    player->SetPosition(std::pair<int,int>(89*map->GetTileWidth(), 145*map->GetTileHeight()));
 }
 void GameManager::Update()
 {
-    pd->graphics->clear(kColorWhite);
+    pd->graphics->clear(kColorBlack);
     pd->graphics->setFont(font);
 
     map->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
-    player->Tick();
+    player->Tick(map);
 
     // Calculate camera position
     float cameraSpeed = 0.2f; // Adjust for smoothness
@@ -43,8 +43,12 @@ void GameManager::Update()
     // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
     const char* resultX = std::to_string(currentCameraOffset.first).c_str();
     const char* resultY = std::to_string(currentCameraOffset.second).c_str();
-    //pd->graphics->drawRect(currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15, kColorBlack);
-    //pd->graphics->drawRect(currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15, kColorBlack);
+    pd->graphics->drawRect(currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15, kColorWhite);
+    pd->graphics->drawRect(currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15, kColorWhite);
+
+    pd->graphics->fillRect(currentCameraOffset.first + 102, currentCameraOffset.second - 118, 46, 11, kColorWhite);
+    pd->graphics->fillRect(currentCameraOffset.first + 152, currentCameraOffset.second - 118, 46, 11, kColorWhite);
+
     pd->graphics->drawTextInRect(resultX, strlen(resultX), kASCIIEncoding, currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
     pd->graphics->drawTextInRect(resultY, strlen(resultY), kASCIIEncoding, currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
 

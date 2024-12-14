@@ -28,14 +28,13 @@ void Map::LoadLayers(const char *fileName, int limitOfTokens)
                 i=i+1;
                 Layer layer;
                 int numberOfTiles = t[i].size;
-                for (int j = 1; j < numberOfTiles; j++)
+                for (int j = 0; j < numberOfTiles; j++)
                 {
                     char* bufferValue = Utils::Subchar(charBuffer, t[i+j].start, t[i+j].end);
                     int parsedId = atoi(bufferValue);
-                    Tile tile{.id =  parsedId, .collision =  true};
+                    Tile tile{.id =  parsedId, .collision = parsedId != 0};
                     layer.tiles.push_back(tile);
                 }
-                layer.tiles[0].collision = false; //Since I'm using the first tile for drawing the background, I don't want it to be a collision
                 mapData.push_back(layer);
                 i+=t[i].size;
             }
@@ -54,14 +53,14 @@ void Map::LoadImageTable(const char *fileName)
 void Map::DrawTileFromLayer(int layer, int x, int y)
 {
     int tileId = mapData[layer].tiles[(y * width) + x].id;
-    if (tileId>0) tileId = tileId - 1;
+    if (tileId == 0) return;
+    tileId = tileId - 1; //I'm not sure why.
 
     LCDBitmap* bitmap = (*imageTable)[tileId];
     int drawX = x * tileWidth/*scale*/;
     int drawY = y * tileHeight/*scale*/;
     //pdcpp::GlobalPlaydateAPI::get()->graphics->drawScaledBitmap(bitmap, drawX, drawY, scale, scale);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmap, drawX, drawY, LCDBitmapFlip::kBitmapUnflipped);
-    //Log::Info("Tile at x: %i and y: %i uses ID: %i", x, y, tileId);
 }
 void Map::Render(int x, int y, int fovX, int fovY)
 {
@@ -84,10 +83,14 @@ void Map::Render(int x, int y, int fovX, int fovY)
 
 bool Map::CheckCollision(int x, int y)
 {
+    x=x/tileWidth;
+    y=y/tileHeight;
+    Log::Info("Checking collision at x: %i and y: %i", x, y);
     for (auto layer : mapData)
     {
         if (layer.tiles[(y * width) + x].collision)
         {
+            pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, 16, 16, kColorWhite);
             return true;
         }
     }

@@ -4,6 +4,7 @@
 
 #include "Player.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
+#include "Log.h"
 
 Player::Player(): level(0)
 {
@@ -54,7 +55,7 @@ Player::Player(): level(0)
     die->LoadBitmaps();
 }
 
-void Player::Tick()
+void Player::Tick(Map* map)
 {
     PDButtons clicked;
     pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, nullptr, nullptr);
@@ -80,11 +81,31 @@ void Player::Tick()
     else if (clicked & kButtonDown) y=1;
     x *= GetMovementScale();
     y *= GetMovementScale();
-    SetPosition(std::pair<int,int>(GetPosition().first + x, GetPosition().second + y));
+    Move(x, y, *map);
 
 
     if (clicked & kButtonA) attack->Draw(GetPosition().first, GetPosition().second);
     else if (clicked & kButtonB) stab->Draw(GetPosition().first, GetPosition().second);
     else if (x != 0 || y != 0) run->Draw(GetPosition().first, GetPosition().second);
     else idle->Draw(GetPosition().first, GetPosition().second);
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 40, 32, kColorWhite);
+}
+
+void Player::Move(int deltaX, int deltaY, Map& map)
+{
+
+    if (deltaY == 0 && deltaX == 0) return;
+
+    int x = GetPosition().first + deltaX;
+    int y = GetPosition().second + deltaY;
+
+    if (!map.CheckCollision(x, y))
+    {
+        SetPosition(std::pair<int,int>(x, y));
+    }
+    else
+    {
+        //pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x, y, 16, 16, kColorWhite);
+    }
 }
