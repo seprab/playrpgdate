@@ -12,20 +12,21 @@ GameManager::GameManager(PlaydateAPI* api)
         Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath.c_str(), err);
 
     new EntityManager(api);
-    player = new Player();
+
     map = new Map();
-    map->LoadLayers("data/samplemap.json", 7510);
-    map->LoadImageTable("images/maps/gray/tilesetworld.pdt");
+    map->LoadLayers("data/map.json", 32768);
+    map->LoadImageTable("images/maps/blackmap.pdt");
     map->SetMapScale(1);
+
+    player = new Player();
+    player->SetPosition(std::pair<int,int>(89*map->GetTileWidth(), 136*map->GetTileHeight()));
 }
 void GameManager::Update()
 {
     pd->graphics->clear(kColorWhite);
     pd->graphics->setFont(font);
-    pd->graphics->drawText("o", strlen("o"), kASCIIEncoding, 0, 0);
 
-
-    map->Render(player->GetPosition().first, player->GetPosition().second, 180);
+    map->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
     player->Tick();
 
     // Calculate camera position

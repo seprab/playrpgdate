@@ -22,18 +22,25 @@ private:
     pdcpp::ImageTable* imageTable;
     int width{};
     int height{};
-    int tileSize{};
+    int tileWidth{};
+    int tileHeight{};
     float scale{};
 
 public:
     Map() = default;
     ~Map() = default;
+    pdcpp::ImageTable* GetImageTable() {return imageTable;}
     void LoadLayers(const char* fileName, int limitOfTokens);
     void LoadImageTable(const char* fileName);
     void DrawTileFromLayer(int layer, int x, int y);
-    void Render(int x, int y, int fov);
+    void Render(int x, int y, int fovX, int fovY);
     bool CheckCollision(int x, int y);
     void SetMapScale(float value){scale = value;};
+
+    [[nodiscard]] int GetWidth() const {return width;};
+    [[nodiscard]] int GetHeight() const {return height;};
+    [[nodiscard]] int GetTileWidth() const {return tileWidth;};
+    [[nodiscard]] int GetTileHeight() const {return tileHeight;};
 };
 
 
