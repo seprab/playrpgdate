@@ -85,7 +85,6 @@ bool Map::CheckCollision(int x, int y)
 {
     x=x/tileWidth;
     y=y/tileHeight;
-    Log::Info("Checking collision at x: %i and y: %i", x, y);
     for (auto layer : mapData)
     {
         if (layer.tiles[(y * width) + x].collision)

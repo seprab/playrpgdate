@@ -23,34 +23,39 @@ Player::Player(): level(0)
     stab = std::make_unique<AnimationClip>();
     die = std::make_unique<AnimationClip>();
 
-    idle->AddImagePath("images/player/idle_a.pdi");
-    idle->AddImagePath("images/player/idle_b.pdi");
+    auto anim =new pdcpp::ImageTable("images/player/animmini");
+
+    // 16 x 16
+    // 16 x 4 = 64
+    // 16 x 5 = 80
+    idle->AddBitmap((*anim)[0]);
+    idle->AddBitmap((*anim)[1]);
     idle->SetDelay(4);
     idle->LoadBitmaps();
 
-    run->AddImagePath("images/player/run_a.pdi");
-    run->AddImagePath("images/player/run_b.pdi");
-    run->AddImagePath("images/player/run_c.pdi");
-    run->AddImagePath("images/player/run_d.pdi");
+    run->AddBitmap((*anim)[4]);
+    run->AddBitmap((*anim)[5]);
+    run->AddBitmap((*anim)[6]);
+    run->AddBitmap((*anim)[7]);
     run->SetDelay(3);
     run->LoadBitmaps();
 
-    attack->AddImagePath("images/player/attack_a.pdi");
-    attack->AddImagePath("images/player/attack_b.pdi");
-    attack->AddImagePath("images/player/attack_c.pdi");
-    attack->AddImagePath("images/player/attack_d.pdi");
+    attack->AddBitmap((*anim)[8]);
+    attack->AddBitmap((*anim)[9]);
+    attack->AddBitmap((*anim)[10]);
+    attack->AddBitmap((*anim)[11]);
     attack->SetDelay(0);
     attack->LoadBitmaps();
 
-    stab->AddImagePath("images/player/jab_a.pdi");
-    stab->AddImagePath("images/player/jab_b.pdi");
-    stab->AddImagePath("images/player/jab_c.pdi");
+    stab->AddBitmap((*anim)[12]);
+    stab->AddBitmap((*anim)[13]);
+    stab->AddBitmap((*anim)[14]);
     stab->SetDelay(0);
     stab->LoadBitmaps();
 
-    die->AddImagePath("images/player/death_a.pdi");
-    die->AddImagePath("images/player/death_b.pdi");
-    die->AddImagePath("images/player/death_c.pdi");
+    die->AddBitmap((*anim)[16]);
+    die->AddBitmap((*anim)[17]);
+    die->AddBitmap((*anim)[18]);
     die->SetDelay(4);
     die->LoadBitmaps();
 }
@@ -89,7 +94,7 @@ void Player::Tick(Map* map)
     else if (x != 0 || y != 0) run->Draw(GetPosition().first, GetPosition().second);
     else idle->Draw(GetPosition().first, GetPosition().second);
 
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 40, 32, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
 }
 
 void Player::Move(int deltaX, int deltaY, Map& map)
@@ -100,12 +105,10 @@ void Player::Move(int deltaX, int deltaY, Map& map)
     int x = GetPosition().first + deltaX;
     int y = GetPosition().second + deltaY;
 
-    if (!map.CheckCollision(x, y))
+    //check the 4 corners of the player
+    if (map.CheckCollision(x, y) || map.CheckCollision(x + 16, y) || map.CheckCollision(x, y + 16) || map.CheckCollision(x + 16, y + 16))
     {
-        SetPosition(std::pair<int,int>(x, y));
+        return;
     }
-    else
-    {
-        //pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x, y, 16, 16, kColorWhite);
-    }
+    SetPosition(std::pair<int,int>(x, y));
 }

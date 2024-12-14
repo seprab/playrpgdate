@@ -14,6 +14,7 @@ public:
     ~AnimationClip()=default;
 
     void AddImagePath(const char* path){paths.emplace_back(path);}
+    void AddBitmap(LCDBitmap* bitmap){bitmaps.push_back(bitmap);}
     void LoadBitmaps();
     void Draw(int x, int y);
     void SetDelay(int value){frameDelay = value; }
