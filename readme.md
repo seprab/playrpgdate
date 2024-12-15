@@ -31,7 +31,7 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 
 #### Screenshot Win/OSX references:
 ![CLion Config A](./imgs/clion_cmake_win_config_a.png)
-
+![CLion Config A](./imgs/clion_cmake_osx_config_a.png)
 #### Specific Win reference:
 ![CLion Config B](./imgs/clion_cmake_win_config_b.png)
 

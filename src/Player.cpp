@@ -105,8 +105,7 @@ void Player::Move(int deltaX, int deltaY, Map& map)
     int x = GetPosition().first + deltaX;
     int y = GetPosition().second + deltaY;
 
-    //check the 4 corners of the player
-    if (map.CheckCollision(x+8, y+10))
+    if (map.CheckCollision(x+8, y+10)) // Set the collision point to the player's feet
     {
         return;
     }
