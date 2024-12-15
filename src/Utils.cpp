@@ -38,29 +38,6 @@ char* Utils::ValueDecoder(char *buffer, jsmntok_t *tokens, int start, int finish
     return nullptr;
 }
 
-char *Utils::ReadBufferFromJSON(const char *fileName, int limitOfTokens, FileStat *fileStat) {
-    auto pd = pdcpp::GlobalPlaydateAPI::get();
-    Log::Info("Loading data from %s", fileName);
-    pd->file->stat(fileName, fileStat);
-    SDFile* file = pd->file->open(fileName, kFileRead);
-    if(file==nullptr)
-    {
-        Log::Error("Error opening the file %s: %s", fileName, pd->file->geterr());
-        return nullptr;
-    }
-    //allocate memory for the buffer before reading data into it.
-    void* buffer = new char[fileStat->size + 1]; // +1 for the null terminator
-    int readResult = pd->file->read(file, buffer, fileStat->size);
-    if(readResult < 0)
-    {
-        Log::Error("Error reading the file %s: %s", fileName, pd->file->geterr());
-        return nullptr;
-    }
-    pd->file->close(file);
-
-    return static_cast<char*>(buffer);
-}
-
 int Utils::InitializeJSMN(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit, jsmntok_t* t) {
     int calculatedTokens = jsmn_parse(parser, charBuffer, len, t, tokenLimit);
     Log::Info("Number of tokens: %d", calculatedTokens);

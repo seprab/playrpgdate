@@ -8,15 +8,17 @@
 #include "Log.h"
 #include "pdcpp/graphics/ImageTable.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
+#include "pdcpp/core/File.h"
 
 void Map::LoadLayers(const char *fileName, int limitOfTokens)
 {
-    auto fileStat = new FileStat;
-    const auto charBuffer = Utils::ReadBufferFromJSON(fileName, limitOfTokens, fileStat);
+    auto* fileHandle = new pdcpp::FileHandle(fileName, kFileRead);
+    char *charBuffer = new char[fileHandle->getDetails().size + 1];
+    fileHandle->read(charBuffer, fileHandle->getDetails().size);
     auto* parser = new jsmn_parser;
     jsmn_init(parser);
     jsmntok_t t[limitOfTokens];
-    int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, fileStat->size, limitOfTokens, t);
+    int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, fileHandle->getDetails().size, limitOfTokens, t);
 
     for (int i=0; i<calculatedTokens; i++)
     {

@@ -8,8 +8,8 @@
 #include "Door.h"
 #include "jsmn.h"
 #include "Log.h"
-#include "Dialogue.h"
 #include "Utils.h"
+#include "pdcpp/core/File.h"
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;
@@ -70,18 +70,20 @@ std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
 {
-    auto fileStat = new FileStat;
-    const auto charBuffer = Utils::ReadBufferFromJSON(fileName, limitOfTokens, fileStat);
+    auto* fileHandle = new pdcpp::FileHandle(fileName, kFileRead);
+    char *charBuffer = new char[fileHandle->getDetails().size + 1];
+    fileHandle->read(charBuffer, fileHandle->getDetails().size);
     jsmn_parser parser;
     jsmn_init(&parser);
-    DecodeJson<T>(&parser, charBuffer, fileStat->size, limitOfTokens);
+    DecodeJson<T>(&parser, charBuffer, fileHandle->getDetails().size, limitOfTokens);
 }
 template <typename T>
 void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
     jsmntok_t t[tokenLimit];
+    Log::Info("Created jsmntok_t array of size %lu", (unsigned long)sizeof(t));
     int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
-
+    Log::Info("Just initialized JSMN with %d tokens", calculatedTokens);
     T dummy{};
     std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens);
     auto items = static_cast<std::vector<T>*>(decodedJson.get());

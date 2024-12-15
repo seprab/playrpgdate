@@ -45,6 +45,7 @@ template void Log::Info<>(const char*, int);
 template void Log::Info<>(const char*, int, int);
 template void Log::Info<>(const char*, int, int, int);
 template void Log::Info<>(const char*, char const*);
+template void Log::Info<>(const char*, char const*, unsigned int);
 template void Log::Info<>(const char*, unsigned int);
 template void Log::Info<>(const char*, unsigned int, int);
 template void Log::Info<>(const char*, unsigned int, char*);
@@ -53,13 +54,15 @@ template void Log::Info<>(const char*, unsigned int, char*, char*);
 template void Log::Info<>(const char*, unsigned int, char*, char*, int);
 template void Log::Info<>(const char*, unsigned int, char*, const char*);
 template void Log::Info<>(const char*, char const*, int, const char*, const char*);
-
+template void Log::Info<>(char const*, char const*, unsigned long);
+template void Log::Info<>(char const*, unsigned long);
 
 template void Log::Error<>(const char*);
 template void Log::Error<>(const char*, int);
 template void Log::Error<>(const char*, int, int);
 template void Log::Error<>(const char*, int, int, int);
 template void Log::Error<>(const char*, char const*);
+template void Log::Error<>(const char*, char const*, unsigned int);
 template void Log::Error<>(const char*, unsigned int);
 template void Log::Error<>(const char*, unsigned int, int);
 template void Log::Error<>(const char*, unsigned int, char*);
@@ -68,4 +71,5 @@ template void Log::Error<>(const char*, unsigned int, char*, char*);
 template void Log::Error<>(const char*, unsigned int, char*, char*, int);
 template void Log::Error<>(const char*, unsigned int, char*, const char*);
 template void Log::Error<>(const char*, char const*, int, const char*, const char*);
-
+template void Log::Error<>(char const*, char const*, unsigned long);
+template void Log::Error<>(char const*, unsigned long);
