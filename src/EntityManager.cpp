@@ -73,14 +73,17 @@ void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
     auto* fileHandle = new pdcpp::FileHandle(fileName, kFileRead);
     char *charBuffer = new char[fileHandle->getDetails().size + 1];
     fileHandle->read(charBuffer, fileHandle->getDetails().size);
-    jsmn_parser parser;
-    jsmn_init(&parser);
-    DecodeJson<T>(&parser, charBuffer, fileHandle->getDetails().size, limitOfTokens);
+    auto* parser = new jsmn_parser;
+    jsmn_init(parser);
+    DecodeJson<T>(parser, charBuffer, fileHandle->getDetails().size, limitOfTokens);
+    delete[] charBuffer;
+    delete fileHandle;
+    delete parser;
 }
 template <typename T>
 void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
-    jsmntok_t t[tokenLimit];
+    auto t = new jsmntok_t[tokenLimit];
     Log::Info("Created jsmntok_t array of size %lu", (unsigned long)sizeof(t));
     int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
     Log::Info("Just initialized JSMN with %d tokens", calculatedTokens);
@@ -91,4 +94,5 @@ void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size
     {
         data[item.GetId()] = std::make_shared<T>(item);
     }
+    delete[] t;
 }

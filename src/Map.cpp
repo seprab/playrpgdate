@@ -17,7 +17,7 @@ void Map::LoadLayers(const char *fileName, int limitOfTokens)
     fileHandle->read(charBuffer, fileHandle->getDetails().size);
     auto* parser = new jsmn_parser;
     jsmn_init(parser);
-    jsmntok_t t[limitOfTokens];
+    auto t = new jsmntok_t[limitOfTokens];
     int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, fileHandle->getDetails().size, limitOfTokens, t);
 
     for (int i=0; i<calculatedTokens; i++)
@@ -45,6 +45,10 @@ void Map::LoadLayers(const char *fileName, int limitOfTokens)
     height = atoi(Utils::ValueDecoder(charBuffer, t, 0, t[0].end, "height"));
     width = atoi(Utils::ValueDecoder(charBuffer, t, 0, t[0].end, "width"));
     Log::Info("Map loaded, %i width and %i height", width, height);
+    delete fileHandle;
+    delete[] charBuffer;
+    delete parser;
+    delete[] t;
 }
 void Map::LoadImageTable(const char *fileName)
 {
