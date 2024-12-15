@@ -65,7 +65,6 @@ void Map::DrawTileFromLayer(int layer, int x, int y)
     LCDBitmap* bitmap = (*imageTable)[tileId];
     int drawX = x * tileWidth/*scale*/;
     int drawY = y * tileHeight/*scale*/;
-    //pdcpp::GlobalPlaydateAPI::get()->graphics->drawScaledBitmap(bitmap, drawX, drawY, scale, scale);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmap, drawX, drawY, LCDBitmapFlip::kBitmapUnflipped);
 }
 void Map::Render(int x, int y, int fovX, int fovY)

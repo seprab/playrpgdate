@@ -106,7 +106,7 @@ void Player::Move(int deltaX, int deltaY, Map& map)
     int y = GetPosition().second + deltaY;
 
     //check the 4 corners of the player
-    if (map.CheckCollision(x, y) || map.CheckCollision(x + 16, y) || map.CheckCollision(x, y + 16) || map.CheckCollision(x + 16, y + 16))
+    if (map.CheckCollision(x+8, y+10))
     {
         return;
     }
