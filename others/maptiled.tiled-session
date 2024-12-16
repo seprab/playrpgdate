@@ -7,13 +7,21 @@
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "anim-table-40-32.tsx": {
+            "scaleInDock": 7.5312,
+            "scaleInEditor": 1.34
+        },
         "tilemap.tmx": {
-            "scale": 0.8345,
+            "scale": 1.2338,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1470.341521869383,
-                "y": 2130.617136009587
+                "x": 793.0782946993029,
+                "y": 1910.3582428270383
             }
+        },
+        "tileset.tsx": {
+            "scaleInDock": 1.778,
+            "scaleInEditor": 1.34
         }
     },
     "last.exportedFilePath": "/Users/sergio.prada/Projects/playdate-rpg/Source/data",
@@ -26,9 +34,16 @@
     "map.tileWidth": 2,
     "map.width": 4,
     "openFiles": [
+        "tileset.tsx",
+        "tilemap.tmx",
+        "anim-table-40-32.tsx",
+        "anim-table-40-32.tsx"
     ],
     "project": "maptiled.tiled-project",
     "recentFiles": [
+        "tileset.tsx",
+        "tilemap.tmx",
+        "anim-table-40-32.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
