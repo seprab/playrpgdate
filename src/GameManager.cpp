@@ -13,21 +13,19 @@ GameManager::GameManager(PlaydateAPI* api)
 
     new EntityManager(api);
 
-    map = new Map();
-    map->LoadLayers("data/map.json", 32768);
-    map->LoadImageTable("images/maps/blackmap.pdt");
-    map->SetMapScale(1);
+    activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
+    activeArea->Load();
 
     player = new Player();
-    player->SetPosition(std::pair<int,int>(89*map->GetTileWidth(), 145*map->GetTileHeight()));
+    player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
 }
 void GameManager::Update()
 {
     pd->graphics->clear(kColorBlack);
     pd->graphics->setFont(font);
 
-    map->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
-    player->Tick(map);
+    activeArea->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
+    player->Tick(activeArea);
 
     // Calculate camera position
     float cameraSpeed = 0.2f; // Adjust for smoothness

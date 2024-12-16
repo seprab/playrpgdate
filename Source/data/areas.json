@@ -1,7 +1,10 @@
 [
 	{
-		"id": 9000,
-		"name":"area_01",
+		"id":9002,
+		"name":"Home Town",
+		"dataPath": "data/areas/01_town.json",
+		"dataTokens": 32768,
+		"tileset": "images/areas/hometown.pdt",
 		"dialogue":
 		{
 			"description": "You are in room 1",
@@ -28,8 +31,11 @@
 		"creatures":[]
 	},
 	{
-		"id": 9001,
+		"id":9005,
 		"name":"area_02",
+		"dataPath": "unset",
+		"dataTokens": 0,
+		"tileset": "unset",
 		"dialogue":
 		{
 			"description": "You are in room 2",

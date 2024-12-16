@@ -60,7 +60,7 @@ Player::Player(): level(0)
     die->LoadBitmaps();
 }
 
-void Player::Tick(Map* map)
+void Player::Tick(const std::shared_ptr<Area>& area)
 {
     PDButtons clicked;
     pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, nullptr, nullptr);
@@ -86,7 +86,7 @@ void Player::Tick(Map* map)
     else if (clicked & kButtonDown) y=1;
     x *= GetMovementScale();
     y *= GetMovementScale();
-    Move(x, y, *map);
+    Move(x, y, area);
 
 
     if (clicked & kButtonA) attack->Draw(GetPosition().first, GetPosition().second);
@@ -97,7 +97,7 @@ void Player::Tick(Map* map)
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
 }
 
-void Player::Move(int deltaX, int deltaY, Map& map)
+void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 {
 
     if (deltaY == 0 && deltaX == 0) return;
@@ -105,7 +105,7 @@ void Player::Move(int deltaX, int deltaY, Map& map)
     int x = GetPosition().first + deltaX;
     int y = GetPosition().second + deltaY;
 
-    if (map.CheckCollision(x+8, y+10)) // Set the collision point to the player's feet
+    if (area->CheckCollision(x+8, y+10)) // Set the collision point to the player's feet
     {
         return;
     }

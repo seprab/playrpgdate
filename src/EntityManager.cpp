@@ -84,7 +84,6 @@ template <typename T>
 void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
     auto t = new jsmntok_t[tokenLimit];
-    Log::Info("Created jsmntok_t array of size %lu", (unsigned long)sizeof(t));
     int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
     Log::Info("Just initialized JSMN with %d tokens", calculatedTokens);
     T dummy{};

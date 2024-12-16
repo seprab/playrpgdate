@@ -5,7 +5,6 @@
 #include <string>
 #include "Creature.h"
 #include "AnimationClip.h"
-#include "Map.h"
 
 class EntityManager;
 
@@ -28,8 +27,8 @@ public:
     Player(const Player& other) = default;
     Player(std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp, unsigned int _level, std::string _className);
 
-    void Tick(Map* map);
-    void Move(int deltaX, int deltaY, Map& map);
+    void Tick(const std::shared_ptr<Area>& area);
+    void Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area);
 
     std::string GetClassName();
     unsigned int GetLevel();
