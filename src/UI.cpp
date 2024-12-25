@@ -24,16 +24,7 @@ void UI::Update()
     pdcpp::GlobalPlaydateAPI::get()->graphics->setFont(font);
 
     HandleInputs();
-
-    // Simulate loading progress
-    if (currentScreen == GameScreen::LOADING)
-    {
-        loadingProgress += 0.02f;
-        if (loadingProgress >= 1.0f)
-        {
-            loadingProgress = 1.0f;
-        }
-    }
+    Draw();
 }
 
 void UI::HandleInputs()
@@ -94,22 +85,44 @@ void UI::Draw() {
     }
 }
 
-void UI::DrawLoadingScreen()
+void UI::DrawLoadingScreen() const
 {
     // Draw loading bar frame
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(50, 120, 200, 20, kColorBlack);
-
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(50, 200, 300, 10, kColorWhite);
     // Draw loading progress
-    int progressWidth = static_cast<int>(loadingProgress * 198);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(51, 121, progressWidth, 18, kColorBlack);
+    int progressWidth = static_cast<int>(loadingProgress * 298);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(51, 201, progressWidth, 8, kColorWhite);
 
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    int textLen = 0;
+    static int frameCount = 0;
+    const char* loadingText;
+    frameCount++;
     // Draw loading text
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("Loading...", strlen("Loading..."), kASCIIEncoding, 125, 100);
-
-    if (loadingProgress >= 1.0f)
+    if (loadingProgress < 1.0f)
     {
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("Press A to continue", strlen("Press A to continue"),kASCIIEncoding, 100, 150);
+        switch (frameCount / 10 % 3)
+        {
+            case 0: loadingText = "."; break;
+            case 1: loadingText = ".."; break;
+            case 2: loadingText = "..."; break;
+        }
+        textLen = strlen(loadingText);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen, kASCIIEncoding, 200-textLen, 180);
     }
+    else
+    {
+        switch (frameCount / 10 % 3)
+        {
+            case 0: loadingText = "Press A to continue"; break;
+            case 1: loadingText = "Press A to continue"; break;
+            case 2: loadingText = ""; break;
+        }
+        textLen = strlen(loadingText);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen,kASCIIEncoding, 120, 180);
+    }
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 }
 
 void UI::DrawMainMenu()

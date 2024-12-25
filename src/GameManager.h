@@ -17,7 +17,6 @@ public:
     void LoadSavedGame();
 
 private:
-    int x{0}, y{0};
     PlaydateAPI* pd;
     Player* player;
     std::shared_ptr<UI> ui;

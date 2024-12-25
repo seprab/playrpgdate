@@ -1,11 +1,11 @@
 #include <pd_api/pd_api_file.h>
 #include "EntityManager.h"
-#include "Item.h"
-#include "Weapon.h"
-#include "Armor.h"
-#include "Creature.h"
-#include "Area.h"
 #include "Door.h"
+#include "Area.h"
+#include "Item.h"
+#include "Armor.h"
+#include "Weapon.h"
+#include "Creature.h"
 #include "jsmn.h"
 #include "Log.h"
 #include "Utils.h"
@@ -13,49 +13,17 @@
 
 // Initialize the instance pointer
 EntityManager* EntityManager::instance = nullptr;
-PlaydateAPI* EntityManager::pd = nullptr;
 
-EntityManager::EntityManager(PlaydateAPI* api)
+EntityManager::EntityManager()
 {
     if (instance!= nullptr)
     {
         Log::Info("EntityManager was already initialized. This is a bug");
         return;
     }
-    pd = api;
     instance = this;
 
 
-}
-void EntityManager::PreloadEntities(std::shared_ptr<UI> ui)
-{
-    int totalTokens = 128 + 64 + 64 + 128 + 2300 + 128;
-    float progress = 0.0f;
-
-
-    LoadJSON<Item>("data/items.json", 128);
-    progress += 128 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
-
-    LoadJSON<Door>("data/doors.json", 64);
-    progress += 64 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
-
-    LoadJSON<Weapon>("data/weapons.json", 64);
-    progress += 64 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
-
-    LoadJSON<Armor>("data/armors.json", 128);
-    progress += 128 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
-
-    LoadJSON<Creature>("data/creatures.json", 2300);
-    progress += 2300 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
-
-    LoadJSON<Area>("data/areas.json", 128);
-    progress += 128 / totalTokens;
-    ui->UpdateLoadingProgress(progress);
 }
 EntityManager* EntityManager::GetInstance()
 {
@@ -68,10 +36,6 @@ EntityManager::~EntityManager()
         entity.second = nullptr;
     }
 }
-PlaydateAPI* EntityManager::GetPD() {
-    return pd;
-}
-
 std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
 {
     auto it = data.find(id);
@@ -117,3 +81,10 @@ void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size
     }
     delete[] t;
 }
+// Explicit template instantiations
+template void EntityManager::LoadJSON<Area>(const char*, int);
+template void EntityManager::LoadJSON<Door>(const char*, int);
+template void EntityManager::LoadJSON<Item>(const char*, int);
+template void EntityManager::LoadJSON<Armor>(const char*, int);
+template void EntityManager::LoadJSON<Weapon>(const char*, int);
+template void EntityManager::LoadJSON<Creature>(const char*, int);

@@ -4,20 +4,58 @@
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
 {
-    Log::Initialize(pd);
-
     ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft");
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
 
-    new EntityManager(api);
-    EntityManager::GetInstance()->PreloadEntities(ui);
+    new EntityManager();
 }
 void GameManager::Update()
 {
     pd->graphics->clear(kColorBlack);
 
 
-    if(isGameRunning)
+    if (!isGameRunning)
+    {
+        int tokenCount[] {128, 64, 64, 128, 2300, 128};
+        const char* jsonPaths[] {"data/items.json", "data/doors.json", "data/weapons.json", "data/armors.json", "data/creatures.json", "data/areas.json"};
+        float totalTokens = 128.f + 64.f + 64.f + 128.f + 2300.f + 128.f;
+
+        static float progress = 0.0f;
+        static int frameCount = 0;
+
+        switch (frameCount)
+        {
+            case 0:
+                EntityManager::GetInstance()->LoadJSON<Item>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            case 1:
+                EntityManager::GetInstance()->LoadJSON<Door>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            case 2:
+                EntityManager::GetInstance()->LoadJSON<Weapon>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            case 3:
+                EntityManager::GetInstance()->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            case 4:
+                EntityManager::GetInstance()->LoadJSON<Creature>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            case 5:
+                EntityManager::GetInstance()->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
+                break;
+            default:
+                progress = 1.f;
+                break;
+        }
+        if (frameCount < sizeof(tokenCount)/sizeof(tokenCount[0]))
+        {
+            progress += (float)tokenCount[frameCount] / totalTokens;
+            ui->UpdateLoadingProgress(progress);
+            Log::Info("FrameCount: %d, Progress: %f", frameCount, progress);
+            frameCount++;
+        }
+    }
+    else
     {
         activeArea->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
         player->Tick(activeArea);
@@ -33,8 +71,6 @@ void GameManager::Update()
     }
 
     ui->Update();
-    ui->Draw();
-
     pd->system->drawFPS(0,0);
 }
 

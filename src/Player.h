@@ -24,7 +24,7 @@ private:
 
 public:
     Player();
-    Player(const Player& other) = default;
+    Player(const Player& other) = delete;
     Player(std::string _name, int _hp, int _strength, int _agility, double _evasion, unsigned int _xp, unsigned int _level, std::string _className);
 
     void Tick(const std::shared_ptr<Area>& area);

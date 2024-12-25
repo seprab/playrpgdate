@@ -6,7 +6,6 @@
 
 class Log {
 public:
-    static void Initialize(PlaydateAPI* api);
     template<typename... Args>
     static void Info(const char* message, Args... args);
     template<typename... Args>
@@ -15,7 +14,6 @@ public:
 private:
     static const char* infoPrefix;
     static const char* errorPrefix;
-    static PlaydateAPI* playdateApi;
 };
 
 #endif //LOG_H

@@ -41,7 +41,7 @@ public:
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
 
 private:
-    void DrawLoadingScreen();
+    void DrawLoadingScreen() const;
     void DrawMainMenu();
     void DrawGameScreen();
 };

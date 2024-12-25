@@ -11,12 +11,11 @@ class EntityManager
 {
 private:
     static EntityManager* instance;
-    static PlaydateAPI* pd;
     std::map<unsigned int, std::shared_ptr<void>> data;
 
 
 public:
-    explicit EntityManager(PlaydateAPI* pdApi);
+    explicit EntityManager();
 
     // Deleted copy constructor and assignment operator
     EntityManager(const EntityManager&) = delete;
@@ -27,8 +26,6 @@ public:
 
     ~EntityManager();
 
-    static PlaydateAPI* GetPD();
-
     template <typename T>
     void LoadJSON(const char* fileName, int limitOfTokens = 128);
 
@@ -36,8 +33,6 @@ public:
     void DecodeJson(jsmn_parser *parser, char *charBuffer, size_t len, int tokenLimit);
 
     std::shared_ptr<void> GetEntity(unsigned int id);
-
-    void PreloadEntities(std::shared_ptr<UI> ui);
 };
 
 #endif
