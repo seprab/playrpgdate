@@ -35,12 +35,11 @@ void UI::HandleInputs()
     switch (currentScreen)
     {
         case GameScreen::LOADING:
-            if (loadingProgress >= 1.0f && (current & kButtonA))
+            if (loadingProgress >= 1.0f && (current))
             {
                 SwitchScreen(GameScreen::MAIN_MENU);
             }
             break;
-
         case GameScreen::MAIN_MENU:
             if (current & kButtonUp)
             {
@@ -115,12 +114,12 @@ void UI::DrawLoadingScreen() const
     {
         switch (frameCount / 10 % 3)
         {
-            case 0: loadingText = "Press A to continue"; break;
-            case 1: loadingText = "Press A to continue"; break;
+            case 0: loadingText = "Press any button to continue"; break;
+            case 1: loadingText = "Press any button to continue"; break;
             case 2: loadingText = ""; break;
         }
         textLen = strlen(loadingText);
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen,kASCIIEncoding, 120, 180);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen,kASCIIEncoding, 100, 180);
     }
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 }
@@ -128,22 +127,30 @@ void UI::DrawLoadingScreen() const
 void UI::DrawMainMenu()
 {
     // Draw title
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("My Game", strlen("My Game"), kASCIIEncoding, 150, 50);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("CardoBlast", strlen("CardoBlast"), kASCIIEncoding, 150, 50);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 
     // Draw menu items
     for (int i = 0; i < menuItemCount; i++)
     {
-        if (i == selectedMenuItem) {
-            pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(90, 100 + i * 30, 140, 20, kColorBlack);
-            pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
-                                   100, 102 + i * 30);
-        } else {
+        if (i == selectedMenuItem)
+        {
+            pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(90, 100 + i * 30, 140, 20, kColorWhite);
             pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
                                    100, 102 + i * 30);
         }
+        else
+        {
+            pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+            pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
+                                   100, 102 + i * 30);
+            pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+        }
     }
 }
-void UI::DrawGameScreen()
+
+void UI::DrawGameScreen() const
 {
     // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
     char resultX[4], resultY[4];

@@ -16,6 +16,7 @@ void GameManager::Update()
 
     if (!isGameRunning)
     {
+        // I'm loading jsons here to create a loading bar. When a json load is complete, update the loading bar.
         int tokenCount[] {128, 64, 64, 128, 2300, 128};
         const char* jsonPaths[] {"data/items.json", "data/doors.json", "data/weapons.json", "data/armors.json", "data/creatures.json", "data/areas.json"};
         float totalTokens = 128.f + 64.f + 64.f + 128.f + 2300.f + 128.f;

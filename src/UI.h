@@ -20,8 +20,8 @@ private:
     GameScreen currentScreen;
     float loadingProgress;
     int selectedMenuItem;
-    const char* menuItems[3] = {"New Game", "Load Game", "Exit"};
-    int menuItemCount = 3;
+    const char* menuItems[2] = {"New Game", "Load Game"};
+    int menuItemCount = 2;
     LCDFont* font;
     std::pair<int,int> offset;
 
@@ -43,7 +43,7 @@ public:
 private:
     void DrawLoadingScreen() const;
     void DrawMainMenu();
-    void DrawGameScreen();
+    void DrawGameScreen() const;
 };
 
 
