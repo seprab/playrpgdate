@@ -166,14 +166,11 @@ void UI::DrawGameScreen() const
     char resultX[4], resultY[4];
     snprintf(resultX, sizeof(resultX), "%d", offset.first);
     snprintf(resultY, sizeof(resultY), "%d", offset.second);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(offset.first + 100, offset.second - 120, 50, 15, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(offset.first + 150, offset.second - 120, 50, 15, kColorWhite);
-
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.first + 102, offset.second - 118, 46, 11, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.first + 152, offset.second - 118, 46, 11, kColorWhite);
-
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.first + 100, offset.second - 120, 100, 20, kColorBlack);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawTextInRect(resultX, strlen(resultX), kASCIIEncoding, offset.first + 100, offset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawTextInRect(resultY, strlen(resultY), kASCIIEncoding, offset.first + 150, offset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 
 }
 
