@@ -25,13 +25,37 @@ EntityManager::EntityManager(PlaydateAPI* api)
     pd = api;
     instance = this;
 
-    // Load the JSON files
+
+}
+void EntityManager::PreloadEntities(std::shared_ptr<UI> ui)
+{
+    int totalTokens = 128 + 64 + 64 + 128 + 2300 + 128;
+    float progress = 0.0f;
+
+
     LoadJSON<Item>("data/items.json", 128);
+    progress += 128 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
+
     LoadJSON<Door>("data/doors.json", 64);
+    progress += 64 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
+
     LoadJSON<Weapon>("data/weapons.json", 64);
+    progress += 64 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
+
     LoadJSON<Armor>("data/armors.json", 128);
+    progress += 128 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
+
     LoadJSON<Creature>("data/creatures.json", 2300);
+    progress += 2300 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
+
     LoadJSON<Area>("data/areas.json", 128);
+    progress += 128 / totalTokens;
+    ui->UpdateLoadingProgress(progress);
 }
 EntityManager* EntityManager::GetInstance()
 {

@@ -5,6 +5,7 @@
 #include <memory>
 #include <pd_api.h>
 #include "jsmn.h"
+#include "UI.h"
 
 class EntityManager
 {
@@ -35,6 +36,8 @@ public:
     void DecodeJson(jsmn_parser *parser, char *charBuffer, size_t len, int tokenLimit);
 
     std::shared_ptr<void> GetEntity(unsigned int id);
+
+    void PreloadEntities(std::shared_ptr<UI> ui);
 };
 
 #endif

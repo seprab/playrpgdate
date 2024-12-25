@@ -5,6 +5,7 @@
 #include "pdcpp/pdnewlib.h"
 #include "EntityManager.h"
 #include "Player.h"
+#include "UI.h"
 
 class GameManager {
 
@@ -12,15 +13,17 @@ public:
     explicit GameManager(PlaydateAPI* api);
     ~GameManager();
     void Update();
+    void LoadNewGame();
+    void LoadSavedGame();
 
 private:
-    std::string fontpath;
-    LCDFont* font;
     int x{0}, y{0};
     PlaydateAPI* pd;
     Player* player;
+    std::shared_ptr<UI> ui;
     std::shared_ptr<Area> activeArea;
     std::pair<int,int> currentCameraOffset = {0,0};
+    bool isGameRunning = false;
 };
 
 
