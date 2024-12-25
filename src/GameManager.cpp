@@ -13,11 +13,14 @@ GameManager::GameManager(PlaydateAPI* api)
 
     new EntityManager(api);
 
+
+    // ************ This should be the code for a new game ************
     activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
     activeArea->Load();
 
     player = new Player();
     player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    // ************ ************ ************ ************  ************
 }
 void GameManager::Update()
 {
@@ -39,8 +42,9 @@ void GameManager::Update()
     // From here, I should start drawing the game UI. Otherwise, the camera will move the UI as well.
 
     // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
-    const char* resultX = std::to_string(currentCameraOffset.first).c_str();
-    const char* resultY = std::to_string(currentCameraOffset.second).c_str();
+    char resultX[4], resultY[4];
+    snprintf(resultX, sizeof(resultX), "%d", currentCameraOffset.first);
+    snprintf(resultY, sizeof(resultY), "%d", currentCameraOffset.second);
     pd->graphics->drawRect(currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15, kColorWhite);
     pd->graphics->drawRect(currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15, kColorWhite);
 
@@ -49,7 +53,6 @@ void GameManager::Update()
 
     pd->graphics->drawTextInRect(resultX, strlen(resultX), kASCIIEncoding, currentCameraOffset.first + 100, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
     pd->graphics->drawTextInRect(resultY, strlen(resultY), kASCIIEncoding, currentCameraOffset.first + 150, currentCameraOffset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
-
 
 
     pd->system->drawFPS(0,0);

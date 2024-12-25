@@ -32,8 +32,6 @@ EntityManager::EntityManager(PlaydateAPI* api)
     LoadJSON<Armor>("data/armors.json", 128);
     LoadJSON<Creature>("data/creatures.json", 2300);
     LoadJSON<Area>("data/areas.json", 128);
-
-
 }
 EntityManager* EntityManager::GetInstance()
 {
