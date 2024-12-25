@@ -24,9 +24,8 @@ private:
     int menuItemCount = 2;
     LCDFont* font;
     std::pair<int,int> offset;
-
     std::function<void()> newGameCallback;
-
+    const float inputCooldown{0.5f};
 
 public:
     explicit UI(const char*);

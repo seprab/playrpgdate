@@ -6,6 +6,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
 
+
 UI::UI(const char *fontPath)
 {
     const char* err;
@@ -29,6 +30,10 @@ void UI::Update()
 
 void UI::HandleInputs()
 {
+    if (pdcpp::GlobalPlaydateAPI::get()->system->getElapsedTime() < inputCooldown)
+    {
+        return; // Skip input processing if cooldown period has not passed
+    }
     PDButtons current;
     pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&current, NULL, NULL);
 
@@ -38,29 +43,34 @@ void UI::HandleInputs()
             if (loadingProgress >= 1.0f && (current))
             {
                 SwitchScreen(GameScreen::MAIN_MENU);
+                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             break;
         case GameScreen::MAIN_MENU:
             if (current & kButtonUp)
             {
                 selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
+                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             if (current & kButtonDown)
             {
                 selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
+                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             if (current & kButtonA)
             {
                 switch (selectedMenuItem)
                 {
                     case 0: // New Game
-                        if (newGameCallback) newGameCallback();
+                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
                         SwitchScreen(GameScreen::GAME);
+                        if (newGameCallback) newGameCallback();
                         break;
                     case 1: // Load Game
                         // Implement load game functionality
                         break;
                 }
+                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             break;
         default:
