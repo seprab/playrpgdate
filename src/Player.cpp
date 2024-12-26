@@ -62,39 +62,9 @@ Player::Player(): level(0)
 
 void Player::Tick(const std::shared_ptr<Area>& area)
 {
-    PDButtons clicked;
-    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, nullptr, nullptr);
-
-    int x = 0, y = 0;
-    if (clicked & kButtonRight)
-    {
-        x=1;
-        idle->SetFlip(false);
-        run->SetFlip(false);
-        attack->SetFlip(false);
-        stab->SetFlip(false);
-    }
-    else if (clicked & kButtonLeft)
-    {
-        x= -1;
-        idle->SetFlip(true);
-        run->SetFlip(true);
-        attack->SetFlip(true);
-        stab->SetFlip(true);
-    }
-    if (clicked & kButtonUp) y=-1;
-    else if (clicked & kButtonDown) y=1;
-    x *= GetMovementScale();
-    y *= GetMovementScale();
-    Move(x, y, area);
-
-
-    if (clicked & kButtonA) attack->Draw(GetPosition().first, GetPosition().second);
-    else if (clicked & kButtonB) stab->Draw(GetPosition().first, GetPosition().second);
-    else if (x != 0 || y != 0) run->Draw(GetPosition().first, GetPosition().second);
-    else idle->Draw(GetPosition().first, GetPosition().second);
-
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
+    HandleInput();
+    Move(dx, dy, area);
+    Draw();
 }
 
 void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
@@ -110,4 +80,44 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
         return;
     }
     SetPosition(std::pair<int,int>(x, y));
+}
+void Player::Draw()
+{
+    if (attackingA) attack->Draw(GetPosition().first, GetPosition().second);
+    else if (attackingB) stab->Draw(GetPosition().first, GetPosition().second);
+    else if (dx != 0 || dy != 0) run->Draw(GetPosition().first, GetPosition().second);
+    else idle->Draw(GetPosition().first, GetPosition().second);
+
+#if DEBUG
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
+#endif
+}
+void Player::HandleInput()
+{
+    PDButtons clicked;
+    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, nullptr, nullptr);
+    dx = 0, dy = 0;
+    if (clicked & kButtonRight)
+    {
+        dx=1;
+        idle->SetFlip(false);
+        run->SetFlip(false);
+        attack->SetFlip(false);
+        stab->SetFlip(false);
+    }
+    else if (clicked & kButtonLeft)
+    {
+        dx= -1;
+        idle->SetFlip(true);
+        run->SetFlip(true);
+        attack->SetFlip(true);
+        stab->SetFlip(true);
+    }
+    if (clicked & kButtonUp) dy=-1;
+    else if (clicked & kButtonDown) dy=1;
+    dx *= GetMovementScale();
+    dy *= GetMovementScale();
+
+    attackingA = (clicked & kButtonA);
+    attackingB = (clicked & kButtonB);
 }

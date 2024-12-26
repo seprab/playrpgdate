@@ -22,6 +22,11 @@ private:
     std::unique_ptr<AnimationClip> stab{};
     std::unique_ptr<AnimationClip> die{};
 
+    int dx =0;
+    int dy =0;
+
+    bool attackingA;
+    bool attackingB;
 public:
     Player();
     Player(const Player& other) = delete;
@@ -29,6 +34,8 @@ public:
 
     void Tick(const std::shared_ptr<Area>& area);
     void Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area);
+    void HandleInput();
+    void Draw();
 
     std::string GetClassName();
     unsigned int GetLevel();
