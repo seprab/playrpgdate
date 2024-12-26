@@ -1,0 +1,8 @@
+name=Cardo Blast
+author=SepraB
+description=Hopefully, sometime in the future, this will be a game.
+bundleID=com.seprab.cardoblast
+version=0.0
+buildNumber=0
+imagePath=launcher
+contentWarning=This game contains something?
