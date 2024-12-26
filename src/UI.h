@@ -24,8 +24,12 @@ private:
     int menuItemCount = 2;
     LCDFont* font;
     std::pair<int,int> offset;
-    std::function<void()> newGameCallback;
+
     const float inputCooldown{0.5f};
+    LCDBitmap* backgroundLoader;
+
+    std::function<void()> newGameCallback;
+    std::function<void()> loadGameCallback;
 
 public:
     explicit UI(const char*);
@@ -38,6 +42,7 @@ public:
     void SetOffset(std::pair<int,int> newOffset) { offset = newOffset; }
 
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
+    void SetOnLoadGameSelected(std::function<void()> callback){loadGameCallback = std::move(callback);}
 
 private:
     void DrawLoadingScreen() const;

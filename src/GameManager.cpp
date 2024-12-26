@@ -1,12 +1,13 @@
 #include "GameManager.h"
 #include "Log.h"
+#include "pdcpp/core/File.h"
 
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
 {
     ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft");
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
-
+    ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
     new EntityManager();
 }
 void GameManager::Update()
@@ -77,6 +78,7 @@ void GameManager::Update()
 
 GameManager::~GameManager()
 {
+    SaveGame();
     delete EntityManager::GetInstance();
     Log::Info("GameManager destroyed");
 }
@@ -93,5 +95,33 @@ void GameManager::LoadNewGame()
 
 void GameManager::LoadSavedGame()
 {
+    activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
+    activeArea->Load();
 
+    player = new Player();
+    player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    isGameRunning = true;
+
+    const char* savePath = "saves/save.data";
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(savePath, FileOptions::kFileRead);
+    size_t bufferSize = sizeof(player->GetPosition().first) + sizeof(player->GetPosition().second);
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+    fileHandle->read(buffer.get(), bufferSize);
+    std::pair<int, int> position;
+    memcpy(&position.first, buffer.get(), sizeof(position.first));
+    memcpy(&position.second, buffer.get() + sizeof(position.first), sizeof(position.second));
+    player->SetPosition(position);
+}
+
+void GameManager::SaveGame()
+{
+    const char* savePath = "saves/save.data";
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(savePath, FileOptions::kFileWrite);
+    size_t bufferSize = sizeof(player->GetPosition().first) + sizeof(player->GetPosition().second);
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+    std::pair<int, int> position = player->GetPosition();
+    memcpy(buffer.get(), &position.first, sizeof(position.first));
+    memcpy(buffer.get() + sizeof(position.first), &position.second, sizeof(position.second));
+    fileHandle->write(buffer.get(), bufferSize);
+    Log::Info("Game saved");
 }

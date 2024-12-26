@@ -5,19 +5,26 @@
 #include "UI.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
+#include "pdcpp/graphics/Image.h"
 
 
 UI::UI(const char *fontPath)
 {
     const char* err;
-    font = pdcpp::GlobalPlaydateAPI::get()->graphics->loadFont(fontPath, &err);
 
+    font = pdcpp::GlobalPlaydateAPI::get()->graphics->loadFont(fontPath, &err);
     if (font == nullptr)
         Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontPath, err);
+
+    const char* backgroundPath = "images/ui/background.png";
+    backgroundLoader = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(backgroundPath, &err);
+    if (backgroundLoader == nullptr)
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, backgroundPath, err);
 
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
     selectedMenuItem = 0;
+
 }
 
 void UI::Update()
@@ -67,7 +74,9 @@ void UI::HandleInputs()
                         if (newGameCallback) newGameCallback();
                         break;
                     case 1: // Load Game
-                        // Implement load game functionality
+                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
+                        SwitchScreen(GameScreen::GAME);
+                        if (loadGameCallback) loadGameCallback();
                         break;
                 }
                 pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
@@ -96,6 +105,11 @@ void UI::Draw() {
 
 void UI::DrawLoadingScreen() const
 {
+    //load image as background
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
+    //And black banner for text
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(0, 170, 400, 50, kColorBlack);
+
     // Draw loading bar frame
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(50, 200, 300, 10, kColorWhite);
     // Draw loading progress
@@ -136,6 +150,10 @@ void UI::DrawLoadingScreen() const
 
 void UI::DrawMainMenu()
 {
+    //load image as background
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(80, 30, 240, 160, kColorBlack);
+
     // Draw title
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("CardoBlast", strlen("CardoBlast"), kASCIIEncoding, 150, 50);
