@@ -5,6 +5,7 @@
 #include <string>
 #include "Creature.h"
 #include "AnimationClip.h"
+#include "MagicProjectile.h"
 
 class EntityManager;
 
@@ -27,6 +28,7 @@ private:
 
     bool attackingA;
     bool attackingB;
+    std::vector<MagicProjectile> projectiles;
 public:
     Player();
     Player(const Player& other) = delete;

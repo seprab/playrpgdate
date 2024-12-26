@@ -65,6 +65,15 @@ void Player::Tick(const std::shared_ptr<Area>& area)
     HandleInput();
     Move(dx, dy, area);
     Draw();
+
+    for(auto& projectile : projectiles)
+    {
+        projectile.Update();
+        if (!projectile.IsAlive())
+        {
+            projectiles.erase(std::remove(projectiles.begin(), projectiles.end(), projectile), projectiles.end());
+        }
+    }
 }
 
 void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
@@ -120,4 +129,10 @@ void Player::HandleInput()
 
     attackingA = (clicked & kButtonA);
     attackingB = (clicked & kButtonB);
+
+    if (attackingA)
+    {
+        pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().first, GetPosition().second);
+        projectiles.emplace_back(Position);
+    }
 }

@@ -6,11 +6,11 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
 
-MagicProjectile::MagicProjectile(pdcpp::Point<int> Position, float Speed, int Size) :
-position(Position), speed(Speed), size(Size)
+MagicProjectile::MagicProjectile(pdcpp::Point<int> Position):
+position(Position)
 {
     isAlive = true;
-    iLifetime = 5000;
+    currentSize = travelSize;
     bornTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
 }
 
@@ -19,19 +19,32 @@ void MagicProjectile::Update()
     if(!isAlive) return;
 
     unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-    if (currentTime - bornTime > iLifetime)
+    unsigned int elapsedTime = currentTime - bornTime;
+    if (!exploding)
     {
-        Kill();
+        exploding = iLifetime - elapsedTime < explosionThreshold;
+        HandleInput();
     }
-
-    HandleInput();
+    else
+    {
+        if (elapsedTime > iLifetime)
+        {
+            Kill();
+        }
+        currentSize+=5;
+    }
     Draw();
 }
 
-void MagicProjectile::Draw()
+void MagicProjectile::Draw() const
 {
     //void playdate->graphics->drawEllipse(int x, int y, int width, int height, int lineWidth, float startAngle, float endAngle, LCDColor color);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawEllipse(position.x, position.y, size, size, 1, 0, 0, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawEllipse(position.x, position.y, currentSize, currentSize, 1, 0, 0, kColorWhite);
+    if (exploding)
+    {
+        //fillEllipse(int x, int y, int width, int height, float startAngle, float endAngle, LCDColor color);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->fillEllipse(position.x, position.y, currentSize-3, currentSize-3, 0, 0, kColorWhite);
+    }
 }
 
 void MagicProjectile::Kill()
@@ -41,6 +54,10 @@ void MagicProjectile::Kill()
 
 void MagicProjectile::HandleInput()
 {
-    float change = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
-    Log::Info("Crank change: %f", change);
+    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle();
+
+    angle = angle * kPI /180.f;
+
+    position.x += cos(angle) * speed;
+    position.y += sin(angle) * speed;
 }

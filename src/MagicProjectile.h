@@ -5,26 +5,34 @@
 #ifndef CARDOBLAST_MAGICPROJECTILE_H
 #define CARDOBLAST_MAGICPROJECTILE_H
 
-#include "pdcpp/graphics/point.h"
+#include <memory>
+#include "pdcpp/graphics/Point.h"
 
 
-class MagicProjectile{
+class MagicProjectile
+        {
 public:
     MagicProjectile() = delete;
-    MagicProjectile(pdcpp::Point<int> Position, float Speed, int Size);
+    MagicProjectile(pdcpp::Point<int> Position);
+    bool operator==(const MagicProjectile& other) const {return this == &other;}
+
     void Update();
-    void Draw();
+    void Draw() const;
     void Kill();
     void HandleInput();
     pdcpp::Point<int> GetPosition();
-    float GetSize();
+    bool IsAlive() const{return isAlive;}
 
 private:
-    bool isAlive;
+    bool isAlive = false;
+    bool exploding = false;
     pdcpp::Point<int> position;
-    float speed;
-    int size;
-    unsigned int iLifetime; //in milliseconds
+    float speed {8};
+    unsigned int travelSize {10};
+    unsigned int explosionSize {50};
+    unsigned int currentSize;
+    unsigned int explosionThreshold {500};
+    unsigned int iLifetime {2000}; //in milliseconds
     unsigned int bornTime;
 };
 
