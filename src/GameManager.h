@@ -6,6 +6,7 @@
 #include "EntityManager.h"
 #include "Player.h"
 #include "UI.h"
+#include "pdcpp/graphics/Point.h"
 
 class GameManager {
 
@@ -22,7 +23,7 @@ private:
     std::shared_ptr<Player> player;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Area> activeArea;
-    std::pair<int,int> currentCameraOffset = {0,0};
+    pdcpp::Point<int> currentCameraOffset = {0,0};
     bool isGameRunning = false;
 };
 

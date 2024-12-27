@@ -59,16 +59,16 @@ void GameManager::Update()
     }
     else
     {
-        activeArea->Render(player->GetPosition().x, player->GetPosition().y, 240, 160);
+        activeArea->Render(player->GetPosition().x, player->GetPosition().y, 234, 136);
         player->Tick(activeArea);
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness
-        currentCameraOffset.first = currentCameraOffset.first + (player->GetPosition().x - currentCameraOffset.first) * cameraSpeed;
-        currentCameraOffset.second = currentCameraOffset.second + (player->GetPosition().y - currentCameraOffset.second)  * cameraSpeed;
+        currentCameraOffset.x = currentCameraOffset.x + (player->GetPosition().x - currentCameraOffset.x) * cameraSpeed;
+        currentCameraOffset.y = currentCameraOffset.y + (player->GetPosition().y - currentCameraOffset.y)  * cameraSpeed;
 
         // Move the camera to calculated position
-        pd->graphics->setDrawOffset(-currentCameraOffset.first + 200, -currentCameraOffset.second + 120);
+        pd->graphics->setDrawOffset(-currentCameraOffset.x + 200, -currentCameraOffset.y + 120);
         ui->SetOffset(currentCameraOffset);
     }
 

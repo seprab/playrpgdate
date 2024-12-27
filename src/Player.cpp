@@ -15,6 +15,7 @@ Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 
     SetHP(100);
     SetMaxHP(100);
     SetMovementScale(5.0f);
+    lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
 
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();
@@ -156,5 +157,9 @@ void Player::HandleInput()
         }
         magicLaunched.push_back(std::move(magic));
     }
-
+}
+float Player::GetCooldownPercentage()
+{
+    int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
+    return (float)magicCastElapsedTime / magicCooldown;
 }

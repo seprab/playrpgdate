@@ -6,6 +6,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
 #include "pdcpp/graphics/Image.h"
+#include "EntityManager.h"
 
 
 UI::UI(const char *fontPath)
@@ -16,11 +17,17 @@ UI::UI(const char *fontPath)
     if (font == nullptr)
         Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontPath, err);
 
-    const char* backgroundPath = "images/ui/background.png";
-    backgroundLoader = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(backgroundPath, &err);
+    const char* path = "images/ui/background.png";
+    backgroundLoader = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
     if (backgroundLoader == nullptr)
-        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, backgroundPath, err);
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
 
+    path = "images/ui/gameui.png";
+    gameOverlay = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
+    if (gameOverlay == nullptr)
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
+
+    magicCooldown = std::make_unique<CircularProgress>(0, 0, 13);
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
     selectedMenuItem = 0;
@@ -182,14 +189,17 @@ void UI::DrawGameScreen() const
 {
     // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
     char resultX[4], resultY[4];
-    snprintf(resultX, sizeof(resultX), "%d", offset.first);
-    snprintf(resultY, sizeof(resultY), "%d", offset.second);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.first + 100, offset.second - 120, 100, 20, kColorBlack);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawTextInRect(resultX, strlen(resultX), kASCIIEncoding, offset.first + 100, offset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawTextInRect(resultY, strlen(resultY), kASCIIEncoding, offset.first + 150, offset.second - 120, 50, 15,PDTextWrappingMode::kWrapWord, PDTextAlignment::kAlignTextRight);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+    snprintf(resultX, sizeof(resultX), "%d", offset.x);
+    snprintf(resultY, sizeof(resultY), "%d", offset.y);
 
+    //load image as background
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(resultX, strlen(resultX), kASCIIEncoding, offset.x + 125, offset.y - 115);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(resultY, strlen(resultY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+    magicCooldown->UpdatePosition(offset.x, offset.y-106);
+    magicCooldown->Draw(EntityManager::GetInstance()->GetPlayer()->GetCooldownPercentage());
 }
 
 void UI::SwitchScreen(GameScreen newScreen)

@@ -41,6 +41,7 @@ public:
     void HandleInput();
     void Draw();
 
+    float GetCooldownPercentage();
     std::string GetClassName();
     unsigned int GetLevel();
     std::unordered_set<std::string>& GetVisitedArea();
