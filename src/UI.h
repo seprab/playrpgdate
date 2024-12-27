@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <utility>
+#include <memory>
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "CircularProgress.h"
