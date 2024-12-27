@@ -18,6 +18,8 @@ Magic(Position), endPosition(Position) {
 void Beam::Draw() const {
     //drawLine(int x1, int y1, int x2, int y2, int width, LCDColor color);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(position.x, position.y, endPosition.x, endPosition.y, (int)size, kColorWhite);
+    if (exploding)
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(position.x, position.y, endPosition.x, endPosition.y, -(int)size, kColorWhite);
 }
 
 void Beam::HandleInput() {

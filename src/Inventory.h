@@ -3,8 +3,8 @@
 
 #include <utility>
 #include <vector>
+#include "item.h"
 
-class Item;
 
 class Inventory
 {
