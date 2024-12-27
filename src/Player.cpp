@@ -9,6 +9,7 @@
 Player::Player(): level(0)
 {
     className = "Warrior";
+    magicCooldown = 5000;
     SetHP(100);
     SetMaxHP(100);
     SetStrength(10);
@@ -128,11 +129,20 @@ void Player::HandleInput()
     dx *= GetMovementScale();
     dy *= GetMovementScale();
 
+
+
+    int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
+    if (magicCastElapsedTime < magicCooldown)
+    {
+        return;
+    }
+
     attackingA = (clicked & kButtonA);
     attackingB = (clicked & kButtonB);
 
     if (attackingA)
     {
+        lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
         pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().first, GetPosition().second);
         std::unique_ptr<Magic> projectile = std::make_unique<Projectile>(Position);
         magicLaunched.push_back(std::move(projectile));

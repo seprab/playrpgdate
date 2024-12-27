@@ -28,6 +28,8 @@ private:
 
     bool attackingA;
     bool attackingB;
+    unsigned int magicCooldown;
+    unsigned int lastMagicCastTime;
     std::vector<std::unique_ptr<Magic>> magicLaunched;
 public:
     Player();
