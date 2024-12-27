@@ -66,14 +66,15 @@ void Player::Tick(const std::shared_ptr<Area>& area)
     Move(dx, dy, area);
     Draw();
 
-    for(auto& projectile : projectiles)
+    for(auto& magic : magicLaunched)
     {
-        projectile.Update();
-        if (!projectile.IsAlive())
+        magic->Update();
+        if (!magic->IsAlive())
         {
-            projectiles.erase(std::remove(projectiles.begin(), projectiles.end(), projectile), projectiles.end());
+            magic.reset();
         }
     }
+    magicLaunched.erase(std::remove(magicLaunched.begin(), magicLaunched.end(), nullptr), magicLaunched.end());
 }
 
 void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
@@ -133,6 +134,7 @@ void Player::HandleInput()
     if (attackingA)
     {
         pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().first, GetPosition().second);
-        projectiles.emplace_back(Position);
+        std::unique_ptr<Magic> projectile = std::make_unique<Projectile>(Position);
+        magicLaunched.push_back(std::move(projectile));
     }
 }
