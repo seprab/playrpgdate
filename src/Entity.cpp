@@ -7,13 +7,11 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
 Entity::Entity(const unsigned int _id):
-id(_id)
+id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 {
     name = nullptr;
     image_path = nullptr;
     description = nullptr;
-    position = std::make_pair(0, 0);
-    size = std::make_pair(0, 0);
     hp = 0;
     maxHP = 0;
     bitmap = nullptr;
@@ -42,12 +40,12 @@ void Entity::DrawBitmap()
         Log::Error("Entity %d has no bitmap loaded", id);
         return;
     }
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmap, position.first, position.second, kBitmapUnflipped);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmap, position.x, position.y, kBitmapUnflipped);
 }
 
 void Entity::DrawBitmap(int x, int y)
 {
-    SetPosition(std::make_pair(x, y));
+    SetPosition(pdcpp::Point<int>(x, y));
     DrawBitmap();
 }
 

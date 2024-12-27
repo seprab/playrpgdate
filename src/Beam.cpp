@@ -42,8 +42,7 @@ void Beam::HandleInput() {
 void Beam::UpdatePosition()
 {
     auto pos = EntityManager::GetInstance()->GetPlayer()->GetPosition();
-    position.x = pos.first;
-    position.y = pos.second;
+    position = pos;
 }
 
 

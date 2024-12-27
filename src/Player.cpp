@@ -8,17 +8,13 @@
 #include "Beam.h"
 #include "Projectile.h"
 
-Player::Player(): level(0)
+Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0)
 {
     className = "Warrior";
     magicCooldown = 5000;
     SetHP(100);
     SetMaxHP(100);
-    SetStrength(10);
-    SetAgility(5);
-    SetEvasion(0.1);
     SetMovementScale(5.0f);
-    SetPosition(std::pair<int,int>(0, 0));
 
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();
@@ -88,21 +84,21 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 
     if (deltaY == 0 && deltaX == 0) return;
 
-    int x = GetPosition().first + deltaX;
-    int y = GetPosition().second + deltaY;
+    int x = GetPosition().x + deltaX;
+    int y = GetPosition().y + deltaY;
 
     if (area->CheckCollision(x+8, y+10)) // Set the collision point to the player's feet
     {
         return;
     }
-    SetPosition(std::pair<int,int>(x, y));
+    SetPosition(pdcpp::Point<int>(x, y));
 }
 void Player::Draw()
 {
-    if (attackingA) attack->Draw(GetPosition().first, GetPosition().second);
-    else if (attackingB) stab->Draw(GetPosition().first, GetPosition().second);
-    else if (dx != 0 || dy != 0) run->Draw(GetPosition().first, GetPosition().second);
-    else idle->Draw(GetPosition().first, GetPosition().second);
+    if (attackingA) attack->Draw(GetPosition().x, GetPosition().y);
+    else if (attackingB) stab->Draw(GetPosition().x, GetPosition().y);
+    else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
+    else idle->Draw(GetPosition().x, GetPosition().y);
 
 #if DEBUG
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
@@ -148,7 +144,7 @@ void Player::HandleInput()
     if (attackingA || attackingB)
     {
         lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-        pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().first, GetPosition().second);
+        pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().x, GetPosition().y);
         std::unique_ptr<Magic> magic;
         if (attackingA)
         {

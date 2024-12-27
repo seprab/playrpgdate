@@ -3,6 +3,7 @@
 #include <memory>
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
+#include "pdcpp/graphics/Point.h"
 
 class EntityManager;
 
@@ -22,8 +23,8 @@ public:
     [[nodiscard]] const char * GetName() const {return name;}
     [[nodiscard]] const char * GetDescription() const {return description;}
     [[nodiscard]] const char * GetImagePath() const {return image_path;}
-    [[nodiscard]] std::pair<float, float> GetPosition() const {return position;}
-    [[nodiscard]] std::pair<float, float> GetSize() const {return size;}
+    [[nodiscard]] pdcpp::Point<int> GetPosition() const {return position;}
+    [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
     [[nodiscard]] float GetHP() const {return hp;}
 
@@ -32,8 +33,8 @@ public:
     void SetName(const char* _name) {name = _name;}
     void SetDescription(char* _description) {description = _description;}
     void SetImagePath(char* _image_path) {image_path = _image_path;}
-    void SetPosition(std::pair<int, int> _position) {position = _position;}
-    void SetSize(std::pair<int, int> _size) {size = _size;}
+    void SetPosition(pdcpp::Point<int> _position) {position = _position;}
+    void SetSize(pdcpp::Point<int> _size) {size = _size;}
 
     void LoadBitmap();
     void LoadBitmap(char* path);
@@ -46,8 +47,8 @@ private:
     unsigned int id{};
     const char* name{};
     char* image_path{};
-    std::pair<int, int> position{};
-    std::pair<int, int> size{};
+    pdcpp::Point<int> position = pdcpp::Point<int>(0, 0);
+    pdcpp::Point<int> size = pdcpp::Point<int>(0, 0);
     float hp{};
     float maxHP{};
     char* description{};

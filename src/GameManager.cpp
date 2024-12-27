@@ -59,13 +59,13 @@ void GameManager::Update()
     }
     else
     {
-        activeArea->Render(player->GetPosition().first, player->GetPosition().second, 240, 160);
+        activeArea->Render(player->GetPosition().x, player->GetPosition().y, 240, 160);
         player->Tick(activeArea);
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness
-        currentCameraOffset.first = currentCameraOffset.first + (player->GetPosition().first - currentCameraOffset.first) * cameraSpeed;
-        currentCameraOffset.second = currentCameraOffset.second + (player->GetPosition().second - currentCameraOffset.second)  * cameraSpeed;
+        currentCameraOffset.first = currentCameraOffset.first + (player->GetPosition().x - currentCameraOffset.first) * cameraSpeed;
+        currentCameraOffset.second = currentCameraOffset.second + (player->GetPosition().y - currentCameraOffset.second)  * cameraSpeed;
 
         // Move the camera to calculated position
         pd->graphics->setDrawOffset(-currentCameraOffset.first + 200, -currentCameraOffset.second + 120);
@@ -89,7 +89,7 @@ void GameManager::LoadNewGame()
     activeArea->Load();
 
     player = std::make_shared<Player>();
-    player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    player->SetPosition(pdcpp::Point<int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
     EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 }
@@ -100,18 +100,18 @@ void GameManager::LoadSavedGame()
     activeArea->Load();
 
     player = std::make_shared<Player>();
-    player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    player->SetPosition(pdcpp::Point<int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
     EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 
     const char* savePath = "saves/save.data";
     auto fileHandle = std::make_unique<pdcpp::FileHandle>(savePath, FileOptions::kFileRead);
-    size_t bufferSize = sizeof(player->GetPosition().first) + sizeof(player->GetPosition().second);
+    size_t bufferSize = sizeof(player->GetPosition().x) + sizeof(player->GetPosition().y);
     std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
     fileHandle->read(buffer.get(), bufferSize);
-    std::pair<int, int> position;
-    memcpy(&position.first, buffer.get(), sizeof(position.first));
-    memcpy(&position.second, buffer.get() + sizeof(position.first), sizeof(position.second));
+    pdcpp::Point<int> position = pdcpp::Point<int>(0,0);
+    memcpy(&position.x, buffer.get(), sizeof(position.x));
+    memcpy(&position.y, buffer.get() + sizeof(position.x), sizeof(position.y));
     player->SetPosition(position);
 }
 
@@ -119,11 +119,11 @@ void GameManager::SaveGame()
 {
     const char* savePath = "saves/save.data";
     auto fileHandle = std::make_unique<pdcpp::FileHandle>(savePath, FileOptions::kFileWrite);
-    size_t bufferSize = sizeof(player->GetPosition().first) + sizeof(player->GetPosition().second);
+    size_t bufferSize = sizeof(player->GetPosition().x) + sizeof(player->GetPosition().y);
     std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
-    std::pair<int, int> position = player->GetPosition();
-    memcpy(buffer.get(), &position.first, sizeof(position.first));
-    memcpy(buffer.get() + sizeof(position.first), &position.second, sizeof(position.second));
+    pdcpp::Point<int> position = player->GetPosition();
+    memcpy(buffer.get(), &position.x, sizeof(position.x));
+    memcpy(buffer.get() + sizeof(position.x), &position.y, sizeof(position.y));
     fileHandle->write(buffer.get(), bufferSize);
     Log::Info("Game saved");
 }
