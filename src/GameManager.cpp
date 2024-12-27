@@ -88,8 +88,9 @@ void GameManager::LoadNewGame()
     activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
     activeArea->Load();
 
-    player = new Player();
+    player = std::make_shared<Player>();
     player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 }
 
@@ -98,8 +99,9 @@ void GameManager::LoadSavedGame()
     activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
     activeArea->Load();
 
-    player = new Player();
+    player = std::make_shared<Player>();
     player->SetPosition(std::pair<int,int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 
     const char* savePath = "saves/save.data";

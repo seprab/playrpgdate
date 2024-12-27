@@ -29,11 +29,6 @@ void Projectile::Draw() const
     }
 }
 
-void Projectile::Terminate()
-{
-    isAlive = false;
-}
-
 void Projectile::HandleInput()
 {
     if (exploding)

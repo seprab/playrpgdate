@@ -5,6 +5,8 @@
 #include "Player.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
+#include "Beam.h"
+#include "Projectile.h"
 
 Player::Player(): level(0)
 {
@@ -69,10 +71,13 @@ void Player::Tick(const std::shared_ptr<Area>& area)
 
     for(auto& magic : magicLaunched)
     {
-        magic->Update();
         if (!magic->IsAlive())
         {
             magic.reset();
+        }
+        else
+        {
+            magic->Update();
         }
     }
     magicLaunched.erase(std::remove(magicLaunched.begin(), magicLaunched.end(), nullptr), magicLaunched.end());
@@ -140,11 +145,20 @@ void Player::HandleInput()
     attackingA = (clicked & kButtonA);
     attackingB = (clicked & kButtonB);
 
-    if (attackingA)
+    if (attackingA || attackingB)
     {
         lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
         pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().first, GetPosition().second);
-        std::unique_ptr<Magic> projectile = std::make_unique<Projectile>(Position);
-        magicLaunched.push_back(std::move(projectile));
+        std::unique_ptr<Magic> magic;
+        if (attackingA)
+        {
+            magic = std::make_unique<Projectile>(Position);
+        }
+        else if (attackingB)
+        {
+            magic = std::make_unique<Beam>(Position);
+        }
+        magicLaunched.push_back(std::move(magic));
     }
+
 }

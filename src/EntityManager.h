@@ -3,16 +3,18 @@
 
 #include <map>
 #include <memory>
+#include <utility>
 #include <pd_api.h>
 #include "jsmn.h"
 #include "UI.h"
+#include "Player.h"
 
 class EntityManager
 {
 private:
     static EntityManager* instance;
     std::map<unsigned int, std::shared_ptr<void>> data;
-
+    std::shared_ptr<Player> player;
 
 public:
     explicit EntityManager();
@@ -33,6 +35,8 @@ public:
     void DecodeJson(jsmn_parser *parser, char *charBuffer, size_t len, int tokenLimit);
 
     std::shared_ptr<void> GetEntity(unsigned int id);
+    [[nodiscard]] std::shared_ptr<Player> GetPlayer() const {return player;};
+    void SetPlayer(std::shared_ptr<Player> Player){player = Player;}
 };
 
 #endif

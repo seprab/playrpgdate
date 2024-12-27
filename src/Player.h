@@ -5,7 +5,7 @@
 #include <string>
 #include "Creature.h"
 #include "AnimationClip.h"
-#include "Projectile.h"
+#include "Magic.h"
 
 class EntityManager;
 

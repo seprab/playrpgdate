@@ -19,7 +19,7 @@ public:
 
 private:
     PlaydateAPI* pd;
-    Player* player;
+    std::shared_ptr<Player> player;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Area> activeArea;
     std::pair<int,int> currentCameraOffset = {0,0};

@@ -4,8 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include "EntityManager.h"
-
 class Item;
 
 class Inventory

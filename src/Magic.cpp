@@ -29,7 +29,7 @@ void Magic::Update()
 }
 
 void Magic::Terminate() {
-
+    isAlive = false;
 }
 
 void Magic::HandleInput() {
