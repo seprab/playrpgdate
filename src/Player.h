@@ -40,6 +40,7 @@ public:
     void Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area);
     void HandleInput();
     void Draw();
+    void DrawAimDirection() const;
 
     float GetCooldownPercentage();
     std::string GetClassName();

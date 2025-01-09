@@ -24,7 +24,7 @@ Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 
     die = std::make_unique<AnimationClip>();
 
     auto anim =new pdcpp::ImageTable("images/player/animmini");
-
+    SetSize(pdcpp::Point<int>(16, 16));
     // 16 x 16
     // 16 x 4 = 64
     // 16 x 5 = 80
@@ -101,6 +101,7 @@ void Player::Draw()
     else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
     else idle->Draw(GetPosition().x, GetPosition().y);
 
+    DrawAimDirection();
 #if DEBUG
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
 #endif
@@ -145,15 +146,14 @@ void Player::HandleInput()
     if (attackingA || attackingB)
     {
         lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-        pdcpp::Point<int> Position = pdcpp::Point<int>(GetPosition().x, GetPosition().y);
         std::unique_ptr<Magic> magic;
         if (attackingA)
         {
-            magic = std::make_unique<Projectile>(Position);
+            magic = std::make_unique<Projectile>(GetCenteredPosition());
         }
         else if (attackingB)
         {
-            magic = std::make_unique<Beam>(Position);
+            magic = std::make_unique<Beam>(GetCenteredPosition());
         }
         magicLaunched.push_back(std::move(magic));
     }
@@ -162,4 +162,23 @@ float Player::GetCooldownPercentage()
 {
     int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
     return (float)magicCastElapsedTime / magicCooldown;
+}
+
+void Player::DrawAimDirection() const {
+    // Draw an arrow to know where the crank is pointing to, so the player knows where to aim the magic
+    // In the range 0-360. Zero is pointing up, and the value increases as the crank moves clockwise
+    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle() * kPI / 180.f;
+    int radius = 30;
+    pdcpp::Point<int> pos = GetCenteredPosition();
+
+    int x = pos.x + (radius * cos(angle));
+    int y = pos.y + (radius * sin(angle));
+    radius = radius - 3;
+    int xa = pos.x + (radius * cos(angle-0.1f));
+    int ya = pos.y + (radius * sin(angle-0.1f));
+    int xb = pos.x + (radius * cos(angle+0.1f));
+    int yb = pos.y + (radius * sin(angle+0.1f));
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xa, ya, 1, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xb, yb, 1, kColorWhite);
 }

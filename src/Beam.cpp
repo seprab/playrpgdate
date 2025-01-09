@@ -7,7 +7,7 @@
 #include "EntityManager.h"
 
 Beam::Beam(pdcpp::Point<int> Position) :
-Magic(Position), endPosition(Position) {
+Magic(Position), startPosition(position), endPosition(Position) {
     isAlive = true;
     iLifetime = 2000;
     size = 1;
@@ -17,9 +17,9 @@ Magic(Position), endPosition(Position) {
 
 void Beam::Draw() const {
     //drawLine(int x1, int y1, int x2, int y2, int width, LCDColor color);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(position.x, position.y, endPosition.x, endPosition.y, (int)size, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(startPosition.x, startPosition.y, endPosition.x, endPosition.y, (int)size, kColorWhite);
     if (exploding)
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(position.x, position.y, endPosition.x, endPosition.y, -(int)size, kColorWhite);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(startPosition.x, startPosition.y, endPosition.x, endPosition.y, -(int)size, kColorWhite);
 }
 
 void Beam::HandleInput() {
@@ -30,19 +30,15 @@ void Beam::HandleInput() {
     }
 
     exploding = iLifetime - elapsedTime < explosionThreshold;
-    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle();
-    angle = angle * kPI /180.f;
+    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle()* kPI /180.f;
 
-    float distance = 150.f;
-    UpdatePosition();
-    endPosition.x = position.x + (int)(cos(angle) * distance);
-    endPosition.y = position.y + (int)(sin(angle) * distance);
-}
-
-void Beam::UpdatePosition()
-{
-    auto pos = EntityManager::GetInstance()->GetPlayer()->GetPosition();
-    position = pos;
+    float startDistance = 30.f;
+    float length = 150.f;
+    position = EntityManager::GetInstance()->GetPlayer()->GetCenteredPosition();
+    startPosition.x = position.x + (int)(cos(angle) * startDistance);
+    startPosition.y = position.y + (int)(sin(angle) * startDistance);
+    endPosition.x = position.x + (int)(cos(angle) * length);
+    endPosition.y = position.y + (int)(sin(angle) * length);
 }
 
 

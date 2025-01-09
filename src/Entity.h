@@ -24,6 +24,7 @@ public:
     [[nodiscard]] const char * GetDescription() const {return description;}
     [[nodiscard]] const char * GetImagePath() const {return image_path;}
     [[nodiscard]] pdcpp::Point<int> GetPosition() const {return position;}
+    [[nodiscard]] pdcpp::Point<int> GetCenteredPosition() const {return {position.x + size.x / 2, position.y + size.y / 2};}
     [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
     [[nodiscard]] float GetHP() const {return hp;}

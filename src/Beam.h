@@ -16,12 +16,12 @@ public:
 
     void Draw() const override;
     void HandleInput() override;
-    void UpdatePosition();
 
 private:
     bool exploding = false;
     unsigned int size;
     unsigned int explosionThreshold;
+    pdcpp::Point<int> startPosition;
     pdcpp::Point<int> endPosition;
 };
 
