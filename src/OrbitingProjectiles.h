@@ -12,7 +12,7 @@
 class OrbitingProjectiles : public Magic{
 public:
     OrbitingProjectiles() = delete;
-    explicit OrbitingProjectiles(pdcpp::Point<int> Position);
+    explicit OrbitingProjectiles(pdcpp::Point<int> Position, const char* iconBitmapPath);
     bool operator==(const OrbitingProjectiles& other) const {return this == &other;}
 
     void Draw() const override;

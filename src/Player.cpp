@@ -151,11 +151,11 @@ void Player::HandleInput()
         if (attackingA)
         {
             //magic = std::make_unique<Projectile>(GetCenteredPosition());
-            magic = std::make_unique<OrbitingProjectiles>(GetCenteredPosition());
+            magic = std::make_unique<OrbitingProjectiles>(GetCenteredPosition(), "images/ui/icon_magic_orbiting_projectiles.png");
         }
         else if (attackingB)
         {
-            magic = std::make_unique<Beam>(GetCenteredPosition());
+            magic = std::make_unique<Beam>(GetCenteredPosition(), "images/ui/icon_magic_beam.png");
         }
         magicLaunched.push_back(std::move(magic));
     }

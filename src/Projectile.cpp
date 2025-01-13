@@ -6,15 +6,13 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
 
-Projectile::Projectile(pdcpp::Point<int> Position):
-Magic(Position)
+Projectile::Projectile(pdcpp::Point<int> Position, const char* iconBitmapPath):
+Magic(Position, iconBitmapPath)
 {
-    isAlive = true;
     iLifetime = 2000;
     speed = 8;
     size = 10;
     explosionThreshold = 500;
-    bornTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
 }
 
 void Projectile::Draw() const
