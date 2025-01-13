@@ -7,6 +7,7 @@
 #include "Log.h"
 #include "Beam.h"
 #include "Projectile.h"
+#include "OrbitingProjectiles.h"
 
 Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0)
 {
@@ -149,7 +150,8 @@ void Player::HandleInput()
         std::unique_ptr<Magic> magic;
         if (attackingA)
         {
-            magic = std::make_unique<Projectile>(GetCenteredPosition());
+            //magic = std::make_unique<Projectile>(GetCenteredPosition());
+            magic = std::make_unique<OrbitingProjectiles>(GetCenteredPosition());
         }
         else if (attackingB)
         {
