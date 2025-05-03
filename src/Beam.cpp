@@ -6,8 +6,8 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 
-Beam::Beam(pdcpp::Point<int> Position, const char* iconBitmapPath) :
-Magic(Position, iconBitmapPath), startPosition(position), endPosition(Position) {
+Beam::Beam(pdcpp::Point<int> Position) :
+Magic(Position), startPosition(position), endPosition(Position) {
     iLifetime = 2000;
     size = 1;
     explosionThreshold = 300;

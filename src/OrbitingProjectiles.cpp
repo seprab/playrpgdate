@@ -6,8 +6,8 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 
-OrbitingProjectiles::OrbitingProjectiles(pdcpp::Point<int> Position, const char* iconBitmapPath) :
-        Magic(Position, iconBitmapPath) {
+OrbitingProjectiles::OrbitingProjectiles(pdcpp::Point<int> Position) :
+        Magic(Position) {
     iLifetime = 4000;
     size = 10;
     radius = 40;

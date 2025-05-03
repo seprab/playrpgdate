@@ -11,7 +11,7 @@
 class Projectile : public Magic{
 public:
     Projectile() = delete;
-    explicit Projectile(pdcpp::Point<int> Position, const char* iconBitmapPath);
+    explicit Projectile(pdcpp::Point<int> Position);
     bool operator==(const Projectile& other) const {return this == &other;}
 
     void Draw() const override;

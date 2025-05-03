@@ -27,6 +27,14 @@ UI::UI(const char *fontPath)
     if (gameOverlay == nullptr)
         Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
 
+    magicIcons = {
+            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_beam", &err),
+            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_projectile", &err),
+            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_orbiting_projectile", &err)
+    };
+    if (magicIcons[0] == nullptr || magicIcons[1] == nullptr || magicIcons[2] == nullptr)
+        Log::Error("Error loading magic icons: %s", err);
+
     magicCooldown = std::make_unique<CircularProgress>(0, 0, 13);
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
@@ -200,6 +208,14 @@ void UI::DrawGameScreen() const
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
     magicCooldown->UpdatePosition(offset.x, offset.y-106);
     magicCooldown->Draw(EntityManager::GetInstance()->GetPlayer()->GetCooldownPercentage());
+
+    unsigned int activeMagic = EntityManager::GetInstance()->GetPlayer()->GetSelectedMagic();
+    int indexA = (activeMagic == 0) ? magicIcons.size() - 1 : activeMagic - 1;
+    int indexB = activeMagic;
+    int indexC = (activeMagic+1) % magicIcons.size();
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
 }
 
 void UI::SwitchScreen(GameScreen newScreen)

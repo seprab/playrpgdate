@@ -59,6 +59,12 @@ Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 
     die->AddBitmap((*anim)[18]);
     die->SetDelay(4);
     die->LoadBitmaps();
+
+    availableMagic = {
+            [](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position); },
+            [](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position); },
+            [](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position); }
+    };
 }
 
 void Player::Tick(const std::shared_ptr<Area>& area)
@@ -97,8 +103,7 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 }
 void Player::Draw()
 {
-    if (attackingA) attack->Draw(GetPosition().x, GetPosition().y);
-    else if (attackingB) stab->Draw(GetPosition().x, GetPosition().y);
+    if (attacking) attack->Draw(GetPosition().x, GetPosition().y);
     else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
     else idle->Draw(GetPosition().x, GetPosition().y);
 
@@ -133,7 +138,14 @@ void Player::HandleInput()
     dx *= GetMovementScale();
     dy *= GetMovementScale();
 
-
+    if (clicked & kButtonB)
+    {
+        selectedMagic++;
+        if (selectedMagic >= availableMagic.size())
+        {
+            selectedMagic = 0;
+        }
+    }
 
     int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
     if (magicCastElapsedTime < magicCooldown)
@@ -141,22 +153,12 @@ void Player::HandleInput()
         return;
     }
 
-    attackingA = (clicked & kButtonA);
-    attackingB = (clicked & kButtonB);
-
-    if (attackingA || attackingB)
+    attacking = (clicked & kButtonA);
+    if (attacking)
     {
         lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
         std::unique_ptr<Magic> magic;
-        if (attackingA)
-        {
-            //magic = std::make_unique<Projectile>(GetCenteredPosition());
-            magic = std::make_unique<OrbitingProjectiles>(GetCenteredPosition(), "images/ui/icon_magic_orbiting_projectiles.png");
-        }
-        else if (attackingB)
-        {
-            magic = std::make_unique<Beam>(GetCenteredPosition(), "images/ui/icon_magic_beam.png");
-        }
+        magic = availableMagic[selectedMagic](GetCenteredPosition());
         magicLaunched.push_back(std::move(magic));
     }
 }

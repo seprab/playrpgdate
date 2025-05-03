@@ -26,11 +26,13 @@ private:
     int dx =0;
     int dy =0;
 
-    bool attackingA;
-    bool attackingB;
+    bool attacking;
     unsigned int magicCooldown;
     unsigned int lastMagicCastTime;
+    unsigned int selectedMagic = 0;
     std::vector<std::unique_ptr<Magic>> magicLaunched;
+    std::vector<std::function<std::unique_ptr<Magic>(const pdcpp::Point<int>&)>> availableMagic;
+
 public:
     Player();
     Player(const Player& other) = delete;
@@ -49,7 +51,7 @@ public:
 
     unsigned int GetXPToLevelUp(unsigned int level);
     bool LevelUp();
-
+    unsigned int GetSelectedMagic() const { return selectedMagic; }
     void Save(EntityManager* manager);
 };
 

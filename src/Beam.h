@@ -11,7 +11,7 @@
 class Beam : public Magic{
 public:
     Beam() = delete;
-    explicit Beam(pdcpp::Point<int> Position, const char* iconBitmapPath);
+    explicit Beam(pdcpp::Point<int> Position);
     bool operator==(const Beam& other) const {return this == &other;}
 
     void Draw() const override;

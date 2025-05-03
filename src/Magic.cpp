@@ -6,13 +6,12 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
 
-Magic::Magic(pdcpp::Point<int> Position, const char* iconBitmapPath):
+Magic::Magic(pdcpp::Point<int> Position):
 position(Position)
 {
     isAlive = true;
     elapsedTime = 0;
     bornTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-    iconBitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(iconBitmapPath, nullptr);
 }
 
 void Magic::Update()
