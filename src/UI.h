@@ -36,6 +36,7 @@ private:
     std::function<void()> newGameCallback;
     std::function<void()> loadGameCallback;
     std::vector<LCDBitmap*> magicIcons;
+    LCDBitmap * playerFace;
 
 public:
     explicit UI(const char*);

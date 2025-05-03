@@ -35,6 +35,10 @@ UI::UI(const char *fontPath)
     if (magicIcons[0] == nullptr || magicIcons[1] == nullptr || magicIcons[2] == nullptr)
         Log::Error("Error loading magic icons: %s", err);
 
+    playerFace = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_player_face", &err);
+    if (playerFace == nullptr)
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
+
     magicCooldown = std::make_unique<CircularProgress>(0, 0, 13);
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
@@ -216,6 +220,8 @@ void UI::DrawGameScreen() const
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(playerFace, offset.x-205, offset.y-130, kBitmapUnflipped);
 }
 
 void UI::SwitchScreen(GameScreen newScreen)
