@@ -49,3 +49,15 @@ void Entity::DrawBitmap(int x, int y)
     DrawBitmap();
 }
 
+void Entity::Draw()
+{
+    DrawBitmap();
+    DrawHealthBar();
+}
+
+void Entity::DrawHealthBar() const
+{
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 2, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * (hp / maxHP), 2, kColorWhite);
+}
+

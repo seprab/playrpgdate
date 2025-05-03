@@ -37,6 +37,12 @@ public:
     void SetPosition(pdcpp::Point<int> _position) {position = _position;}
     void SetSize(pdcpp::Point<int> _size) {size = _size;}
 
+    void Damage(float damage) {hp -= damage;}
+    void Heal(float heal) {hp += heal;}
+
+    virtual void Draw();
+    void DrawHealthBar() const;
+
     void LoadBitmap();
     void LoadBitmap(char* path);
     void DrawBitmap();

@@ -41,7 +41,7 @@ public:
     void Tick(const std::shared_ptr<Area>& area);
     void Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area);
     void HandleInput();
-    void Draw();
+    void Draw() override;
     void DrawAimDirection() const;
 
     float GetCooldownPercentage();

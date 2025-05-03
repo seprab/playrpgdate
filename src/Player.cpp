@@ -106,7 +106,7 @@ void Player::Draw()
     if (attacking) attack->Draw(GetPosition().x, GetPosition().y);
     else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
     else idle->Draw(GetPosition().x, GetPosition().y);
-
+    Entity::DrawHealthBar();
     DrawAimDirection();
 #if DEBUG
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
