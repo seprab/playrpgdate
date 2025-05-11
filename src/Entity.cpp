@@ -25,6 +25,11 @@ void Entity::LoadBitmap()
     {
         Log::Error("Entity %d couldn't load bitmap %s: %s", id, image_path, outErr);
     }
+    else
+    {
+        pdcpp::GlobalPlaydateAPI::get()->graphics->getBitmapData(bitmap, &size.x, &size.y, nullptr, nullptr, nullptr);
+        Log::Info("Entity %d loaded bitmap %s", id, image_path);
+    }
 }
 
 void Entity::LoadBitmap(char *path)

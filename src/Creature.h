@@ -58,6 +58,7 @@ public:
 
     int Attack(Creature* target);
     int TraverseDoor(Door* door);
+    void Tick();
 };
 
 #endif

@@ -205,10 +205,30 @@ void Area::Load()
 {
     LoadLayers(dataPath, tokens);
     LoadImageTable(tilesetPath);
+    SpawnCreatures();
 }
 void Area::Unload()
 {
     mapData.clear();
     delete imageTable;
+}
+
+void Area::SpawnCreatures()
+{
+    for (const auto& creature : creatures)
+    {
+        creature->LoadBitmap();
+        creature->SetPosition(pdcpp::Point<int>(GetTileWidth()* 95, GetTileHeight()*145));
+        //creature->SetPosition(pdcpp::Point<int>(rand() % width * tileWidth, rand() % height * tileHeight));
+    }
+}
+
+void Area::Tick()
+{
+    for (const auto& creature : creatures)
+    {
+        creature->Tick();
+    }
+
 }
 

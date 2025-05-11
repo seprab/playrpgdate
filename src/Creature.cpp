@@ -137,4 +137,9 @@ int Creature::TraverseDoor(Door *door) {
     return 0;
 }
 
+void Creature::Tick()
+{
+    Draw();
+}
+
 

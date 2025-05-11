@@ -35,6 +35,7 @@ private:
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Creature>> creatures;
+    void SpawnCreatures();
 
 public:
     Area() = default;
@@ -57,6 +58,7 @@ public:
     void DrawTileFromLayer(int layer, int x, int y);
     void Render(int x, int y, int fovX, int fovY);
     bool CheckCollision(int x, int y);
+    void Tick();
 
     void Load();
     void Unload();
