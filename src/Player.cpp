@@ -81,7 +81,7 @@ void Player::Tick(const std::shared_ptr<Area>& area)
         }
         else
         {
-            magic->Update();
+            magic->Update(area);
         }
     }
     magicLaunched.erase(std::remove(magicLaunched.begin(), magicLaunched.end(), nullptr), magicLaunched.end());

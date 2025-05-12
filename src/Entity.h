@@ -37,8 +37,8 @@ public:
     void SetPosition(pdcpp::Point<int> _position) {position = _position;}
     void SetSize(pdcpp::Point<int> _size) {size = _size;}
 
-    void Damage(float damage) {hp -= damage;}
-    void Heal(float heal) {hp += heal;}
+    void Damage(float damage);
+    void Heal(float heal);
 
     virtual void Draw();
     void DrawHealthBar() const;

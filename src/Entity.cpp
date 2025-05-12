@@ -62,7 +62,18 @@ void Entity::Draw()
 
 void Entity::DrawHealthBar() const
 {
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 2, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * (hp / maxHP), 2, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 4, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * (hp / maxHP), 4, kColorWhite);
+}
+
+void Entity::Damage(float damage)
+{
+    Log::Info("Entity %s took damage", name);
+    hp = std::max(0.f, hp - damage);
+}
+
+void Entity::Heal(float heal) {
+
+    hp = std::min(maxHP, hp + heal);
 }
 

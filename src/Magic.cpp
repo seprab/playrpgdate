@@ -14,7 +14,7 @@ position(Position)
     bornTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
 }
 
-void Magic::Update()
+void Magic::Update(const std::shared_ptr<Area>& area)
 {
     if(!isAlive) return;
 
@@ -26,16 +26,21 @@ void Magic::Update()
     }
     HandleInput();
     Draw();
+    Damage(area);
 }
-
-void Magic::Terminate() {
+void Magic::Terminate()
+{
     isAlive = false;
 }
-
-void Magic::HandleInput() {
+void Magic::HandleInput()
+{
 
 }
+void Magic::Draw() const
+{
 
-void Magic::Draw() const {
-
+}
+void Magic::Damage(const std::shared_ptr<Area>& area)
+{
+    // Implement damage logic here
 }

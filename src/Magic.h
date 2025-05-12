@@ -8,6 +8,8 @@
 
 #include "pdcpp/graphics/Point.h"
 #include <pd_api/pd_api_gfx.h>
+#include <memory>
+#include "Area.h"
 
 
 class Magic{
@@ -16,10 +18,11 @@ public:
     explicit Magic(pdcpp::Point<int> Position);
     bool operator==(const Magic& other) const {return this == &other;}
 
-    void Update();
+    void Update(const std::shared_ptr<Area>& area);
     virtual void Draw() const;
     virtual void Terminate();
     virtual void HandleInput();
+    virtual void Damage(const std::shared_ptr<Area>& area);
     [[nodiscard]] bool IsAlive() const{return isAlive;}
 
 protected:

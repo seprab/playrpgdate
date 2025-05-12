@@ -16,6 +16,7 @@ public:
 
     void Draw() const override;
     void HandleInput() override;
+    void Damage(const std::shared_ptr<Area>& area) override;
 
 private:
     bool exploding = false;

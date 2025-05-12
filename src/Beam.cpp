@@ -5,6 +5,7 @@
 #include "Beam.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
+#include "Log.h"
 
 Beam::Beam(pdcpp::Point<int> Position) :
 Magic(Position), startPosition(position), endPosition(Position) {
@@ -20,16 +21,9 @@ void Beam::Draw() const {
         pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(startPosition.x, startPosition.y, endPosition.x, endPosition.y, -(int)size, kColorWhite);
 }
 
-void Beam::HandleInput() {
-    if (exploding)
-    {
-        size+=4;
-        return;
-    }
-
-    exploding = iLifetime - elapsedTime < explosionThreshold;
+void Beam::HandleInput()
+{
     float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle()* kPI /180.f;
-
     float startDistance = 30.f;
     float length = 150.f;
     position = EntityManager::GetInstance()->GetPlayer()->GetCenteredPosition();
@@ -37,6 +31,36 @@ void Beam::HandleInput() {
     startPosition.y = position.y + (int)(sin(angle) * startDistance);
     endPosition.x = position.x + (int)(cos(angle) * length);
     endPosition.y = position.y + (int)(sin(angle) * length);
+
+    if (exploding)
+    {
+        size+=4;
+        return;
+    }
+    exploding = iLifetime - elapsedTime < explosionThreshold;
+}
+
+void Beam::Damage(const std::shared_ptr<Area>& area)
+{
+    if (!exploding) return;
+    int xi = startPosition.x;
+    int xf = endPosition.x;
+    int yi = startPosition.y;
+    int yf = endPosition.y;
+
+    for (auto& entity : area->GetCreatures())
+    {
+        pdcpp::Point<int> creaturePos = entity->GetPosition();
+
+        // Calculate the perpendicular distance from the line to the point
+        float numerator = abs((yf - yi) * (xi - creaturePos.x) - (xf - xi) * (yi - creaturePos.y));
+        float denominator = sqrt(pow((yf - yi), 2) + pow((xf - xi), 2));
+        float distance = numerator / denominator;
+        if (distance < size)
+        {
+            entity->Damage(1);
+        }
+    }
 }
 
 

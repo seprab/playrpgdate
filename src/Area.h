@@ -46,6 +46,7 @@ public:
     [[nodiscard]] int GetTokenCount() const {return tokens;}
     [[nodiscard]] char* GetDataPath() const {return dataPath;}
     [[nodiscard]] char* GetTilesetPath() const {return tilesetPath;}
+    [[nodiscard]] std::vector<std::shared_ptr<Creature>> GetCreatures() const {return creatures;}
 
     void SetTokenCount(int value){tokens=value;}
     void SetDataPath(char* value){dataPath=value;}
