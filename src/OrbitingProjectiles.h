@@ -17,11 +17,13 @@ public:
 
     void Draw() const override;
     void HandleInput() override;
+    void Damage(const std::shared_ptr<Area>& area) override;
 
 private:
     unsigned int size;
     short int radius;
     float angles[4] = {0.f, kPI/2.f, kPI, 3.f*kPI/2.f};
+    pdcpp::Point<int> projectilePositions[4] = {{0, 0},{0, 0},{0, 0},{0, 0}};
 };
 
 

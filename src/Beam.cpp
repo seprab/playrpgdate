@@ -58,7 +58,7 @@ void Beam::Damage(const std::shared_ptr<Area>& area)
         float distance = numerator / denominator;
         if (distance < size)
         {
-            entity->Damage(1);
+            entity->Damage(0.4f);
         }
     }
 }
