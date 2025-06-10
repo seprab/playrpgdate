@@ -5,6 +5,7 @@
 #include "Inventory.h"
 #include "Creature.h"
 #include "Dialogue.h"
+#include "AStarContainer.h"
 #include "pdcpp/graphics/ImageTable.h"
 
 class EntityManager;
@@ -35,6 +36,7 @@ private:
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Creature>> creatures;
+    std::shared_ptr<AStarContainer> pathfindingContainer;
     void SpawnCreatures();
 
 public:
@@ -60,6 +62,7 @@ public:
     void Render(int x, int y, int fovX, int fovY);
     bool CheckCollision(int x, int y);
     void Tick();
+    void SetUpPathfindingContainer();
 
     void Load();
     void Unload();

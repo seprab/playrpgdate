@@ -19,6 +19,7 @@ Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char
         creatures.push_back(creature);
     }
     Log::Info("Area created with id: %d, name: %s", _id, _name);
+
 }
 Area::Area(const Area &other)
         : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), creatures(other.creatures)
@@ -232,3 +233,16 @@ void Area::Tick()
 
 }
 
+void Area::SetUpPathfindingContainer()
+{
+    pathfindingContainer = std::make_shared<AStarContainer>(width, height, width*height);
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            if (CheckCollision(i * tileWidth, j * tileHeight)) continue;
+            auto* node = new AStarNode(pdcpp::Point<int>(i, j));
+            pathfindingContainer->Add(node);
+        }
+    }
+}
