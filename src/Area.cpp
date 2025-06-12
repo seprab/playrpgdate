@@ -9,6 +9,7 @@
 #include "pdcpp/core/File.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
+#include "Monster.h"
 
 Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, std::vector<std::shared_ptr<Monster>> _monsters)
 : Entity(_id), dataPath(_dataPath), tokens(_dataTokens), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))

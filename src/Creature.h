@@ -12,7 +12,6 @@ class Weapon;
 class Armor;
 class Door;
 class Player;
-class Monster;
 
 class Creature : public Entity
 {
@@ -37,7 +36,6 @@ public:
     Creature(Creature&& other) noexcept;
     Creature(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
 
     [[nodiscard]] int GetStrength() const;

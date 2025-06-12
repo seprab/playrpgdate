@@ -40,7 +40,7 @@ void GameManager::Update()
                 EntityManager::GetInstance()->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 4:
-                EntityManager::GetInstance()->LoadJSON<Creature>(jsonPaths[frameCount], tokenCount[frameCount]);
+                EntityManager::GetInstance()->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 5:
                 EntityManager::GetInstance()->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);

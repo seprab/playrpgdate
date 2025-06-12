@@ -1,15 +1,15 @@
 #ifndef AREA_H
 #define AREA_H
 
-#include "Player.h"
 #include "Inventory.h"
-#include "Monster.h"
 #include "Dialogue.h"
 #include "AStarContainer.h"
 #include "pdcpp/graphics/ImageTable.h"
 
 class EntityManager;
 class Door;
+class Monster;
+class Player;
 
 struct Tile {
     int id;

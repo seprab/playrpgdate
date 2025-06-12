@@ -8,10 +8,9 @@
 #include "Magic.h"
 
 class EntityManager;
-class Magic;
-class Creature;
+class Area;
 
-class Player final : public Creature
+class Player : public Creature
 {
 private:
     std::string className;
@@ -55,6 +54,8 @@ public:
     bool LevelUp();
     unsigned int GetSelectedMagic() const { return selectedMagic; }
     void Save(EntityManager* manager);
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+
 };
 
 #endif

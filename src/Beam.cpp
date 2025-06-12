@@ -6,6 +6,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 #include "Log.h"
+#include "Monster.h"
 
 Beam::Beam(pdcpp::Point<int> Position) :
 Magic(Position), startPosition(position), endPosition(Position) {

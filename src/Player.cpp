@@ -186,3 +186,6 @@ void Player::DrawAimDirection() const {
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xa, ya, 1, kColorWhite);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xb, yb, 1, kColorWhite);
 }
+std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+    return nullptr;
+}

@@ -6,14 +6,21 @@
 #define CARDOBLAST_MONSTER_H
 
 #include "Creature.h"
-#include "Player.h"
 #include "pdcpp/graphics/Point.h"
 
 class Player;
-class Monster final : public Creature
+
+class Monster : public Creature
 {
 public:
+    Monster() = default;
+    Monster(const Monster &other);
+    Monster(Monster &&other) noexcept;
+    Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
+             int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
+
     void Tick(Player* player);
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
 private:
     bool ShouldMove();

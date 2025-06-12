@@ -6,6 +6,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 #include "Log.h"
+#include "Monster.h"
 
 OrbitingProjectiles::OrbitingProjectiles(pdcpp::Point<int> Position) :
         Magic(Position) {

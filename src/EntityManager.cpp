@@ -5,7 +5,7 @@
 #include "Item.h"
 #include "Armor.h"
 #include "Weapon.h"
-#include "Creature.h"
+#include "Monster.h"
 #include "jsmn.h"
 #include "Log.h"
 #include "Utils.h"
@@ -87,4 +87,4 @@ template void EntityManager::LoadJSON<Door>(const char*, int);
 template void EntityManager::LoadJSON<Item>(const char*, int);
 template void EntityManager::LoadJSON<Armor>(const char*, int);
 template void EntityManager::LoadJSON<Weapon>(const char*, int);
-template void EntityManager::LoadJSON<Creature>(const char*, int);
+template void EntityManager::LoadJSON<Monster>(const char*, int);
