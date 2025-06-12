@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
+# Check if PROJECT_NAME is defined, otherwise set a default
+if(NOT DEFINED PROJECT_NAME)
+    set(PROJECT_NAME "CardoBlast")
+endif()
 project(${PROJECT_NAME})
 
 # C++ 20 and up is required in order to include the playdate headers
