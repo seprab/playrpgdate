@@ -4,12 +4,15 @@
 #include "Entity.h"
 #include "Inventory.h"
 #include "Area.h"
+#include "pdcpp/graphics/ImageTable.h"
 
 class Area;
 class EntityManager;
 class Weapon;
 class Armor;
 class Door;
+class Player;
+class Monster;
 
 class Creature : public Entity
 {
@@ -22,6 +25,7 @@ private:
     int weapon{};
     int armor{};
     float movementScale{1.0f};
+    std::vector<pdcpp::Point<int>> path;
 
     Inventory* inventory{};
     Weapon* equippedWeapon{};

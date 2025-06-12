@@ -61,7 +61,7 @@ void GameManager::Update()
     {
         activeArea->Render(player->GetPosition().x, player->GetPosition().y, 234, 136);
         player->Tick(activeArea);
-        activeArea->Tick();
+        activeArea->Tick(player.get());
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness

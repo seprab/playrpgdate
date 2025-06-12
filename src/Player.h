@@ -8,6 +8,8 @@
 #include "Magic.h"
 
 class EntityManager;
+class Magic;
+class Creature;
 
 class Player final : public Creature
 {

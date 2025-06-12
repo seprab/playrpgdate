@@ -10,24 +10,24 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 
-Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, std::vector<std::shared_ptr<Creature>> _creatures)
+Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, std::vector<std::shared_ptr<Monster>> _monsters)
 : Entity(_id), dataPath(_dataPath), tokens(_dataTokens), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
 {
     SetName(_name);
-    for (const std::shared_ptr<Creature>& creature : _creatures)
+    for (const std::shared_ptr<Monster>& monster : _monsters)
     {
-        creatures.push_back(creature);
+        monsters.push_back(monster);
     }
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 
 }
 Area::Area(const Area &other)
-        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), creatures(other.creatures)
+        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), monsters(other.monsters)
 {
     SetName(other.GetName());
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), creatures(other.creatures)
+        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), monsters(other.monsters)
 {
     SetName(other.GetName());
 }
@@ -45,7 +45,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         char* decodedTileset{};
         std::shared_ptr<Dialogue> decodedDialogue;
         std::vector<std::shared_ptr<Door>> decodedDoors{};
-        std::vector<std::shared_ptr<Creature>> decodedCreatures;
+        std::vector<std::shared_ptr<Monster>> decodedCreatures;
 
         const int endOfObject = tokens[i].end; //get the end of the Area object
         decodedId = atoi(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"));
@@ -102,7 +102,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
                         Log::Error("Creature with ID %d not found", creatureId);
                         continue;
                     }
-                    decodedCreatures.push_back(std::static_pointer_cast<Creature>(originalInstance));
+                    decodedCreatures.push_back(std::static_pointer_cast<Monster>(originalInstance));
                 }
                 i=i+numOfCreatures;
             }
@@ -216,19 +216,19 @@ void Area::Unload()
 
 void Area::SpawnCreatures()
 {
-    for (const auto& creature : creatures)
+    for (const auto& monster : monsters)
     {
-        creature->LoadBitmap();
-        creature->SetPosition(pdcpp::Point<int>(GetTileWidth()* 95, GetTileHeight()*145));
+        monster->LoadBitmap();
+        monster->SetPosition(pdcpp::Point<int>(GetTileWidth()* 95, GetTileHeight()*145));
         //creature->SetPosition(pdcpp::Point<int>(rand() % width * tileWidth, rand() % height * tileHeight));
     }
 }
 
-void Area::Tick()
+void Area::Tick(Player* player)
 {
-    for (const auto& creature : creatures)
+    for (const auto& monster : monsters)
     {
-        creature->Tick();
+        monster->Tick(player);
     }
 
 }

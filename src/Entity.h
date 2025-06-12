@@ -17,8 +17,6 @@ public:
     Entity(Entity&& other) noexcept = default;
     virtual ~Entity() = default;
 
-
-
     [[nodiscard]] unsigned int GetId() const {return id;}
     [[nodiscard]] const char * GetName() const {return name;}
     [[nodiscard]] const char * GetDescription() const {return description;}
