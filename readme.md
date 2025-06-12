@@ -2,6 +2,15 @@
 
 Attempting to create a text-based RPG for the playdate using c++.
 
+## Pre-requisites
+Ensure Playdate SDK v2.6.2 is being used and it set as an environment variable.
+```
+export PLAYDATE_SDK_PATH="/Users/sergio.prada/Developer/PlaydateSDK/"
+```
+The download link is [https://download-cdn.panic.com/playdate_sdk/](https://download-cdn.panic.com/playdate_sdk/).
+- Why this version? This game depends on [Playdate-cpp](https://github.com/nstbayless/playdate-cpp) which is no longer updated.
+- Setting the env SDK path as `/Users/sergio.prada/Developer/PlaydateSDK-2.6.2/` won't work.
+
 ## How to build
 I work with this either with Terminal or CLion
 
