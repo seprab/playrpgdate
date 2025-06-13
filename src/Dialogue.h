@@ -21,9 +21,9 @@ public:
     Dialogue(Dialogue&& other) noexcept;
 
     void AddChoice(Choice choice);
-    unsigned int Size() const;
+    [[nodiscard]] unsigned int Size() const;
 
-    int Activate() const;
+    [[nodiscard]] int Activate() const;
 
 private:
     char* description{};

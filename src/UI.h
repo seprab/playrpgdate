@@ -41,7 +41,7 @@ private:
 public:
     explicit UI(const char*);
     void Update();
-    void Draw();
+    void Draw() const;
     void HandleInputs();
     void SwitchScreen(GameScreen newScreen);
 
@@ -53,7 +53,7 @@ public:
 
 private:
     void DrawLoadingScreen() const;
-    void DrawMainMenu();
+    void DrawMainMenu() const;
     void DrawGameScreen() const;
 };
 

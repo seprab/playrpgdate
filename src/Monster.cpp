@@ -12,16 +12,10 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
 {
 }
-Monster::Monster(const Monster &other) : Creature(other)
-{
-}
-Monster::Monster(Monster &&other) noexcept : Creature(other)
-{
-}
 void Monster::Tick(Player* player)
 {
     pdcpp::Point<int> playerPosition = player->GetPosition();
-    if (ShouldMove())
+    if (ShouldMove(playerPosition))
     {
         CalculatePath(playerPosition);
         Move(playerPosition);
@@ -52,17 +46,17 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
             // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
             char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
 
-            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            if(strcmp(object, "id") == 0) decodedId = static_cast<int>(strtol(value, nullptr, 10));
             else if(strcmp(object, "name") == 0) decodedName = value;
             else if(strcmp(object, "image") == 0) decodedPath = value;
-            else if(strcmp(object, "hp") == 0) decodedMaxHp = atof(value);
-            else if(strcmp(object, "str") == 0) decodedStrength = atoi(value);
-            else if(strcmp(object, "agi") == 0) decodedAgility = atoi(value);
-            else if(strcmp(object, "con") == 0) decodedConstitution = atoi(value);
-            else if(strcmp(object, "evasion") == 0) decodedEvasion = atof(value);
+            else if(strcmp(object, "hp") == 0) decodedMaxHp = strtof(value, nullptr);
+            else if(strcmp(object, "str") == 0) decodedStrength = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "agi") == 0) decodedAgility = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "con") == 0) decodedConstitution = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "evasion") == 0) decodedEvasion = strtof(value, nullptr);
             else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
-            else if(strcmp(object, "weapon") == 0) decodedWeapon = atoi(value);
-            else if(strcmp(object, "armor") == 0) decodedArmor = atoi(value);
+            else if(strcmp(object, "weapon") == 0) decodedWeapon = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "armor") == 0) decodedArmor = static_cast<int>(strtol(value, nullptr, 10));
             else Log::Error("Unknown property %s", object);
         }
         creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
@@ -75,7 +69,12 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
     return std::make_shared<std::vector<Monster>>(creatures_decoded);
 }
 
-bool Monster::ShouldMove() {
+bool Monster::ShouldMove(pdcpp::Point<int> playerPosition) const
+{
+
+    if (GetPosition().distance(playerPosition) <= 50) {
+        return true;
+    }
     return false;
 }
 

@@ -24,14 +24,14 @@ class Area final : public Entity
 {
 private:
     std::vector<Layer> mapData;
-    pdcpp::ImageTable* imageTable;
+    pdcpp::ImageTable* imageTable = nullptr;
     int tokens{};
     int width{};
     int height{};
     int tileWidth{};
     int tileHeight{};
-    char* dataPath;
-    char* tilesetPath;
+    char* dataPath = nullptr;
+    char* tilesetPath = nullptr;
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Monster>> monsters;
@@ -42,7 +42,7 @@ public:
     Area() = default;
     Area(const Area& other);
     Area(Area&& other) noexcept;
-    Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, std::vector<std::shared_ptr<Monster>> _monsters);
+    Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
 
     [[nodiscard]] int GetTokenCount() const {return tokens;}
     [[nodiscard]] char* GetDataPath() const {return dataPath;}

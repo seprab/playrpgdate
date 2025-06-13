@@ -54,10 +54,9 @@ void Beam::Damage(const std::shared_ptr<Area>& area)
         pdcpp::Point<int> creaturePos = entity->GetPosition();
 
         // Calculate the perpendicular distance from the line to the point
-        float numerator = abs((yf - yi) * (xi - creaturePos.x) - (xf - xi) * (yi - creaturePos.y));
-        float denominator = sqrt(pow((yf - yi), 2) + pow((xf - xi), 2));
-        float distance = numerator / denominator;
-        if (distance < size)
+        const int numerator = abs((yf - yi) * (xi - creaturePos.x) - (xf - xi) * (yi - creaturePos.y));
+        const double denominator = sqrt(pow((yf - yi), 2) + pow((xf - xi), 2));
+        if ((numerator / denominator) < size)
         {
             entity->Damage(0.4f);
         }

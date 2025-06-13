@@ -25,7 +25,7 @@ Creature::Creature(const Creature &other)
     SetMaxHP(other.GetMaxHP());
 }
 Creature::Creature(Creature &&other) noexcept
-: Entity(other), strength(other.GetStrength()), agility(other.GetAgility())
+: Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility())
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
@@ -88,7 +88,7 @@ void Creature::EquipArmor(Armor *_armor) {
 }
 
 int Creature::Attack(Creature *target) {
-    return 0;
+    target->Damage(static_cast<float>(GetStrength()));
 }
 
 int Creature::TraverseDoor(Door *door) {

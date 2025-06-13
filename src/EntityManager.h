@@ -36,7 +36,7 @@ public:
 
     std::shared_ptr<void> GetEntity(unsigned int id);
     [[nodiscard]] std::shared_ptr<Player> GetPlayer() const {return player;};
-    void SetPlayer(std::shared_ptr<Player> Player){player = Player;}
+    void SetPlayer(const std::shared_ptr<Player>& Player){player = Player;}
 };
 
 #endif

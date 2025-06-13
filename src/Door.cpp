@@ -56,12 +56,17 @@ std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         const char* objects[] = {"id", "area_a", "area_b", "key", "locked"};
         for (const char* & object : objects)
         {
-            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
-            if(strcmp(object, "id") == 0) decodedId = atoi(value);
-            else if(strcmp(object, "key") == 0) decodedKey = atoi(value);
+            const char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+            if(strcmp(object, "id") == 0) decodedId = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "key") == 0) decodedKey = static_cast<int>(strtol(value, nullptr, 10));
             else if(strcmp(object, "locked") == 0) decodedLocked = strcmp(value, "true") == 0;
-            else if(strcmp(object, "area_a") == 0) decodedAreaA = atoi(value);
-            else if(strcmp(object, "area_b") == 0) decodedAreaB = atoi(value);
+            else if(strcmp(object, "area_a") == 0) decodedAreaA = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "area_b") == 0) decodedAreaB = static_cast<int>(strtol(value, nullptr, 10));
+            else
+            {
+                Log::Error("Unknown object in Door JSON: %s", object);
+                return nullptr;
+            }
         }
         doors_decoded.emplace_back(decodedId, decodedLocked, decodedKey, decodedAreaA, decodedAreaB);
         Log::Info("Door ID: %d", decodedId);

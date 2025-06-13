@@ -2,7 +2,6 @@
 #include "Area.h"
 #include "Door.h"
 #include "Entity.h"
-#include "Inventory.h"
 #include "Dialogue.h"
 #include "Log.h"
 #include "Utils.h"
@@ -11,8 +10,8 @@
 #include "EntityManager.h"
 #include "Monster.h"
 
-Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, std::vector<std::shared_ptr<Monster>> _monsters)
-: Entity(_id), dataPath(_dataPath), tokens(_dataTokens), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
+Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
+: Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
 {
     SetName(_name);
     for (const std::shared_ptr<Monster>& monster : _monsters)
@@ -23,16 +22,16 @@ Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char
 
 }
 Area::Area(const Area &other)
-        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), monsters(other.monsters)
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), monsters(other.monsters)
 {
     SetName(other.GetName());
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), dataPath(other.GetDataPath()), tokens(other.GetTokenCount()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), monsters(other.monsters)
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), monsters(std::move(other.monsters))
 {
     SetName(other.GetName());
 }
-std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const int size)
 {
     std::vector<Area> decodedAreas;
     for (int i = 0; i < size; i++)
@@ -49,10 +48,10 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         std::vector<std::shared_ptr<Monster>> decodedCreatures;
 
         const int endOfObject = tokens[i].end; //get the end of the Area object
-        decodedId = atoi(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"));
+        decodedId = static_cast<int>(strtol(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"), nullptr, 10));
         decodedName = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "name");
         decodedData = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataPath");
-        decodedTokens = atoi(Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataTokens"));
+        decodedTokens = static_cast<int>(strtol(Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataTokens"), nullptr, 10));
         decodedTileset = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "tileset");
 
         i++; //move into the first property of the Area object. Otherwise, the while is invalid
@@ -139,7 +138,7 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
                 for (int j = 0; j < numberOfTiles; j++)
                 {
                     char* bufferValue = Utils::Subchar(charBuffer.get(), t[i+j].start, t[i+j].end);
-                    int parsedId = atoi(bufferValue);
+                    int parsedId = static_cast<int>(strtol(bufferValue, nullptr, 10));
                     Tile tile{.id =  parsedId, .collision = parsedId != 0};
                     layer.tiles.push_back(tile);
                 }
@@ -148,8 +147,8 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
             }
         }
     }
-    height = atoi(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "height"));
-    width = atoi(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "width"));
+    height = static_cast<int>(strtol(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "height"), nullptr, 10));
+    width = static_cast<int>(strtol(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "width"), nullptr, 10));
     Log::Info("Map loaded, %i width and %i height", width, height);
 }
 void Area::LoadImageTable(const char *fileName)

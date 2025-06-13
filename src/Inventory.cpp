@@ -26,7 +26,7 @@ int Inventory::Print(const bool label) const
     {
         Log::Info(item->GetName());
     }
-    return items.size();
+    return static_cast<int>(items.size());
 }
 
 void Inventory::Clear()

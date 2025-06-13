@@ -27,7 +27,7 @@ private:
     int dx =0;
     int dy =0;
 
-    bool attacking;
+    bool attacking = false;
     unsigned int magicCooldown;
     unsigned int lastMagicCastTime;
     unsigned int selectedMagic = 0;
@@ -45,14 +45,14 @@ public:
     void Draw() override;
     void DrawAimDirection() const;
 
-    float GetCooldownPercentage();
+    float GetCooldownPercentage() const;
     std::string GetClassName();
     unsigned int GetLevel();
     std::unordered_set<std::string>& GetVisitedArea();
 
     unsigned int GetXPToLevelUp(unsigned int level);
     bool LevelUp();
-    unsigned int GetSelectedMagic() const { return selectedMagic; }
+    [[nodiscard]] unsigned int GetSelectedMagic() const { return selectedMagic; }
     void Save(EntityManager* manager);
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
 
