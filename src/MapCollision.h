@@ -94,8 +94,8 @@ public:
 	MapCollision();
 	~MapCollision();
 
-	void setMap(const Map_Layer& _colmap, unsigned short w, unsigned short h);
-	bool move(float &x, float &y, float step_x, float step_y, int movement_type, int collide_type);
+	void SetMap(const Map_Layer& _colmap, unsigned short w, unsigned short h);
+	bool Move(float &x, float &y, float step_x, float step_y, int movement_type, int collide_type);
 
 	bool isOutsideMap(const float& tile_x, const float& tile_y) const;
 	bool isWall(const float& x, const float& y) const;
@@ -107,7 +107,7 @@ public:
 
 	bool isFacing(const float& x1, const float& y1, char direction, const float& x2, const float& y2);
 
-	bool computePath(const pdcpp::Point<int>& start, const pdcpp::Point<int>& end, std::vector<pdcpp::Point<int>> &path, int movement_type, unsigned int limit);
+	bool ComputePath(const pdcpp::Point<int>& start, const pdcpp::Point<int>& end, std::vector<pdcpp::Point<int>> &path, int movement_type, unsigned int limit);
 
 	void block(const float& map_x, const float& map_y, bool is_ally);
 	void unblock(const float& map_x, const float& map_y);

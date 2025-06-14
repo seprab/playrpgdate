@@ -19,7 +19,6 @@ Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char
         monsters.push_back(monster);
     }
     Log::Info("Area created with id: %d, name: %s", _id, _name);
-
 }
 Area::Area(const Area &other)
         : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), monsters(other.monsters)
@@ -206,6 +205,8 @@ void Area::Load()
 {
     LoadLayers(dataPath, tokens);
     LoadImageTable(tilesetPath);
+    collider = std::make_shared<MapCollision>();
+    collider->SetMap(ToMapLayer(), width, height);
     SpawnCreatures();
 }
 void Area::Unload()
@@ -228,11 +229,20 @@ void Area::Tick(Player* player)
 {
     for (const auto& monster : monsters)
     {
-        monster->Tick(player);
+        monster->Tick(player, this);
     }
 
 }
-
+Map_Layer Area::ToMapLayer() const {
+    Map_Layer layer(width, std::vector<unsigned short>(height, 0));
+    for (int x = 0; x < width; ++x) {
+        for (int y = 0; y < height; ++y) {
+            const Tile& tile = mapData[0].tiles[y * width + x];
+            layer[x][y] = tile.collision ? MapCollision::BLOCKS_ALL : MapCollision::BLOCKS_NONE;
+        }
+    }
+    return layer;
+}
 void Area::SetUpPathfindingContainer()
 {
     pathfindingContainer = std::make_shared<AStarContainer>(width, height, width*height);

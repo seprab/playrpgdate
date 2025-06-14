@@ -24,7 +24,6 @@ private:
     int weapon{};
     int armor{};
     float movementScale{1.0f};
-    std::vector<pdcpp::Point<int>> path;
 
     Inventory* inventory{};
     Weapon* equippedWeapon{};

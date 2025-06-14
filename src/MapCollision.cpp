@@ -45,7 +45,7 @@ MapCollision::MapCollision()
 	colmap[0].resize(1);
 }
 
-void MapCollision::setMap(const Map_Layer& _colmap, unsigned short w, unsigned short h) {
+void MapCollision::SetMap(const Map_Layer& _colmap, unsigned short w, unsigned short h) {
 	has_empty_tile = false;
 
 	colmap.resize(w);
@@ -150,7 +150,7 @@ bool MapCollision::smallStepForcedSlide(float &x, float &y, float step_x, float 
  * If we encounter an obstacle at 90 degrees, stop.
  * If we encounter an obstacle at 45 or 135 degrees, slide.
  */
-bool MapCollision::move(float &x, float &y, float _step_x, float _step_y, int movement_type, int collide_type) {
+bool MapCollision::Move(float &x, float &y, float _step_x, float _step_y, int movement_type, int collide_type) {
 	// when trying to slide against a bottom or right wall, step_x or step_y can become 0
 	// this causes diag to become false, making this function return false
 	// we try to catch such a scenario and return true early
@@ -159,23 +159,27 @@ bool MapCollision::move(float &x, float &y, float _step_x, float _step_y, int mo
 	while (_step_x != 0 || _step_y != 0) {
 
 		float step_x = 0;
-		if (_step_x > 0) {
+		if (_step_x > 0)
+		{
 			// find next interesting value, which is either the whole step, or the transition to the next tile
 			step_x = std::min(ceilf(x) - x, _step_x);
 			// if we are standing on the edge of a tile (ceilf(x) - x == 0), we need to look one tile ahead
 			if (step_x <= MIN_TILE_GAP) step_x = std::min(1.f, _step_x);
 		}
-		else if (_step_x < 0) {
+		else if (_step_x < 0)
+		{
 			step_x = std::max(floorf(x) - x, _step_x);
 			if (step_x == 0) step_x = std::max(-1.f, _step_x);
 		}
 
 		float step_y = 0;
-		if (_step_y > 0) {
+		if (_step_y > 0)
+		{
 			step_y = std::min(ceilf(y) - y, _step_y);
 			if (step_y <= MIN_TILE_GAP) step_y = std::min(1.f, _step_y);
 		}
-		else if (_step_y < 0) {
+		else if (_step_y < 0)
+		{
 			step_y = std::max(floorf(y) - y, _step_y);
 			if (step_y == 0) step_y	= std::max(-1.f, _step_y);
 		}
@@ -183,12 +187,15 @@ bool MapCollision::move(float &x, float &y, float _step_x, float _step_y, int mo
 		_step_x -= step_x;
 		_step_y -= step_y;
 
-		if (!smallStep(x, y, step_x, step_y, movement_type, collide_type)) {
-			if (force_slide) {
+		if (!smallStep(x, y, step_x, step_y, movement_type, collide_type))
+		{
+			if (force_slide)
+			{
 				if (!smallStepForcedSlideAlongGrid(x, y, step_x, step_y, movement_type, collide_type))
 					return false;
 			}
-			else {
+			else
+			{
 				if (!smallStepForcedSlide(x, y, step_x, step_y, movement_type, collide_type))
 					return false;
 			}
@@ -373,7 +380,7 @@ bool MapCollision::isFacing(const float& x1, const float& y1, char direction, co
 * limit is the maximum number of explored node
 * @return true if a path is found
 */
-bool MapCollision::computePath(const pdcpp::Point<int>& start_pos, const pdcpp::Point<int>& end_pos, std::vector<pdcpp::Point<int>> &path, int movement_type, unsigned int limit) {
+bool MapCollision::ComputePath(const pdcpp::Point<int>& start_pos, const pdcpp::Point<int>& end_pos, std::vector<pdcpp::Point<int>> &path, int movement_type, unsigned int limit) {
 
 	if (isOutsideMap(end_pos.x, end_pos.y)) return false;
 

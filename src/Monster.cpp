@@ -11,14 +11,41 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
 {
+    SetMovementScale(0.1f); // Set a default movement scale for monsters
 }
-void Monster::Tick(Player* player)
+void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerPosition = player->GetPosition();
+    if (tileSize == 0) tileSize = area->GetTileWidth(); // Assuming square tiles
+    playerPosition.x /= tileSize;
+    playerPosition.y /= tileSize;
+    tiledPosition.x = GetPosition().x / tileSize;
+    tiledPosition.y = GetPosition().y / tileSize;
+
     if (ShouldMove(playerPosition))
     {
-        CalculatePath(playerPosition);
-        Move(playerPosition);
+        if (!pathFound && pathFindFailureCount < 5)
+        {
+            CalculatePath(playerPosition, area);
+        }
+        else if (pathFound)
+        {
+            if (!path.empty())
+            {
+                if (movementTick>10)
+                {
+                    nextPosition = path.back();
+                    path.pop_back();
+                    movementTick = 0; // Reset movement tick
+                }
+                Move(nextPosition, area);
+                movementTick++;
+            }
+            else
+            {
+                pathFound = false; // Reset if path is empty
+            }
+        }
     }
     if (ShouldAttack(playerPosition))
     {
@@ -71,21 +98,40 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
 
 bool Monster::ShouldMove(pdcpp::Point<int> playerPosition) const
 {
-
-    if (GetPosition().distance(playerPosition) <= 50) {
+    if (tiledPosition.distance(playerPosition) <= 50) {
         return true;
     }
     return false;
 }
 
-void Monster::CalculatePath(pdcpp::Point<int> target) {
-
+void Monster::CalculatePath(const pdcpp::Point<int> target, const Area* area)
+{
+    path.clear();
+    pathFound = area->GetCollider()->ComputePath(tiledPosition, target, path, MapCollision::MOVE_NORMAL, MapCollision::DEFAULT_PATH_LIMIT);
+    if (!pathFound)
+    {
+        pathFindFailureCount++;
+    }
+    else
+    {
+        pathFindFailureCount = 0; // Reset failure count on success
+    }
 }
 
-void Monster::Move(pdcpp::Point<int> target) {
+void Monster::Move(pdcpp::Point<int> target, Area* area)
+{
+    float dx = static_cast<float>(target.x - tiledPosition.x) * GetMovementScale();
+    float dy = static_cast<float>(target.y - tiledPosition.y) * GetMovementScale();
 
+    float x = static_cast<float>(tiledPosition.x);
+    float y = static_cast<float>(tiledPosition.y);
+    area->GetCollider()->Move(x, y, dx, dy,
+        MapCollision::MOVE_NORMAL, MapCollision::ENTITY_COLLIDE_ALL);
+    target.x = x*tileSize;
+    target.y = y*tileSize;
+    SetPosition(target);
 }
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) {
-    return GetPosition().distance(target) <= 5;
+    return tiledPosition.distance(target) <= 5;
 }

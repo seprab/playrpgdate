@@ -68,7 +68,7 @@ void Entity::DrawHealthBar() const
 
 void Entity::Damage(float damage)
 {
-    Log::Info("Entity %s took damage", name);
+    //Log::Info("Entity %s took damage", name);
     hp = std::max(0.f, hp - damage);
 }
 

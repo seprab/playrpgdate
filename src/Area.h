@@ -4,6 +4,7 @@
 #include "Inventory.h"
 #include "Dialogue.h"
 #include "AStarContainer.h"
+#include "MapCollision.h"
 #include "pdcpp/graphics/ImageTable.h"
 
 class EntityManager;
@@ -24,6 +25,7 @@ class Area final : public Entity
 {
 private:
     std::vector<Layer> mapData;
+    std::shared_ptr<MapCollision> collider;;
     pdcpp::ImageTable* imageTable = nullptr;
     int tokens{};
     int width{};
@@ -37,6 +39,7 @@ private:
     std::vector<std::shared_ptr<Monster>> monsters;
     std::shared_ptr<AStarContainer> pathfindingContainer;
     void SpawnCreatures();
+    [[nodiscard]] Map_Layer ToMapLayer() const;
 
 public:
     Area() = default;
@@ -62,7 +65,6 @@ public:
     bool CheckCollision(int x, int y);
     void Tick(Player* player);
     void SetUpPathfindingContainer();
-
     void Load();
     void Unload();
 
@@ -70,7 +72,7 @@ public:
     [[nodiscard]] int GetHeight() const {return height;};
     [[nodiscard]] int GetTileWidth() const {return tileWidth;};
     [[nodiscard]] int GetTileHeight() const {return tileHeight;};
-
+    [[nodiscard]] MapCollision* GetCollider() const {return collider.get();}
 };
 
 #endif
