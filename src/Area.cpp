@@ -185,7 +185,7 @@ void Area::Render(int x, int y, int fovX, int fovY)
         }
     }
 }
-bool Area::CheckCollision(int x, int y)
+bool Area::CheckCollision(int x, int y) const
 {
     x=x/tileWidth;
     y=y/tileHeight;
@@ -215,12 +215,12 @@ void Area::Unload()
     delete imageTable;
 }
 
-void Area::SpawnCreatures()
+void Area::SpawnCreatures() const
 {
     for (const auto& monster : monsters)
     {
         monster->LoadBitmap();
-        monster->SetPosition(pdcpp::Point<int>(GetTileWidth()* 95, GetTileHeight()*145));
+        monster->SetTiledPosition(pdcpp::Point<int>(95, 145));
         //creature->SetPosition(pdcpp::Point<int>(rand() % width * tileWidth, rand() % height * tileHeight));
     }
 }

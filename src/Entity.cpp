@@ -38,7 +38,7 @@ void Entity::LoadBitmap(char *path)
     LoadBitmap();
 }
 
-void Entity::DrawBitmap()
+void Entity::DrawBitmap() const
 {
     if (bitmap == nullptr)
     {
@@ -64,6 +64,20 @@ void Entity::DrawHealthBar() const
 {
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 4, kColorWhite);
     pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * static_cast<int>(hp / maxHP), 4, kColorWhite);
+}
+
+void Entity::SetPosition(pdcpp::Point<int> _position)
+{
+    position = _position;
+    tiledPosition.x = _position.x / 16; // Assuming size.x is the tile width
+    tiledPosition.y = _position.y / 16; // Assuming size.y is the tile height
+}
+
+void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
+{
+    tiledPosition = _tiledPosition;
+    position.x = _tiledPosition.x * 16; // Assuming size.x is the tile width
+    position.y = _tiledPosition.y * 16; // Assuming size.y is the tile height
 }
 
 void Entity::Damage(float damage)

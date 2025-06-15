@@ -22,6 +22,7 @@ public:
     [[nodiscard]] const char * GetDescription() const {return description;}
     [[nodiscard]] const char * GetImagePath() const {return image_path;}
     [[nodiscard]] pdcpp::Point<int> GetPosition() const {return position;}
+    [[nodiscard]] pdcpp::Point<int> GetTiledPosition() const {return tiledPosition;}
     [[nodiscard]] pdcpp::Point<int> GetCenteredPosition() const {return {position.x + size.x / 2, position.y + size.y / 2};}
     [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
@@ -32,7 +33,8 @@ public:
     void SetName(const char* _name) {name = _name;}
     void SetDescription(char* _description) {description = _description;}
     void SetImagePath(char* _image_path) {image_path = _image_path;}
-    void SetPosition(pdcpp::Point<int> _position) {position = _position;}
+    void SetPosition(pdcpp::Point<int> _position);
+    void SetTiledPosition(pdcpp::Point<int> _tiledPosition);
     void SetSize(pdcpp::Point<int> _size) {size = _size;}
 
     void Damage(float damage);
@@ -43,7 +45,7 @@ public:
 
     void LoadBitmap();
     void LoadBitmap(char* path);
-    void DrawBitmap();
+    void DrawBitmap() const;
     void DrawBitmap(int x, int y);
 
     virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) = 0;
@@ -53,6 +55,7 @@ private:
     const char* name{};
     char* image_path{};
     pdcpp::Point<int> position = pdcpp::Point<int>(0, 0);
+    pdcpp::Point<int> tiledPosition{0, 0}; // Position in tiles
     pdcpp::Point<int> size = pdcpp::Point<int>(0, 0);
     float hp{};
     float maxHP{};

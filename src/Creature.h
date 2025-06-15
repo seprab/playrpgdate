@@ -4,7 +4,6 @@
 #include "Entity.h"
 #include "Inventory.h"
 #include "Area.h"
-#include "pdcpp/graphics/ImageTable.h"
 
 class Area;
 class EntityManager;
@@ -23,7 +22,7 @@ private:
     unsigned int xp{};
     int weapon{};
     int armor{};
-    float movementScale{1.0f};
+    int movementScale{1};
 
     Inventory* inventory{};
     Weapon* equippedWeapon{};
@@ -46,13 +45,13 @@ public:
     [[nodiscard]] float GetEvasion() const;
     void SetEvasion(float _evasion);
     [[nodiscard]] unsigned int GetXP() const;
-    void SetMovementScale(float value){movementScale = value;}
+    void SetMovementScale(int value){movementScale = value;}
 
 
     Inventory* GetInventory();
     Weapon* GetEquippedWeapon();
     Armor* GetEquippedArmor();
-    [[nodiscard]] float GetMovementScale() const {return movementScale; }
+    [[nodiscard]] int GetMovementScale() const {return movementScale; }
 
     void EquipWeapon(Weapon* weapon);
     void EquipArmor(Armor* armor);

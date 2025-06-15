@@ -9,7 +9,7 @@
 #include "Projectile.h"
 #include "OrbitingProjectiles.h"
 
-Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0)
+Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
 {
     className = "Warrior";
     magicCooldown = 5000;

@@ -38,7 +38,7 @@ private:
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Monster>> monsters;
     std::shared_ptr<AStarContainer> pathfindingContainer;
-    void SpawnCreatures();
+    void SpawnCreatures() const;
     [[nodiscard]] Map_Layer ToMapLayer() const;
 
 public:
@@ -62,7 +62,7 @@ public:
     void LoadImageTable(const char* fileName);
     void DrawTileFromLayer(int layer, int x, int y);
     void Render(int x, int y, int fovX, int fovY);
-    bool CheckCollision(int x, int y);
+    bool CheckCollision(int x, int y) const;
     void Tick(Player* player);
     void SetUpPathfindingContainer();
     void Load();
