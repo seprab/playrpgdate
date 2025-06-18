@@ -16,7 +16,6 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
-
     if (ShouldMove(playerTiledPosition))
     {
         if (!pathFound && pathFindFailureCount < maxPathFindFailureCount)
@@ -122,9 +121,12 @@ void Monster::CalculateNodesToTarget(const pdcpp::Point<int> target, const Area*
 
 void Monster::Move(pdcpp::Point<int> target)
 {
-    pdcpp::Point<int> d = {0,0};
-    d.x = target.x - GetTiledPosition().x;
-    d.y = target.y - GetTiledPosition().y;
+    // We are moving in pixel coordinates to improve the movement smoothness.
+    target.x *= 16;
+    target.y *= 16;
+    pdcpp::Point<float> d = {
+        static_cast<float>(target.x - GetPosition().x),
+        static_cast<float>(target.y - GetPosition().y)};
 
     // normalize the direction vector
     if (d.x != 0 || d.y != 0)
@@ -132,20 +134,29 @@ void Monster::Move(pdcpp::Point<int> target)
         float length = sqrtf((d.x * d.x) + (d.y * d.y));
         if (length > 0)
         {
-            d.x = static_cast<int>(d.x / length);
-            d.y = static_cast<int>(d.y / length);
+            d.x = d.x / length;
+            d.y = d.y / length;
         }
     }
-    pdcpp::Point<int> newPosition {GetPosition().x + d.x, GetPosition().y + d.y};
-    //newPosition.x *= GetMovementScale();
-    //newPosition.y *= GetMovementScale();
-    SetPosition(newPosition);
-
-    // In case the new position is close to the target, return true.
-    if (GetTiledPosition().distance(target) == 0)
+    else
     {
         reachedNode = true;
-        Log::Info("Problem here!! Reached node");
+        return; // Already at the target position
+    }
+
+    // print dx and dy for debugging
+    Log::Info("dx (%d), dy  (%d)", d.x, d.y);
+
+    d.x *= GetMovementScale();
+    d.y *= GetMovementScale();
+    pdcpp::Point<int> newPosition {
+        static_cast<int>(GetPosition().x + d.x),
+        static_cast<int>(GetPosition().y + d.y)};
+    SetPosition(newPosition);
+    // In case the new position is close to the target, return true.
+    if (GetPosition().distance(target) < 1)
+    {
+        reachedNode = true;
     }
 }
 
