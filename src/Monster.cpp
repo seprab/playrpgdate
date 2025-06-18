@@ -11,10 +11,7 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
 {
-    SetMovementScale(1); // Set a default movement scale for monsters
-    maxMovementTick *= GetMovementScale();
-    movementTick = maxMovementTick; // so we set the next position accordingly in tick movement logic
-    routeToNextPosition = std::vector<pdcpp::Point<int>>(maxMovementTick, pdcpp::Point<int>(0,0));
+    SetMovementScale(10); // Set a default movement scale for monsters
 }
 void Monster::Tick(Player* player, Area* area)
 {
@@ -30,15 +27,13 @@ void Monster::Tick(Player* player, Area* area)
         {
             if (!path.empty())
             {
-                if (movementTick>=maxMovementTick)
+                if (reachedNode)
                 {
                     nextPosition = path.back();
-                    CalculatePathToNextNode(nextPosition);
                     path.pop_back();
-                    movementTick = 0; // Reset movement tick
+                    reachedNode = false;
                 }
-                Move(routeToNextPosition[movementTick]);
-                movementTick++;
+                Move(nextPosition);
             }
             else
             {
@@ -125,36 +120,33 @@ void Monster::CalculateNodesToTarget(const pdcpp::Point<int> target, const Area*
     }
 }
 
-void Monster::CalculatePathToNextNode(pdcpp::Point<int> target)
-{
-    /*
-    // The following code of code is implemented in Flare Engine, I haven't really analyzed what's for,
-    // but it seems related to consider area bounds, collision with other entities and type of step.
-    ///////////////////
-    float dxA = static_cast<float>(target.x - GetTiledPosition().x);
-    float dyA = static_cast<float>(target.y - GetTiledPosition().y);
-
-    float x = static_cast<float>(GetTiledPosition().x);
-    float y = static_cast<float>(GetTiledPosition().y);
-    area->GetCollider()->Move(x, y, dxA, dyA,
-        MapCollision::MOVE_NORMAL, MapCollision::ENTITY_COLLIDE_ALL);
-
-    ///////////////////
-    */
-    // Below, I implement some logic to calculate the route to the next position via pixel movement.
-    const int dxB = static_cast<int>(target.x) - GetTiledPosition().x;
-    const int dyB = static_cast<int>(target.y) - GetTiledPosition().y;
-    for (int i=0; i< routeToNextPosition.size(); i++)
-    {
-        routeToNextPosition[i].x = GetPosition().x + (dxB * 16 * i / maxMovementTick);
-        routeToNextPosition[i].y = GetPosition().y + (dyB * 16 * i / maxMovementTick);
-    }
-}
-
 void Monster::Move(pdcpp::Point<int> target)
 {
-    Log::Info("Monster::Move to (%d, %d)", target.x, target.y);
-    SetPosition(target);
+    pdcpp::Point<int> d = {0,0};
+    d.x = target.x - GetTiledPosition().x;
+    d.y = target.y - GetTiledPosition().y;
+
+    // normalize the direction vector
+    if (d.x != 0 || d.y != 0)
+    {
+        float length = sqrtf((d.x * d.x) + (d.y * d.y));
+        if (length > 0)
+        {
+            d.x = static_cast<int>(d.x / length);
+            d.y = static_cast<int>(d.y / length);
+        }
+    }
+    pdcpp::Point<int> newPosition {GetPosition().x + d.x, GetPosition().y + d.y};
+    //newPosition.x *= GetMovementScale();
+    //newPosition.y *= GetMovementScale();
+    SetPosition(newPosition);
+
+    // In case the new position is close to the target, return true.
+    if (GetTiledPosition().distance(target) == 0)
+    {
+        reachedNode = true;
+        Log::Info("Problem here!! Reached node");
+    }
 }
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const

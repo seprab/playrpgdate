@@ -26,16 +26,13 @@ private:
     [[nodiscard]] bool ShouldMove(pdcpp::Point<int> playerPosition) const;
     [[nodiscard]] bool ShouldAttack(pdcpp::Point<int> target) const;
     void CalculateNodesToTarget(pdcpp::Point<int> target, const Area* area);
-    void CalculatePathToNextNode(pdcpp::Point<int> target);
     void Move(pdcpp::Point<int> target);
     std::vector<pdcpp::Point<int>> path;
     bool pathFound = false;
     int pathFindFailureCount = 0;
     int maxPathFindFailureCount = 5; // Max attempts to find a path before giving up
-    int movementTick = 0; // For controlling movement speed
-    int maxMovementTick = 5; // How many ticks before moving to the next node in path
     pdcpp::Point<int> nextPosition = {0, 0}; // Next position to move to
-    std::vector<pdcpp::Point<int>> routeToNextPosition; // Route to the next position
+    bool reachedNode = true; // Flag to check if the node was reached
 };
 
 
