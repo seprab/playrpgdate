@@ -14,7 +14,7 @@ void AnimationClip::LoadBitmaps()
     }
     for (auto& path : paths)
     {
-        const char** error{};
+        const char** error = nullptr;
         LCDBitmap* bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path.c_str(), error);
         if (bitmap == nullptr && *error != nullptr)
         {
