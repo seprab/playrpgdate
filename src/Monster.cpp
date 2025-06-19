@@ -48,7 +48,7 @@ void Monster::Tick(Player* player, Area* area)
     }
     if (ShouldAttack(playerTiledPosition))
     {
-        player->Damage(1);
+        player->Damage(static_cast<float>(GetStrength()));
     }
     Draw();
 }
@@ -238,5 +238,5 @@ void Monster::Move(pdcpp::Point<int> target)
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const
 {
-    return GetTiledPosition().distance(target) <= 5;
+    return GetTiledPosition().distance(target) <= 1;
 }
