@@ -22,7 +22,7 @@ private:
     unsigned int xp{};
     int weapon{};
     int armor{};
-    int movementScale{1};
+    int movementScale{}; // Default movement scale, can be adjusted for different creature types
 
     Inventory* inventory{};
     Weapon* equippedWeapon{};

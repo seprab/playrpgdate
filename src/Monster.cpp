@@ -10,9 +10,7 @@
 Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
-{
-    SetMovementScale(10); // Set a default movement scale for monsters
-}
+{}
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
@@ -28,8 +26,8 @@ void Monster::Tick(Player* player, Area* area)
             {
                 if (reachedNode)
                 {
-                    nextPosition = path.back();
-                    path.pop_back();
+                    nextPosition = path.back(); // Get the next position in the path
+                    path.pop_back(); // Remove the previous position from the path
                     reachedNode = false;
                 }
                 Move(nextPosition);
@@ -42,7 +40,7 @@ void Monster::Tick(Player* player, Area* area)
         else if (pathFindFailureCount >= maxPathFindFailureCount)
         {
             pathFindFailureCount++; // Increment failure count
-            if (pathFindFailureCount >= maxPathFindFailureCount * 100)
+            if (pathFindFailureCount >= maxPathFindFailureCount * 10) // If too many failures, reset
             {
                 pathFindFailureCount = 0; // Give the chance to try again after a long time
             }
@@ -122,20 +120,83 @@ void Monster::CalculateNodesToTarget(const pdcpp::Point<int> target, const Area*
 void Monster::Move(pdcpp::Point<int> target)
 {
     // We are moving in pixel coordinates to improve the movement smoothness.
-    target.x *= 16;
-    target.y *= 16;
-    pdcpp::Point<float> d = {
-        static_cast<float>(target.x - GetPosition().x),
-        static_cast<float>(target.y - GetPosition().y)};
+    pdcpp::Point<int> iPosCache = {GetPosition().x, GetPosition().y};
+    pdcpp::Point<int> iPos = {iPosCache.x, iPosCache.y};
+    pdcpp::Point<int> fPos = {target.x*16,target.y*16};
+    pdcpp::Point<int> d = {(fPos.x - iPos.x),(fPos.y - iPos.y)}; //direction vector
+    pdcpp::Point<int> dn {0,0}; //direction normalized
 
     // normalize the direction vector
     if (d.x != 0 || d.y != 0)
     {
+        /*
+         *The idea here was to normalize the direction vector so that the monster moves in a straight line towards the target.
+         *Nonetheless, it didn't work because when casting float to int, it would round down to 0.
+         *And when scaling up the value, there's a risk to enter in an cycle where it jumps back and fort
         float length = sqrtf((d.x * d.x) + (d.y * d.y));
         if (length > 0)
         {
             d.x = d.x / length;
             d.y = d.y / length;
+        }*/
+
+        /*
+         *The idea here is to scale down the movement depending on the dx.
+         *The problem is that the monsters will always move at a different speed rate.
+         *And they should always move at the same speed rate.
+        if (GetMovementScale() > 1) Log::Error("Movement scale is greater than 1, this will cause the monster to jump beyond the nodes and move in cycle.");
+        else if (GetMovementScale() <= 0) Log::Error("Movement scale is less than or equal to 0, this will cause the monster to not move.");
+        else
+        {
+            d.x = d.x * GetMovementScale();
+            d.y = d.y * GetMovementScale();
+            if (d.x > 0 && d.x < 1) d.x = 1; // Ensure minimum movement in x direction is 1 unit or zero.
+            if (d.y > 0 && d.y < 1) d.y = 1; // Ensure minimum movement in y direction is 1 unit or zero.
+        }
+        */
+
+        /*
+         *This kind of works, but still the speed relies on the nodes distance. I want speed to be constant.
+        float length = sqrtf((d.x * d.x) + (d.y * d.y));
+        if (length > 0)
+        {
+            dn.x = d.x / length;
+            dn.y = d.y / length;
+        }
+        dn.x *= GetMovementScale();
+        dn.y *= GetMovementScale();
+        if (dn.x > d.x) dn.x = d.x; // Ensure we do not overshoot the target in x direction
+        if (dn.y > d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
+        if (dn.x > 0 && dn.x < 1) dn.x = 1; // Ensure minimum movement in x direction is 1 unit or zero.
+        if (dn.y > 0 && dn.y < 1) dn.y = 1; // Ensure minimum movement in y direction is 1 unit or zero.
+        */
+
+        int moveScale = GetMovementScale();
+        if (d.x != 0 && d.y != 0)
+        {
+            // ensure move scale is less when moving in diagonals but never less than 1
+            // La hipotenusa, que es la diagonal del cuadrado, es en realidad √2 veces la longitud de uno de sus lados.
+            // Esto equivale aproximadamente a 1.414 veces la longitud del lado, lo que representa un aumento de alrededor del 41.4%,
+            moveScale = std::max(1, static_cast<int>(moveScale * 0.7f));
+        }
+        if (d.x > 0)
+        {
+            dn.x = moveScale;
+            if (dn.x > d.x) dn.x = d.x; // Ensure we do not overshoot the target in x direction
+        }
+        else if (d.x < 0)
+        {
+            dn.x = -moveScale; // Ensure we do not overshoot the target in x direction
+        }
+        if (d.y > 0)
+        {
+            dn.y = moveScale;
+            if (dn.y > d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
+        }
+        else if (d.y < 0)
+        {
+            dn.y = -moveScale;
+            if (dn.y < d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
         }
     }
     else
@@ -143,18 +204,41 @@ void Monster::Move(pdcpp::Point<int> target)
         reachedNode = true;
         return; // Already at the target position
     }
-
     // print dx and dy for debugging
-    Log::Info("dx (%d), dy  (%d)", d.x, d.y);
+    //Log::Info("dx (%f), dy  (%f)", d.x, d.y);
 
-    d.x *= GetMovementScale();
-    d.y *= GetMovementScale();
-    pdcpp::Point<int> newPosition {
-        static_cast<int>(GetPosition().x + d.x),
-        static_cast<int>(GetPosition().y + d.y)};
+    pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
     SetPosition(newPosition);
+
+    // calculate actual difference between start and after movement to validate it is not stuck
+    if (iPosCache.x == newPosition.x && iPosCache.y == newPosition.y)
+    {
+        // We force calculating a new path
+        pathFound = false;
+        return;
+    }
+
     // In case the new position is close to the target, return true.
-    if (GetPosition().distance(target) < 1)
+    if (newPosition.distance(target) < 1.f)
+    {
+        reachedNode = true;
+    }
+
+    // calculate if the new position is beyond the target position, so we mark it as reached. and move to the next node.
+    // this is good to avoid jittering. Returning when passing the node, or reducing the movement rate
+    if (dn.x > 0 && newPosition.x >= fPos.x)
+    {
+        reachedNode = true;
+    }
+    else if (dn.x < 0 && newPosition.x <= fPos.x)
+    {
+        reachedNode = true;
+    }
+    if (dn.y > 0 && newPosition.y >= fPos.y)
+    {
+        reachedNode = true;
+    }
+    else if (dn.y < 0 && newPosition.y <= fPos.y)
     {
         reachedNode = true;
     }

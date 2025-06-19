@@ -15,7 +15,7 @@ Creature::Creature(unsigned int _id, char *_name, char* image, float _maxHp, int
     SetName(_name);
     SetHP(_maxHp);
     SetMaxHP(_maxHp);
-
+    SetMovementScale(1); // Default movement scale for creatures, can be adjusted later
 }
 
 Creature::Creature(const Creature &other)
@@ -23,12 +23,14 @@ Creature::Creature(const Creature &other)
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
+    SetMovementScale(3); // Default movement scale for creatures, can be adjusted later
 }
 Creature::Creature(Creature &&other) noexcept
 : Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility())
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
+    SetMovementScale(1); // Default movement scale for creatures, can be adjusted later
 }
 
 int Creature::GetStrength() const {
