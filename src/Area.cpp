@@ -194,7 +194,7 @@ bool Area::CheckCollision(int x, int y) const
         if (layer.tiles[(y * width) + x].collision)
         {
 #if DEBUG
-            pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, 16, 16, kColorWhite);
+            pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, Globals::MAP_TILE_SIZE, Globals::MAP_TILE_SIZE, kColorWhite);
 #endif
             return true;
         }

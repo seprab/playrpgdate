@@ -3,6 +3,8 @@
 //
 
 #include "Monster.h"
+
+#include "Globals.h"
 #include "Player.h"
 #include "Log.h"
 
@@ -14,36 +16,33 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
-    if (ShouldMove(playerTiledPosition))
+    if (!pathFound && pathFindFailureCount < maxPathFindFailureCount && ShouldMove(playerTiledPosition))
     {
-        if (!pathFound && pathFindFailureCount < maxPathFindFailureCount)
+        CalculateNodesToTarget(playerTiledPosition, area);
+    }
+    if (pathFound)
+    {
+        if (!path.empty())
         {
-            CalculateNodesToTarget(playerTiledPosition, area);
+            if (reachedNode)
+            {
+                nextPosition = path.back(); // Get the next position in the path
+                path.pop_back(); // Remove the previous position from the path
+                reachedNode = false;
+            }
+            Move(nextPosition);
         }
-        if (pathFound)
+        else
         {
-            if (!path.empty())
-            {
-                if (reachedNode)
-                {
-                    nextPosition = path.back(); // Get the next position in the path
-                    path.pop_back(); // Remove the previous position from the path
-                    reachedNode = false;
-                }
-                Move(nextPosition);
-            }
-            else
-            {
-                pathFound = false; // Reset if path is empty
-            }
+            pathFound = false; // Reset if path is empty
         }
-        else if (pathFindFailureCount >= maxPathFindFailureCount)
+    }
+    else if (pathFindFailureCount >= maxPathFindFailureCount)
+    {
+        pathFindFailureCount++; // Increment failure count
+        if (pathFindFailureCount >= maxPathFindFailureCount * Globals::MULT_FOR_RESET_PATH_FIND_FAILURE) // If too many failures, reset
         {
-            pathFindFailureCount++; // Increment failure count
-            if (pathFindFailureCount >= maxPathFindFailureCount * 10) // If too many failures, reset
-            {
-                pathFindFailureCount = 0; // Give the chance to try again after a long time
-            }
+            pathFindFailureCount = 0; // Give the chance to try again after a long time
         }
     }
     if (ShouldAttack(playerTiledPosition))
@@ -97,7 +96,7 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
 
 bool Monster::ShouldMove(pdcpp::Point<int> playerPosition) const
 {
-    if (GetTiledPosition().distance(playerPosition) <= 50) {
+    if (GetTiledPosition().distance(playerPosition) <= Globals::MONSTER_AWARENESS_RADIUS) {
         return true;
     }
     return false;
@@ -122,7 +121,7 @@ void Monster::Move(pdcpp::Point<int> target)
     // We are moving in pixel coordinates to improve the movement smoothness.
     const pdcpp::Point<int> iPosCache = {GetPosition().x, GetPosition().y};
     const pdcpp::Point<int> iPos = {iPosCache.x, iPosCache.y};
-    const pdcpp::Point<int> fPos = {target.x*16,target.y*16};
+    const pdcpp::Point<int> fPos = {target.x*Globals::MAP_TILE_SIZE,target.y*Globals::MAP_TILE_SIZE};
     const pdcpp::Point<int> d = {(fPos.x - iPos.x),(fPos.y - iPos.y)}; //direction vector
     pdcpp::Point<int> dn {0,0}; //direction normalized
 
@@ -171,31 +170,31 @@ void Monster::Move(pdcpp::Point<int> target)
         if (dn.y > 0 && dn.y < 1) dn.y = 1; // Ensure minimum movement in y direction is 1 unit or zero.
         */
 
-        int moveScale = GetMovementScale();
+        int moveSpeed = GetMovementSpeed();
         if (d.x != 0 && d.y != 0)
         {
             // ensure move scale is less when moving in diagonals but never less than 1
             // La hipotenusa, que es la diagonal del cuadrado, es en realidad √2 veces la longitud de uno de sus lados.
             // Esto equivale aproximadamente a 1.414 veces la longitud del lado, lo que representa un aumento de alrededor del 41.4%,
-            moveScale = std::max(1, static_cast<int>(moveScale * 0.7f));
+            moveSpeed = std::max(1, static_cast<int>(static_cast<float>(moveSpeed) * Globals::MONSTER_DIAGONAL_MOVE_SCALE));
         }
         if (d.x > 0)
         {
-            dn.x = moveScale;
+            dn.x = moveSpeed;
             if (dn.x > d.x) dn.x = d.x; // Ensure we do not overshoot the target in x direction
         }
         else if (d.x < 0)
         {
-            dn.x = -moveScale; // Ensure we do not overshoot the target in x direction
+            dn.x = -moveSpeed; // Ensure we do not overshoot the target in x direction
         }
         if (d.y > 0)
         {
-            dn.y = moveScale;
+            dn.y = moveSpeed;
             if (dn.y > d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
         }
         else if (d.y < 0)
         {
-            dn.y = -moveScale;
+            dn.y = -moveSpeed;
             if (dn.y < d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
         }
     }
@@ -210,7 +209,7 @@ void Monster::Move(pdcpp::Point<int> target)
     const pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
     SetPosition(newPosition);
 
-    // calculate actual difference between start and after movement to validate it is not stuck
+    // calculate the actual difference between start and after movement to validate it is not stuck
     if (iPosCache.x == newPosition.x && iPosCache.y == newPosition.y)
     {
         // We force calculating a new path
@@ -238,5 +237,5 @@ void Monster::Move(pdcpp::Point<int> target)
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const
 {
-    return GetTiledPosition().distance(target) <= 1;
+    return GetTiledPosition().distance(target) <= Globals::MONSTER_ATTACK_RANGE;
 }

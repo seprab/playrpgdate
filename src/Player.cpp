@@ -135,8 +135,8 @@ void Player::HandleInput()
     }
     if (clicked & kButtonUp) dy=-1;
     else if (clicked & kButtonDown) dy=1;
-    dx *= static_cast<int>(GetMovementScale());
-    dy *= static_cast<int>(GetMovementScale());
+    dx *= static_cast<int>(GetMovementSpeed());
+    dy *= static_cast<int>(GetMovementSpeed());
 
     if (clicked & kButtonB)
     {

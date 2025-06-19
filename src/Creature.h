@@ -51,7 +51,7 @@ public:
     Inventory* GetInventory();
     Weapon* GetEquippedWeapon();
     Armor* GetEquippedArmor();
-    [[nodiscard]] int GetMovementScale() const {return movementScale; }
+    [[nodiscard]] int GetMovementSpeed() const {return movementScale; }
 
     void EquipWeapon(Weapon* weapon);
     void EquipArmor(Armor* armor);

@@ -3,6 +3,8 @@
 //
 
 #include "Entity.h"
+
+#include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
@@ -69,15 +71,15 @@ void Entity::DrawHealthBar() const
 void Entity::SetPosition(pdcpp::Point<int> _position)
 {
     position = _position;
-    tiledPosition.x = _position.x / 16; // Assuming size.x is the tile width
-    tiledPosition.y = _position.y / 16; // Assuming size.y is the tile height
+    tiledPosition.x = _position.x / Globals::MAP_TILE_SIZE; // Assuming size.x is the tile width
+    tiledPosition.y = _position.y / Globals::MAP_TILE_SIZE; // Assuming size.y is the tile height
 }
 
 void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
 {
     tiledPosition = _tiledPosition;
-    position.x = _tiledPosition.x * 16; // Assuming size.x is the tile width
-    position.y = _tiledPosition.y * 16; // Assuming size.y is the tile height
+    position.x = _tiledPosition.x * Globals::MAP_TILE_SIZE; // Assuming size.x is the tile width
+    position.y = _tiledPosition.y * Globals::MAP_TILE_SIZE; // Assuming size.y is the tile height
 }
 
 void Entity::Damage(float damage)
