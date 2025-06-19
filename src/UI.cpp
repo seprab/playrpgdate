@@ -58,10 +58,10 @@ void UI::HandleInputs()
 {
     if (pdcpp::GlobalPlaydateAPI::get()->system->getElapsedTime() < inputCooldown)
     {
-        return; // Skip input processing if cooldown period has not passed
+        return; // Skip input processing if a cooldown period has not passed
     }
     PDButtons current;
-    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&current, NULL, NULL);
+    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&current, nullptr, nullptr);
 
     switch (currentScreen)
     {
@@ -97,6 +97,7 @@ void UI::HandleInputs()
                         SwitchScreen(GameScreen::GAME);
                         if (loadGameCallback) loadGameCallback();
                         break;
+                    default: break;
                 }
                 pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
@@ -106,7 +107,8 @@ void UI::HandleInputs()
     }
 }
 
-void UI::Draw() {
+void UI::Draw() const
+{
     switch (currentScreen) {
         case GameScreen::LOADING:
             DrawLoadingScreen();
@@ -124,7 +126,7 @@ void UI::Draw() {
 
 void UI::DrawLoadingScreen() const
 {
-    //load image as background
+    //load image as a background
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
     //And black banner for text
     pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(0, 170, 400, 50, kColorBlack);
@@ -149,27 +151,30 @@ void UI::DrawLoadingScreen() const
             case 0: loadingText = "."; break;
             case 1: loadingText = ".."; break;
             case 2: loadingText = "..."; break;
+            default: loadingText = ""; break;
         }
-        textLen = strlen(loadingText);
+        textLen = static_cast<int>(strlen(loadingText));
         pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen, kASCIIEncoding, 200-textLen, 180);
     }
     else
     {
-        switch (frameCount / 10 % 3)
+        switch (frameCount / 10 % 4)
         {
-            case 0: loadingText = "Press any button to continue"; break;
-            case 1: loadingText = "Press any button to continue"; break;
-            case 2: loadingText = ""; break;
+            case 0: loadingText = "Press any button to continue."; break;
+            case 1: loadingText = "Press any button to continue.."; break;
+            case 2: loadingText = "Press any button to continue..."; break;
+            case 3:
+            default: loadingText = ""; break;
         }
-        textLen = strlen(loadingText);
+        textLen = static_cast<int>(strlen(loadingText));
         pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen,kASCIIEncoding, 100, 180);
     }
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 }
 
-void UI::DrawMainMenu()
+void UI::DrawMainMenu() const
 {
-    //load image as background
+    //load image as a background
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(80, 30, 240, 160, kColorBlack);
 
@@ -204,7 +209,7 @@ void UI::DrawGameScreen() const
     snprintf(resultX, sizeof(resultX), "%d", offset.x);
     snprintf(resultY, sizeof(resultY), "%d", offset.y);
 
-    //load image as background
+    //load image as a background
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(resultX, strlen(resultX), kASCIIEncoding, offset.x + 125, offset.y - 115);
@@ -213,11 +218,10 @@ void UI::DrawGameScreen() const
     magicCooldown->UpdatePosition(offset.x, offset.y-106);
     magicCooldown->Draw(EntityManager::GetInstance()->GetPlayer()->GetCooldownPercentage());
 
-    unsigned int activeMagic = EntityManager::GetInstance()->GetPlayer()->GetSelectedMagic();
-    int indexA = (activeMagic == 0) ? magicIcons.size() - 1 : activeMagic - 1;
-    int indexB = activeMagic;
-    int indexC = (activeMagic+1) % magicIcons.size();
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
+    const unsigned int activeMagic = EntityManager::GetInstance()->GetPlayer()->GetSelectedMagic();
+    const int indexA = (activeMagic == 0) ? static_cast<int>(magicIcons.size()) - 1 : static_cast<int>(activeMagic) - 1;
+    const int indexB = static_cast<int>(activeMagic);
+    const int indexC = static_cast<int>((activeMagic + 1) % static_cast<unsigned int>(magicIcons.size()));    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
 

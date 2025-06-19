@@ -9,7 +9,7 @@
 #include "Projectile.h"
 #include "OrbitingProjectiles.h"
 
-Player::Player(): level(0), Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0)
+Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
 {
     className = "Warrior";
     magicCooldown = 5000;
@@ -135,8 +135,8 @@ void Player::HandleInput()
     }
     if (clicked & kButtonUp) dy=-1;
     else if (clicked & kButtonDown) dy=1;
-    dx *= GetMovementScale();
-    dy *= GetMovementScale();
+    dx *= static_cast<int>(GetMovementSpeed());
+    dy *= static_cast<int>(GetMovementSpeed());
 
     if (clicked & kButtonB)
     {
@@ -147,7 +147,8 @@ void Player::HandleInput()
         }
     }
 
-    int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
+    const auto currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    const int magicCastElapsedTime = static_cast<int>(currentTime - lastMagicCastTime);
     if (magicCastElapsedTime < magicCooldown)
     {
         return;
@@ -162,18 +163,18 @@ void Player::HandleInput()
         magicLaunched.push_back(std::move(magic));
     }
 }
-float Player::GetCooldownPercentage()
+float Player::GetCooldownPercentage() const
 {
-    int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
-    return (float)magicCastElapsedTime / magicCooldown;
+    unsigned int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
+    return static_cast<float>(magicCastElapsedTime) / static_cast<float>(magicCooldown);
 }
 
 void Player::DrawAimDirection() const {
     // Draw an arrow to know where the crank is pointing to, so the player knows where to aim the magic
     // In the range 0-360. Zero is pointing up, and the value increases as the crank moves clockwise
-    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle() * kPI / 180.f;
+    const float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle() * kPI / 180.f;
     int radius = 30;
-    pdcpp::Point<int> pos = GetCenteredPosition();
+    const pdcpp::Point<int> pos = GetCenteredPosition();
 
     int x = pos.x + (radius * cos(angle));
     int y = pos.y + (radius * sin(angle));
@@ -185,4 +186,21 @@ void Player::DrawAimDirection() const {
 
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xa, ya, 1, kColorWhite);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xb, yb, 1, kColorWhite);
+}
+
+bool Player::LevelUp()
+{
+    //TODO: Implement player level up
+    level++;
+    SetHP(GetMaxHP());
+    return true;
+}
+
+void Player::Save(EntityManager* manager)
+{
+    //TODO: Implement player save
+}
+
+std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+    return nullptr;
 }

@@ -7,11 +7,9 @@
 
 
 #include "pdcpp/graphics/Point.h"
-#include <pd_api/pd_api_gfx.h>
 #include <memory>
 #include "Area.h"
-
-
+class Area;
 class Magic{
 public:
     Magic() = delete;

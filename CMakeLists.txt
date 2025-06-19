@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
-project(${PROJECT_NAME})
+
+project(CardoBlast)
 
 # C++ 20 and up is required in order to include the playdate headers
 set(CMAKE_CXX_STANDARD 20)

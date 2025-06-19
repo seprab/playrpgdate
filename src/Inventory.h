@@ -1,9 +1,8 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include <utility>
 #include <vector>
-#include "item.h"
+#include "Item.h"
 
 
 class Inventory
@@ -20,7 +19,7 @@ public:
     std::shared_ptr<Item> Remove(int itemId);
 
     int Count(int itemId);
-    int Print(bool label = true) const;
+    [[nodiscard]] int Print(bool label = true) const;
     void Clear();
 };
 

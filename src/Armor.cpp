@@ -17,7 +17,7 @@ Armor::Armor(const Armor &other)
 
 }
 Armor::Armor(Armor &&other) noexcept
-: Item(other), defense(other.GetDefense())
+: Item(std::move(other)), defense(other.GetDefense())
 {
 
 }
@@ -36,9 +36,9 @@ std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int siz
         for (const char* & object : objects)
         {
             char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
-            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            if(strcmp(object, "id") == 0) decodedId = static_cast<int>(strtol(value, nullptr, 10));
             else if(strcmp(object, "name") == 0) decodedName = value;
-            else if(strcmp(object, "defense") == 0) decodedDefense = atoi(value);
+            else if(strcmp(object, "defense") == 0) decodedDefense = static_cast<int>(strtol(value, nullptr, 10));
             else if(strcmp(object, "description") == 0) decodedDescription = value;
         }
         Armors_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDefense);

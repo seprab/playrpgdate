@@ -3,6 +3,8 @@
 //
 
 #include "Entity.h"
+
+#include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
@@ -38,7 +40,7 @@ void Entity::LoadBitmap(char *path)
     LoadBitmap();
 }
 
-void Entity::DrawBitmap()
+void Entity::DrawBitmap() const
 {
     if (bitmap == nullptr)
     {
@@ -63,12 +65,26 @@ void Entity::Draw()
 void Entity::DrawHealthBar() const
 {
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 4, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * (hp / maxHP), 4, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, static_cast<int>(25 * (static_cast<float>(hp) / maxHP)), 4, kColorWhite);
+}
+
+void Entity::SetPosition(pdcpp::Point<int> _position)
+{
+    position = _position;
+    tiledPosition.x = _position.x / Globals::MAP_TILE_SIZE; // Assuming size.x is the tile width
+    tiledPosition.y = _position.y / Globals::MAP_TILE_SIZE; // Assuming size.y is the tile height
+}
+
+void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
+{
+    tiledPosition = _tiledPosition;
+    position.x = _tiledPosition.x * Globals::MAP_TILE_SIZE; // Assuming size.x is the tile width
+    position.y = _tiledPosition.y * Globals::MAP_TILE_SIZE; // Assuming size.y is the tile height
 }
 
 void Entity::Damage(float damage)
 {
-    Log::Info("Entity %s took damage", name);
+    //Log::Info("Entity %s took damage", name);
     hp = std::max(0.f, hp - damage);
 }
 

@@ -2,6 +2,15 @@
 
 Attempting to create a text-based RPG for the playdate using c++.
 
+## Pre-requisites
+Ensure Playdate SDK v2.6.2 is being used and it set as an environment variable.
+```
+export PLAYDATE_SDK_PATH="/Users/sergio.prada/Developer/PlaydateSDK/"
+```
+The download link is [https://download-cdn.panic.com/playdate_sdk/](https://download-cdn.panic.com/playdate_sdk/).
+- Why this version? This game depends on [Playdate-cpp](https://github.com/nstbayless/playdate-cpp) which is no longer updated.
+- Setting the env SDK path as `/Users/sergio.prada/Developer/PlaydateSDK-2.6.2/` won't work.
+
 ## How to build
 I work with this either with Terminal or CLion
 
@@ -50,6 +59,8 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 - [Playdate-cpp](https://github.com/nstbayless/playdate-cpp)
 - [Playdate SDK](https://play.date/)
 - [JSMN - json parser](https://github.com/zserge/jsmn)
+- [Flare Engine (extracted A* from here)](https://github.com/flareteam/flare-engine/tree/master/src)
+- [Solarus - RPG Cpp Lib Reference](https://gitlab.com/solarus-games/solarus/-/tree/dev?ref_type=heads)
 
 ## Disclaimer
 

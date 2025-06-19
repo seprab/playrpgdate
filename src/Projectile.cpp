@@ -18,8 +18,8 @@ Magic(Position)
 void Projectile::Draw() const
 {
     //void playdate->graphics->drawEllipse(int x, int y, int width, int height, int lineWidth, float startAngle, float endAngle, LCDColor color);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawEllipse(position.x, position.y, size, size, 1, 0, 0, kColorWhite);
-    int fillSize = size - 3;
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawEllipse(static_cast<int>(position.x), static_cast<int>(position.y), static_cast<int>(size), static_cast<int>(size), 1, 0, 0, kColorWhite);
+    int fillSize = static_cast<int>(size) - 3;
     if (exploding && fillSize > 0)
     {
         //fillEllipse(int x, int y, int width, int height, float startAngle, float endAngle, LCDColor color);

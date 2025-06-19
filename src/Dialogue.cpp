@@ -9,11 +9,11 @@ Dialogue::Dialogue(char* _description, std::vector<Choice> _choices)
 
 }
 Dialogue::Dialogue(Dialogue &&other) noexcept
-: description(other.description), choices(other.choices)
+: description(other.description), choices(std::move(other.choices))
 {
 
 }
-void Dialogue::AddChoice(Choice choice)
+void Dialogue::AddChoice(const Choice choice)
 {
     choices.push_back(choice);
 }

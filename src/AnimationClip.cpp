@@ -14,16 +14,16 @@ void AnimationClip::LoadBitmaps()
     }
     for (auto& path : paths)
     {
-        const char** error{};
+        const char** error = nullptr;
         LCDBitmap* bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path.c_str(), error);
-        if (bitmap == nullptr)
+        if (bitmap == nullptr && *error != nullptr)
         {
             Log::Error("Failed to load bitmap: %s", *error);
             return;
         }
         bitmaps.emplace_back(bitmap);
     }
-    frameCount = bitmaps.size();
+    frameCount = static_cast<int>(bitmaps.size());
     loaded = true;
 }
 void AnimationClip::Draw(int x, int y)

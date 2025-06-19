@@ -40,7 +40,7 @@ void GameManager::Update()
                 EntityManager::GetInstance()->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 4:
-                EntityManager::GetInstance()->LoadJSON<Creature>(jsonPaths[frameCount], tokenCount[frameCount]);
+                EntityManager::GetInstance()->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 5:
                 EntityManager::GetInstance()->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
@@ -61,12 +61,12 @@ void GameManager::Update()
     {
         activeArea->Render(player->GetPosition().x, player->GetPosition().y, 234, 136);
         player->Tick(activeArea);
-        activeArea->Tick();
+        activeArea->Tick(player.get());
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness
-        currentCameraOffset.x = currentCameraOffset.x + (player->GetPosition().x - currentCameraOffset.x) * cameraSpeed;
-        currentCameraOffset.y = currentCameraOffset.y + (player->GetPosition().y - currentCameraOffset.y)  * cameraSpeed;
+        currentCameraOffset.x = static_cast<int>(currentCameraOffset.x + (player->GetPosition().x - currentCameraOffset.x) * cameraSpeed);
+        currentCameraOffset.y = static_cast<int>(currentCameraOffset.y + (player->GetPosition().y - currentCameraOffset.y) * cameraSpeed);
 
         // Move the camera to calculated position
         pd->graphics->setDrawOffset(-currentCameraOffset.x + 200, -currentCameraOffset.y + 120);
