@@ -65,7 +65,7 @@ void Entity::Draw()
 void Entity::DrawHealthBar() const
 {
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 4, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, 25 * static_cast<int>(hp / maxHP), 4, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, static_cast<int>(25 * (static_cast<float>(hp) / maxHP)), 4, kColorWhite);
 }
 
 void Entity::SetPosition(pdcpp::Point<int> _position)
