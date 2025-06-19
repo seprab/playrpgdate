@@ -120,10 +120,10 @@ void Monster::CalculateNodesToTarget(const pdcpp::Point<int> target, const Area*
 void Monster::Move(pdcpp::Point<int> target)
 {
     // We are moving in pixel coordinates to improve the movement smoothness.
-    pdcpp::Point<int> iPosCache = {GetPosition().x, GetPosition().y};
-    pdcpp::Point<int> iPos = {iPosCache.x, iPosCache.y};
-    pdcpp::Point<int> fPos = {target.x*16,target.y*16};
-    pdcpp::Point<int> d = {(fPos.x - iPos.x),(fPos.y - iPos.y)}; //direction vector
+    const pdcpp::Point<int> iPosCache = {GetPosition().x, GetPosition().y};
+    const pdcpp::Point<int> iPos = {iPosCache.x, iPosCache.y};
+    const pdcpp::Point<int> fPos = {target.x*16,target.y*16};
+    const pdcpp::Point<int> d = {(fPos.x - iPos.x),(fPos.y - iPos.y)}; //direction vector
     pdcpp::Point<int> dn {0,0}; //direction normalized
 
     // normalize the direction vector
@@ -207,7 +207,7 @@ void Monster::Move(pdcpp::Point<int> target)
     // print dx and dy for debugging
     //Log::Info("dx (%f), dy  (%f)", d.x, d.y);
 
-    pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
+    const pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
     SetPosition(newPosition);
 
     // calculate actual difference between start and after movement to validate it is not stuck
@@ -224,21 +224,13 @@ void Monster::Move(pdcpp::Point<int> target)
         reachedNode = true;
     }
 
-    // calculate if the new position is beyond the target position, so we mark it as reached. and move to the next node.
-    // this is good to avoid jittering. Returning when passing the node, or reducing the movement rate
-    if (dn.x > 0 && newPosition.x >= fPos.x)
-    {
-        reachedNode = true;
-    }
-    else if (dn.x < 0 && newPosition.x <= fPos.x)
-    {
-        reachedNode = true;
-    }
-    if (dn.y > 0 && newPosition.y >= fPos.y)
-    {
-        reachedNode = true;
-    }
-    else if (dn.y < 0 && newPosition.y <= fPos.y)
+    // Calculate if the new position is beyond the target position, so we mark it as reached. And move to the next node.
+    // This is good to avoid "jittering", returning when passing the node, or reducing the movement rate
+    // Check if we've passed the target position in either axis and mark node as reached
+    if ((dn.x > 0 && newPosition.x >= fPos.x) ||
+        (dn.x < 0 && newPosition.x <= fPos.x) ||
+        (dn.y > 0 && newPosition.y >= fPos.y) ||
+        (dn.y < 0 && newPosition.y <= fPos.y))
     {
         reachedNode = true;
     }
