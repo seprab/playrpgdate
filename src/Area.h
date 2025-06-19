@@ -25,7 +25,7 @@ class Area final : public Entity
 {
 private:
     std::vector<Layer> mapData;
-    std::shared_ptr<MapCollision> collider;;
+    std::shared_ptr<MapCollision> collider;
     pdcpp::ImageTable* imageTable = nullptr;
     int tokens{};
     int width{};
