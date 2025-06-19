@@ -59,6 +59,8 @@ Add execution permission to bootstrap with chmod +x bootstrap.sh, and launch it.
 - [Playdate-cpp](https://github.com/nstbayless/playdate-cpp)
 - [Playdate SDK](https://play.date/)
 - [JSMN - json parser](https://github.com/zserge/jsmn)
+- [Flare Engine (extracted A* from here)](https://github.com/flareteam/flare-engine/tree/master/src)
+- [Solarus - RPG Cpp Lib Reference](https://gitlab.com/solarus-games/solarus/-/tree/dev?ref_type=heads)
 
 ## Disclaimer
 
