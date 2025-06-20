@@ -75,6 +75,18 @@ I tested this one:
 
 ## Troubleshooting
 
+### Compiling the game to the device
+
+I'm confused about this problem because sometimes it works and sometimes it doesn't. The general steps I recommend for testing in the device is:
+
+1. `git clean -fdx && git reset --hard`
+2. Unlock the playdate and connect it via USB
+3. `./bootstrap.sh` -> option 1
+4. `./bootstrap.sh` -> option 2
+4. Upload to device
+
+It looks like compiling the game twice is necessary.
+
 ### Linker Issue on Mac
 
 **Problem Description:**

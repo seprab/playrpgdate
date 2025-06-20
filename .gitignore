@@ -5,6 +5,8 @@ cmake-build-debug/
 cmake-build-device/
 .idea/
 .DS_Store
+**/.DS_Store
 .vscode/
 .sentry-native/
 Source/pdex.dylib
+Source/pdex.elf
