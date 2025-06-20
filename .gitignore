@@ -1,6 +1,8 @@
 *.pdx
 *.dll
 build/
+cmake-build-debug/
+cmake-build-device/
 .idea/
 .DS_Store
 .vscode/
