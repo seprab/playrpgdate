@@ -31,7 +31,6 @@ private:
     std::vector<pdcpp::Point<int>> path;
     bool pathFound = false;
     int pathFindFailureCount = 0;
-    int maxPathFindFailureCount = Globals::MAX_PATH_FIND_FAILURE_COUNT; // Max attempts to find a path before giving up
     pdcpp::Point<int> nextPosition = {0, 0}; // Next position to move to
     bool reachedNode = true; // Flag to check if the node was reached
 };

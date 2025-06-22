@@ -16,7 +16,7 @@ Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int 
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
-    if (!pathFound && pathFindFailureCount < maxPathFindFailureCount && ShouldMove(playerTiledPosition))
+    if (!pathFound && pathFindFailureCount < Globals::MAX_PATH_FIND_FAILURE_COUNT && ShouldMove(playerTiledPosition))
     {
         CalculateNodesToTarget(playerTiledPosition, area);
     }
@@ -37,10 +37,10 @@ void Monster::Tick(Player* player, Area* area)
             pathFound = false; // Reset if path is empty
         }
     }
-    else if (pathFindFailureCount >= maxPathFindFailureCount)
+    else if (pathFindFailureCount >= Globals::MAX_PATH_FIND_FAILURE_COUNT)
     {
         pathFindFailureCount++; // Increment failure count
-        if (pathFindFailureCount >= maxPathFindFailureCount * Globals::MULT_FOR_RESET_PATH_FIND_FAILURE) // If too many failures, reset
+        if (pathFindFailureCount >= Globals::MAX_PATH_FIND_FAILURE_COUNT * Globals::MULT_FOR_RESET_PATH_FIND_FAILURE) // If too many failures, reset
         {
             pathFindFailureCount = 0; // Give the chance to try again after a long time
         }
