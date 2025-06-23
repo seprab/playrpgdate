@@ -90,7 +90,7 @@ void GameManager::LoadNewGame()
     activeArea->Load();
 
     player = std::make_shared<Player>();
-    player->SetPosition(pdcpp::Point<int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    player->SetTiledPosition(pdcpp::Point<int>(23, 32));
     EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 }
@@ -101,7 +101,7 @@ void GameManager::LoadSavedGame()
     activeArea->Load();
 
     player = std::make_shared<Player>();
-    player->SetPosition(pdcpp::Point<int>(89*activeArea->GetTileWidth(), 145*activeArea->GetTileHeight()));
+    player->SetTiledPosition(pdcpp::Point<int>(23, 32));
     EntityManager::GetInstance()->SetPlayer(player);
     isGameRunning = true;
 

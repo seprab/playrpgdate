@@ -2,7 +2,7 @@
 	{
 		"id":9002,
 		"name":"Home Town",
-		"dataPath": "data/areas/01_town.json",
+		"dataPath": "data/areas/00_downtown_tiledmap.json",
 		"dataTokens": 32768,
 		"tileset": "images/areas/hometown.pdt",
 		"dialogue":

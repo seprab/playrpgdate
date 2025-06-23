@@ -204,16 +204,19 @@ void UI::DrawMainMenu() const
 
 void UI::DrawGameScreen() const
 {
-    // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
-    char resultX[4], resultY[4];
-    snprintf(resultX, sizeof(resultX), "%d", offset.x);
-    snprintf(resultY, sizeof(resultY), "%d", offset.y);
-
     //load image as a background
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(resultX, strlen(resultX), kASCIIEncoding, offset.x + 125, offset.y - 115);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(resultY, strlen(resultY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+
+    // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
+    pdcpp::Point<int> playerTiledPos = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
+    char posX[3], posY[3];
+    snprintf(posX, sizeof(posX), "%d", playerTiledPos.x);
+    snprintf(posY, sizeof(posY), "%d", playerTiledPos.y);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+
+
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
     magicCooldown->UpdatePosition(offset.x, offset.y-106);
     magicCooldown->Draw(EntityManager::GetInstance()->GetPlayer()->GetCooldownPercentage());

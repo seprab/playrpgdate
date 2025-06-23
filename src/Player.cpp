@@ -6,6 +6,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
 #include "Beam.h"
+#include "Globals.h"
 #include "Projectile.h"
 #include "OrbitingProjectiles.h"
 
@@ -25,7 +26,7 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     die = std::make_unique<AnimationClip>();
 
     auto anim =new pdcpp::ImageTable("images/player/animmini");
-    SetSize(pdcpp::Point<int>(16, 16));
+    SetSize(pdcpp::Point<int>(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE));
     // 16 x 16
     // 16 x 4 = 64
     // 16 x 5 = 80
