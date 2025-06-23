@@ -49,7 +49,7 @@ void Monster::Tick(Player* player, Area* area)
     {
         player->Damage(static_cast<float>(GetStrength()));
     }
-    Draw();
+    //Draw();
 }
 
 std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int size)

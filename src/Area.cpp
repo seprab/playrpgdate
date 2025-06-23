@@ -188,6 +188,10 @@ void Area::Render(int x, int y, int fovX, int fovY)
             }
         }
     }
+    for (const auto& monster : monsters)
+    {
+        monster->Draw();
+    }
 }
 bool Area::CheckCollision(int x, int y) const
 {
@@ -224,7 +228,7 @@ void Area::SpawnCreatures() const
     for (const auto& monster : monsters)
     {
         monster->LoadBitmap();
-        monster->SetTiledPosition(pdcpp::Point<int>(95, 145));
+        monster->SetTiledPosition(pdcpp::Point<int>(32, 26));
         //creature->SetPosition(pdcpp::Point<int>(rand() % width * tileWidth, rand() % height * tileHeight));
     }
 }

@@ -1,4 +1,6 @@
 #include "GameManager.h"
+
+#include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/File.h"
 
@@ -59,18 +61,51 @@ void GameManager::Update()
     }
     else
     {
-        activeArea->Render(player->GetPosition().x, player->GetPosition().y, 234, 136);
         player->Tick(activeArea);
         activeArea->Tick(player.get());
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness
-        currentCameraOffset.x = static_cast<int>(currentCameraOffset.x + (player->GetPosition().x - currentCameraOffset.x) * cameraSpeed);
-        currentCameraOffset.y = static_cast<int>(currentCameraOffset.y + (player->GetPosition().y - currentCameraOffset.y) * cameraSpeed);
+        currentCameraOffset.x = static_cast<int>(static_cast<float>(currentCameraOffset.x) +
+            static_cast<float>(player->GetPosition().x - currentCameraOffset.x) * cameraSpeed);
+        currentCameraOffset.y = static_cast<int>(static_cast<float>(currentCameraOffset.y) +
+            static_cast<float>(player->GetPosition().y - currentCameraOffset.y) * cameraSpeed);
 
-        // Move the camera to calculated position
-        pd->graphics->setDrawOffset(-currentCameraOffset.x + 200, -currentCameraOffset.y + 120);
-        ui->SetOffset(currentCameraOffset);
+        // Move the camera to the calculated position
+        int screenCenterWidth = pd->display->getWidth() / 2;
+        int screenCenterHeight = pd->display->getHeight() / 2;
+
+        pdcpp::Point<int> drawOffset = {0,0};
+        if (currentCameraOffset.x > screenCenterWidth)
+        {
+            if (currentCameraOffset.x > (activeArea->GetWidth() * Globals::MAP_TILE_SIZE) - screenCenterWidth)
+            {
+                drawOffset.x = -((activeArea->GetWidth() * Globals::MAP_TILE_SIZE) - pd->display->getWidth());
+            }
+            else
+            {
+                drawOffset.x = -currentCameraOffset.x + screenCenterWidth;
+            }
+        }
+        if (currentCameraOffset.y > screenCenterHeight)
+        {
+            if (currentCameraOffset.y > (activeArea->GetHeight() * Globals::MAP_TILE_SIZE) - screenCenterHeight)
+            {
+                drawOffset.y = -((activeArea->GetHeight() * Globals::MAP_TILE_SIZE) - pd->display->getHeight());
+            }
+            else
+            {
+                drawOffset.y = -currentCameraOffset.y + screenCenterHeight;
+            }
+        }
+        pd->graphics->setDrawOffset(drawOffset.x, drawOffset.y);
+        drawOffset.x = -drawOffset.x+screenCenterWidth;
+        drawOffset.y = -drawOffset.y+screenCenterHeight;
+
+
+        activeArea->Render(drawOffset.x, drawOffset.y, Globals::PLAYER_FOV_X, Globals::PLAYER_FOV_Y);
+        player->Draw();
+        ui->SetOffset(drawOffset);
     }
 
     ui->Update();

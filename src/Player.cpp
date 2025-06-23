@@ -72,7 +72,7 @@ void Player::Tick(const std::shared_ptr<Area>& area)
 {
     HandleInput();
     Move(dx, dy, area);
-    Draw();
+    //Draw();
 
     for(auto& magic : magicLaunched)
     {
