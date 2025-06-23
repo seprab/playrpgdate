@@ -136,7 +136,11 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
                 int numberOfTiles = t[i].size;
                 for (int j = 0; j < numberOfTiles; j++)
                 {
-                    char* bufferValue = Utils::Subchar(charBuffer.get(), t[i+j].start, t[i+j].end);
+                    /*
+                     * In the following line I am summing 1 to the index of the tile otherwise it tries to cast '[' (the start of the array)
+                     * to integer, and it doesn't get to the end of the tile id.
+                     */
+                    bufferValue = Utils::Subchar(charBuffer.get(), t[i+j+1].start, t[i+j+1].end);
                     int parsedId = static_cast<int>(strtol(bufferValue, nullptr, 10));
                     Tile tile{.id =  parsedId, .collision = parsedId != 0};
                     layer.tiles.push_back(tile);
@@ -159,7 +163,7 @@ void Area::LoadImageTable(const char *fileName)
 void Area::DrawTileFromLayer(int layer, int x, int y)
 {
     int tileId = mapData[layer].tiles[(y * width) + x].id;
-    if (tileId == 0) return;
+    if (tileId == 0) return; // skip empty tiles
     tileId = tileId - 1; //I'm not sure why.
 
     LCDBitmap* bitmap = (*imageTable)[tileId];
