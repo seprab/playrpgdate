@@ -190,6 +190,10 @@ void Area::Render(int x, int y, int fovX, int fovY)
     }
     for (const auto& monster : monsters)
     {
+        auto monsterPos = monster->GetPosition();
+        bool visibleX = abs(x - monsterPos.x) < fovX;
+        bool visibleY = abs(y - monsterPos.y) < fovY;
+        if (!visibleX || !visibleY) continue;
         monster->Draw();
     }
 }
