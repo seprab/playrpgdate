@@ -245,7 +245,7 @@ void Area::SpawnCreature()
     std::shared_ptr<Monster> monster = toSpawnMonsters[0];
     livingMonsters.push_back(monster);
     livingMonsters.back()->LoadBitmap();
-    livingMonsters.back()->SetTiledPosition(Area::FindSpawnablePosition(0)); // set a default position for the monster
+    livingMonsters.back()->SetTiledPosition(this->FindSpawnablePosition(0)); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
 }
