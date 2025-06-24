@@ -27,7 +27,7 @@ private:
     [[nodiscard]] bool ShouldMove(pdcpp::Point<int> playerPosition) const;
     [[nodiscard]] bool ShouldAttack(pdcpp::Point<int> target) const;
     void CalculateNodesToTarget(pdcpp::Point<int> target, const Area* area);
-    void Move(pdcpp::Point<int> target);
+    void Move(pdcpp::Point<int> target, Area* area);
     std::vector<pdcpp::Point<int>> path;
     bool pathFound = false;
     int pathFindFailureCount = 0;

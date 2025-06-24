@@ -119,6 +119,7 @@ public:
 	}
 
 	bool hasEmptyTile() { return has_empty_tile; }
+	bool IsTileBlockedByChar(int x, int y);
 
 	Map_Layer colmap;
     pdcpp::Point<int> map_size;
