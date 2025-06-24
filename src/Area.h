@@ -74,7 +74,7 @@ public:
     void Load();
     void Unload();
     void SetupMonstersToSpawn();
-    pdcpp::Point<int> FindSpawnablePosition();
+    pdcpp::Point<int> FindSpawnablePosition(int attemptCount);
     void LoadSpawnablePositions();
 
     [[nodiscard]] std::shared_ptr<AStarContainer> GetPathfindingContainer() const {return pathfindingContainer;}

@@ -22,5 +22,6 @@ namespace  Globals
     constexpr int MONSTER_TOTAL_TO_SPAWN = 50; // Total number of monsters to spawn in an area
     constexpr int TICKS_BETWEEN_MONSTER_SPAWNS = 60; // Number of ticks between monster spawns
     constexpr int MONSTER_RANDOM_SPACING = 4; // Random spacing for monster when moving and finding a blocker
+    constexpr int MAX_SPAWN_ATTEMPTS = 10; // Maximum number of attempts to spawn a monster
 }
 #endif //GLOBALS_H

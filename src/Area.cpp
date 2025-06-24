@@ -250,12 +250,12 @@ void Area::SpawnCreature()
     ticksSinceLastSpawn = 0; // reset the spawn timer
 }
 /// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
-pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount = 0)
+pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
 {
     if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
     {
-        Log::Warning("Max spawn attempts reached. Returning fallback position.");
-        return spawnablePositions.empty() ? pdcpp::Point<int>(0, 0) : spawnablePositions[0]; // fallback position
+        Log::Error("Max spawn attempts reached. Returning fallback position.");
+        return spawnablePositions[0]; // fallback position
     }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
     unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
