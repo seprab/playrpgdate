@@ -245,19 +245,24 @@ void Area::SpawnCreature()
     std::shared_ptr<Monster> monster = toSpawnMonsters[0];
     livingMonsters.push_back(monster);
     livingMonsters.back()->LoadBitmap();
-    livingMonsters.back()->SetTiledPosition(Area::FindSpawnablePosition()); // set a default position for the monster
+    livingMonsters.back()->SetTiledPosition(Area::FindSpawnablePosition(0)); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
 }
 /// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
-pdcpp::Point<int> Area::FindSpawnablePosition()
+pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount = 0)
 {
+    if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
+    {
+        Log::Warning("Max spawn attempts reached. Returning fallback position.");
+        return spawnablePositions.empty() ? pdcpp::Point<int>(0, 0) : spawnablePositions[0]; // fallback position
+    }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
     unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
     if (playerPosition.distance(spawnablePositions[randomIndex]) < Globals::MONSTER_SPAWN_RADIUS)
     {
         // if the position is too close to the player, find another one
-        return FindSpawnablePosition();
+        return FindSpawnablePosition(attemptCount + 1);
     }
     return spawnablePositions[randomIndex];
 }
