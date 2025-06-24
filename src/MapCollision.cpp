@@ -399,11 +399,12 @@ bool MapCollision::ComputePath(const pdcpp::Point<int>& start_pos, const pdcpp::
 	// if the target square has an entity, temporarily clear it to compute the path
 	bool target_blocks = false;
 	int target_blocks_type = colmap[end.x][end.y];
+	/*
 	if (colmap[end.x][end.y] == BLOCKS_ENTITIES || colmap[end.x][end.y] == BLOCKS_ENEMIES) {
 		target_blocks = true;
 		unblock(end_pos.x, end_pos.y);
 	}
-
+	*/
     pdcpp::Point<int> current = start;
 	AStarNode* node = new AStarNode(start);
 	node->setActualCost(0);
@@ -551,6 +552,12 @@ pdcpp::Point<int> MapCollision::collisionToMap(const pdcpp::Point<int>& p) {
 	ret.x = static_cast<float>(p.x) + 0.5f;
 	ret.y = static_cast<float>(p.y) + 0.5f;
 	return ret;
+}
+
+bool MapCollision::IsTileBlockedByChar(int x, int y)
+{
+	auto blockType = colmap[x][y];
+	return blockType == BLOCKS_ENEMIES;
 }
 
 MapCollision::~MapCollision() {

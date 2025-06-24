@@ -30,7 +30,8 @@ void Entity::LoadBitmap()
     else
     {
         pdcpp::GlobalPlaydateAPI::get()->graphics->getBitmapData(bitmap, &size.x, &size.y, nullptr, nullptr, nullptr);
-        Log::Info("Entity %d loaded bitmap %s", id, image_path);
+        //Log::Info("Entity %d loaded bitmap %s", id, image_path);
+        // TODO: I am loading the same bitmap every time I load an entity, which is not efficient. I should keep it loaded.
     }
 }
 

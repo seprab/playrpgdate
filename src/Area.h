@@ -5,6 +5,7 @@
 #include "Dialogue.h"
 #include "AStarContainer.h"
 #include "MapCollision.h"
+#include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
 
 class EntityManager;
@@ -34,12 +35,17 @@ private:
     int tileHeight{};
     char* dataPath = nullptr;
     char* tilesetPath = nullptr;
+    int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
-    std::vector<std::shared_ptr<Monster>> monsters;
+    std::vector<std::shared_ptr<Monster>> bankOfMonsters; // the type of monsters to spawn in the area
+    std::vector<std::shared_ptr<Monster>> livingMonsters; // the monsters that are currently alive in the area
+    std::vector<std::shared_ptr<Monster>> toSpawnMonsters; // the monsters that haven't been spawned yet
     std::shared_ptr<AStarContainer> pathfindingContainer;
-    void SpawnCreatures() const;
+    void SpawnCreature();
     [[nodiscard]] Map_Layer ToMapLayer() const;
+    pdcpp::Random random = {};
+    std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn
 
 public:
     Area() = default;
@@ -50,7 +56,7 @@ public:
     [[nodiscard]] int GetTokenCount() const {return tokens;}
     [[nodiscard]] char* GetDataPath() const {return dataPath;}
     [[nodiscard]] char* GetTilesetPath() const {return tilesetPath;}
-    [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return monsters;}
+    [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return livingMonsters;}
 
     void SetTokenCount(int value){tokens=value;}
     void SetDataPath(char* value){dataPath=value;}
@@ -67,6 +73,12 @@ public:
     void SetUpPathfindingContainer();
     void Load();
     void Unload();
+    void SetupMonstersToSpawn();
+    pdcpp::Point<int> FindSpawnablePosition(int attemptCount);
+    void LoadSpawnablePositions();
+
+    [[nodiscard]] std::shared_ptr<AStarContainer> GetPathfindingContainer() const {return pathfindingContainer;}
+    [[nodiscard]] std::vector<std::shared_ptr<Door>> GetDoors() const {return doors;}
 
     [[nodiscard]] int GetWidth() const {return width;};
     [[nodiscard]] int GetHeight() const {return height;};

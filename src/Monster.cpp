@@ -30,7 +30,7 @@ void Monster::Tick(Player* player, Area* area)
                 path.pop_back(); // Remove the previous position from the path
                 reachedNode = false;
             }
-            Move(nextPosition);
+            Move(nextPosition, area);
         }
         else
         {
@@ -49,7 +49,6 @@ void Monster::Tick(Player* player, Area* area)
     {
         player->Damage(static_cast<float>(GetStrength()));
     }
-    //Draw();
 }
 
 std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
@@ -116,7 +115,7 @@ void Monster::CalculateNodesToTarget(const pdcpp::Point<int> target, const Area*
     }
 }
 
-void Monster::Move(pdcpp::Point<int> target)
+void Monster::Move(pdcpp::Point<int> target, Area* area)
 {
     // We are moving in pixel coordinates to improve the movement smoothness.
     const pdcpp::Point<int> iPosCache = {GetPosition().x, GetPosition().y};
@@ -206,7 +205,16 @@ void Monster::Move(pdcpp::Point<int> target)
     // print dx and dy for debugging
     //Log::Info("dx (%f), dy  (%f)", d.x, d.y);
 
-    const pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
+    pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
+    if (area->GetCollider()->IsTileBlockedByChar(newPosition.x / Globals::MAP_TILE_SIZE, newPosition.y / Globals::MAP_TILE_SIZE))
+    {
+        // This is a workaround to avoid the monster getting stuck in a tile,
+        // and sharing the same position as the other monsters.
+        // It doesn't look smooth, but it has a certain nice feeling.
+        pdcpp::Random random {};
+        newPosition.x += static_cast<int>(random.next()% Globals::MONSTER_RANDOM_SPACING) - static_cast<int>((random.next()%Globals::MONSTER_RANDOM_SPACING));
+        newPosition.y += static_cast<int>(random.next()% Globals::MONSTER_RANDOM_SPACING) - static_cast<int>((random.next()%Globals::MONSTER_RANDOM_SPACING));
+    }
     SetPosition(newPosition);
 
     // calculate the actual difference between start and after movement to validate it is not stuck

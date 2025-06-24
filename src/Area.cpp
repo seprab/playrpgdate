@@ -9,6 +9,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 #include "Monster.h"
+#include "pdcpp/core/Random.h"
 
 Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
 : Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
@@ -16,20 +17,21 @@ Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char
     SetName(_name);
     for (const std::shared_ptr<Monster>& monster : _monsters)
     {
-        monsters.push_back(monster);
+        bankOfMonsters.push_back(monster);
     }
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
 Area::Area(const Area &other)
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), monsters(other.monsters)
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
 {
     SetName(other.GetName());
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), monsters(std::move(other.monsters))
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
 {
     SetName(other.GetName());
 }
+
 std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const int size)
 {
     std::vector<Area> decodedAreas;
@@ -113,7 +115,6 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
     }
     return std::make_shared<std::vector<Area>>(decodedAreas);
 }
-
 void Area::LoadLayers(const char *fileName, int limitOfTokens)
 {
     auto fileHandle = std::make_unique<pdcpp::FileHandle>(fileName, kFileRead);
@@ -181,14 +182,11 @@ void Area::Render(int x, int y, int fovX, int fovY)
             bool visibleY = abs(y-(j*tileHeight)) < fovY;
             if (visibleX && visibleY)
             {
-                for (int k = 0; k < mapData.size(); k++)
-                {
-                    DrawTileFromLayer(k, i, j);
-                }
+                DrawTileFromLayer(0, i, j); // The first layer is the only one to draw
             }
         }
     }
-    for (const auto& monster : monsters)
+    for (const auto& monster : livingMonsters)
     {
         auto monsterPos = monster->GetPosition();
         bool visibleX = abs(x - monsterPos.x) < fovX;
@@ -201,15 +199,12 @@ bool Area::CheckCollision(int x, int y) const
 {
     x=x/tileWidth;
     y=y/tileHeight;
-    for (auto layer : mapData)
+    if (mapData[0].tiles[(y * width) + x].collision)
     {
-        if (layer.tiles[(y * width) + x].collision)
-        {
 #if DEBUG
-            pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, Globals::MAP_TILE_SIZE, Globals::MAP_TILE_SIZE, kColorWhite);
+        pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, Globals::MAP_TILE_SIZE, Globals::MAP_TILE_SIZE, kColorWhite);
 #endif
-            return true;
-        }
+        return true;
     }
     return false;
 }
@@ -219,36 +214,111 @@ void Area::Load()
     LoadImageTable(tilesetPath);
     collider = std::make_shared<MapCollision>();
     collider->SetMap(ToMapLayer(), width, height);
-    SpawnCreatures();
+    LoadSpawnablePositions();
+    SetupMonstersToSpawn();
 }
 void Area::Unload()
 {
     mapData.clear();
     delete imageTable;
 }
-
-void Area::SpawnCreatures() const
+void Area::SetupMonstersToSpawn()
 {
-    for (const auto& monster : monsters)
+    for (int i=0; i< Globals::MONSTER_TOTAL_TO_SPAWN; i++)
     {
-        monster->LoadBitmap();
-        monster->SetTiledPosition(pdcpp::Point<int>(32, 26));
-        //creature->SetPosition(pdcpp::Point<int>(rand() % width * tileWidth, rand() % height * tileHeight));
+        unsigned int randomIndex = random.next() % static_cast<unsigned int>(bankOfMonsters.size());
+        auto monster = std::make_shared<Monster>(*bankOfMonsters[randomIndex]);
+        toSpawnMonsters.push_back(monster);
     }
 }
+void Area::SpawnCreature()
+{
+    if (ticksSinceLastSpawn < Globals::TICKS_BETWEEN_MONSTER_SPAWNS)
+    {
+        ticksSinceLastSpawn++;
+        return; // don't spawn monsters if the time hasn't passed
+    }
+    int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - static_cast<int>(livingMonsters.size());
+    if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
+    if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
 
+    std::shared_ptr<Monster> monster = toSpawnMonsters[0];
+    livingMonsters.push_back(monster);
+    livingMonsters.back()->LoadBitmap();
+    livingMonsters.back()->SetTiledPosition(this->FindSpawnablePosition(0)); // set a default position for the monster
+    toSpawnMonsters.erase(toSpawnMonsters.begin());
+    ticksSinceLastSpawn = 0; // reset the spawn timer
+}
+/// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
+pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
+{
+    if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
+    {
+        Log::Error("Max spawn attempts reached. Returning fallback position.");
+        return spawnablePositions[0]; // fallback position
+    }
+    pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
+    unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
+    if (playerPosition.distance(spawnablePositions[randomIndex]) < Globals::MONSTER_SPAWN_RADIUS)
+    {
+        // if the position is too close to the player, find another one
+        return FindSpawnablePosition(attemptCount + 1);
+    }
+    return spawnablePositions[randomIndex];
+}
+void Area::LoadSpawnablePositions()
+{
+    spawnablePositions = std::vector<pdcpp::Point<int>>();
+    for (int i = 0; i < mapData[1].tiles.size(); i++)
+    {
+        if (mapData[1].tiles[i].id == 0) continue;
+        // flat coordinates to 2D coordinates
+        spawnablePositions.emplace_back(i % width, i / width);
+    }
+}
 void Area::Tick(Player* player)
 {
-    for (const auto& monster : monsters)
+    SpawnCreature(); // we'll be spawning creatures as long as there's space for them and haven't reached the max count
+    // Then, we will mark the positions of the monsters as blocked in the collider
+    std::vector<pdcpp::Point<int>> blockPositions = std::vector<pdcpp::Point<int>>();
+    for (const auto& monster : livingMonsters)
     {
-        monster->Tick(player, this);
+        blockPositions.emplace_back(monster->GetTiledPosition());
     }
-
+    for (auto blockedPosition : blockPositions)
+    {
+        collider->block(
+            static_cast<float>(blockedPosition.x),
+            static_cast<float>(blockedPosition.y),
+            true);
+    }
+    // Then, we will tick the monsters. So they can calculate paths and move
+    for (const auto& monster : livingMonsters)
+    {
+        // We avoid the monsters from blocking itself by unblocking its position before ticking it.
+        collider->unblock(
+            static_cast<float>(monster->GetTiledPosition().x),
+            static_cast<float>(monster->GetTiledPosition().y));
+        monster->Tick(player, this);
+        collider->block(
+            static_cast<float>(monster->GetTiledPosition().x),
+            static_cast<float>(monster->GetTiledPosition().y), true);
+    }
+    // Finally, we will unblock the positions of the monsters
+    for (auto blockedPosition : blockPositions)
+    {
+        collider->unblock(
+            static_cast<float>(blockedPosition.x),
+            static_cast<float>(blockedPosition.y));
+    }
 }
-Map_Layer Area::ToMapLayer() const {
+Map_Layer Area::ToMapLayer() const
+{
     Map_Layer layer(width, std::vector<unsigned short>(height, 0));
-    for (int x = 0; x < width; ++x) {
-        for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x)
+    {
+        for (int y = 0; y < height; ++y)
+        {
             const Tile& tile = mapData[0].tiles[y * width + x];
             layer[x][y] = tile.collision ? MapCollision::BLOCKS_ALL : MapCollision::BLOCKS_NONE;
         }
