@@ -14,9 +14,11 @@ namespace  Globals
     constexpr int PLAYER_SIZE = 16; // Size of the player character
     constexpr int PLAYER_FOV_X = 234; // Field of view width for the player
     constexpr int PLAYER_FOV_Y = 136; // Field of view height for the player
-    constexpr int MONSTER_AWARENESS_RADIUS = 15; // Radius within which monsters can detect the player
+    constexpr int MONSTER_AWARENESS_RADIUS = 50; // Radius within which monsters can detect the player
+    constexpr int MONSTER_SPAWN_RADIUS = 20; // Radius within which monsters can spawn around the player
     constexpr int MONSTER_ATTACK_RANGE = 1; // Range within which monsters can attack the player
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; // Scale factor for diagonal movement speed of monsters
-    // Other global constants can be added here as needed
+    constexpr int MONSTER_MAX_LIVING_COUNT = 10; // Maximum number of monsters that can be present in an area
+    constexpr int MONSTER_TOTAL_TO_SPAWN = 50; // Total number of monsters to spawn in an area
 }
 #endif //GLOBALS_H
