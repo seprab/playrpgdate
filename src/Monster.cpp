@@ -206,7 +206,7 @@ void Monster::Move(pdcpp::Point<int> target, Area* area)
     //Log::Info("dx (%f), dy  (%f)", d.x, d.y);
 
     pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
-    if (area->GetCollider()->IsTileBlockedByChar(nextPosition.x, nextPosition.y))
+    if (area->GetCollider()->IsTileBlockedByChar(newPosition.x / Globals::MAP_TILE_SIZE, newPosition.y / Globals::MAP_TILE_SIZE))
     {
         // This is a workaround to avoid the monster getting stuck in a tile,
         // and sharing the same position as the other monsters.

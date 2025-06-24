@@ -290,7 +290,14 @@ void Area::Tick(Player* player)
     // Then, we will tick the monsters. So they can calculate paths and move
     for (const auto& monster : livingMonsters)
     {
+        // We avoid the monsters from blocking itself by unblocking its position before ticking it.
+        collider->unblock(
+            static_cast<float>(monster->GetTiledPosition().x),
+            static_cast<float>(monster->GetTiledPosition().y));
         monster->Tick(player, this);
+        collider->block(
+            static_cast<float>(monster->GetTiledPosition().x),
+            static_cast<float>(monster->GetTiledPosition().y), true);
     }
     // Finally, we will unblock the positions of the monsters
     for (auto blockedPosition : blockPositions)
