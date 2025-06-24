@@ -231,19 +231,23 @@ void Area::SetupMonstersToSpawn()
         toSpawnMonsters.push_back(monster);
     }
 }
-void Area::SpawnCreatures()
+void Area::SpawnCreature()
 {
+    if (ticksSinceLastSpawn < Globals::TICKS_BETWEEN_MONSTER_SPAWNS)
+    {
+        ticksSinceLastSpawn++;
+        return; // don't spawn monsters if the time hasn't passed
+    }
     int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - static_cast<int>(livingMonsters.size());
     if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
-    for (int i = 0; i < monstersToSpawn; i++)
-    {
-        if (toSpawnMonsters.empty()) break; // no more monsters to spawn. Necessary in each iteration
-        std::shared_ptr<Monster> monster = toSpawnMonsters[0];
-        livingMonsters.push_back(monster);
-        livingMonsters.back()->LoadBitmap();
-        livingMonsters.back()->SetTiledPosition(Area::FindSpawnablePosition()); // set a default position for the monster
-        toSpawnMonsters.erase(toSpawnMonsters.begin());
-    }
+    if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
+
+    std::shared_ptr<Monster> monster = toSpawnMonsters[0];
+    livingMonsters.push_back(monster);
+    livingMonsters.back()->LoadBitmap();
+    livingMonsters.back()->SetTiledPosition(Area::FindSpawnablePosition()); // set a default position for the monster
+    toSpawnMonsters.erase(toSpawnMonsters.begin());
+    ticksSinceLastSpawn = 0; // reset the spawn timer
 }
 /// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
 pdcpp::Point<int> Area::FindSpawnablePosition()
@@ -269,7 +273,7 @@ void Area::LoadSpawnablePositions()
 }
 void Area::Tick(Player* player)
 {
-    SpawnCreatures(); // we'll be spawning creatures as long as there's space for them and haven't reached the max count
+    SpawnCreature(); // we'll be spawning creatures as long as there's space for them and haven't reached the max count
     for (const auto& monster : livingMonsters)
     {
         monster->Tick(player, this);

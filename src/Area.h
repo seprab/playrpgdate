@@ -35,13 +35,14 @@ private:
     int tileHeight{};
     char* dataPath = nullptr;
     char* tilesetPath = nullptr;
+    int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Monster>> bankOfMonsters; // the type of monsters to spawn in the area
     std::vector<std::shared_ptr<Monster>> livingMonsters; // the monsters that are currently alive in the area
     std::vector<std::shared_ptr<Monster>> toSpawnMonsters; // the monsters that haven't been spawned yet
     std::shared_ptr<AStarContainer> pathfindingContainer;
-    void SpawnCreatures();
+    void SpawnCreature();
     [[nodiscard]] Map_Layer ToMapLayer() const;
     pdcpp::Random random = {};
     std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn

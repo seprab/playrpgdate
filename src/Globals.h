@@ -20,5 +20,6 @@ namespace  Globals
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; // Scale factor for diagonal movement speed of monsters
     constexpr int MONSTER_MAX_LIVING_COUNT = 10; // Maximum number of monsters that can be present in an area
     constexpr int MONSTER_TOTAL_TO_SPAWN = 50; // Total number of monsters to spawn in an area
+    constexpr int TICKS_BETWEEN_MONSTER_SPAWNS = 60; // Number of ticks between monster spawns
 }
 #endif //GLOBALS_H
