@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "tilemap.tmx",
+    "activeFile": "castle_tiled_map.tmx",
     "expandedProjectPaths": [
     ],
     "fileStates": {
@@ -23,8 +23,8 @@
             "scale": 0.2514,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1068.0190930787587,
-                "y": 1567.2235481304695
+                "x": 960.6205250596656,
+                "y": 2072.3945902943515
             }
         },
         "tilemap.tmx": {
@@ -36,8 +36,8 @@
             }
         },
         "tileset.tsx": {
-            "scaleInDock": 1.778,
-            "scaleInEditor": 1.34
+            "scaleInDock": 1.5114,
+            "scaleInEditor": 0.7
         }
     },
     "last.exportedFilePath": "/Users/sergio.prada/Projects/playdate-rpg/Source/data/areas",
@@ -55,12 +55,15 @@
     "map.width": 50,
     "openFiles": [
         "tileset.tsx",
-        "tilemap.tmx"
+        "castle_tiled_map.tmx",
+        "00_downtown_tiledmap.tmx"
     ],
     "project": "maptiled.tiled-project",
     "recentFiles": [
-        "tilemap.tmx",
         "tileset.tsx",
+        "00_downtown_tiledmap.tmx",
+        "castle_tiled_map.tmx",
+        "tilemap.tmx",
         "anim-table-40-32.tsx"
     ],
     "resizeMap.removeObjects": false,

@@ -95,7 +95,9 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
 
 bool Monster::ShouldMove(pdcpp::Point<int> playerPosition) const
 {
-    if (GetTiledPosition().distance(playerPosition) <= Globals::MONSTER_AWARENESS_RADIUS) {
+    float distance = GetTiledPosition().distance(playerPosition);
+    if (distance <= Globals::MONSTER_AWARENESS_RADIUS && distance > Globals::MONSTER_ATTACK_RANGE)
+    {
         return true;
     }
     return false;
