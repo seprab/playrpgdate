@@ -279,31 +279,34 @@ void Area::LoadSpawnablePositions()
 void Area::Tick(Player* player)
 {
     SpawnCreature(); // we'll be spawning creatures as long as there's space for them and haven't reached the max count
+
     // Then, we will mark the positions of the monsters as blocked in the collider
     std::vector<pdcpp::Point<int>> blockPositions = std::vector<pdcpp::Point<int>>();
     for (const auto& monster : livingMonsters)
     {
-        blockPositions.emplace_back(monster->GetTiledPosition());
-    }
-    for (auto blockedPosition : blockPositions)
-    {
+        auto monsterPos = monster->GetPosition();
+        blockPositions.emplace_back(monsterPos);
         collider->block(
-            static_cast<float>(blockedPosition.x),
-            static_cast<float>(blockedPosition.y),
+            static_cast<float>(monsterPos.x),
+            static_cast<float>(monsterPos.y),
             true);
     }
+
     // Then, we will tick the monsters. So they can calculate paths and move
     for (const auto& monster : livingMonsters)
     {
         // We avoid the monsters from blocking itself by unblocking its position before ticking it.
+        auto monsterPos = monster->GetPosition();
         collider->unblock(
-            static_cast<float>(monster->GetTiledPosition().x),
-            static_cast<float>(monster->GetTiledPosition().y));
+            static_cast<float>(monsterPos.x),
+            static_cast<float>(monsterPos.y));
         monster->Tick(player, this);
+        monsterPos = monster->GetPosition();
         collider->block(
-            static_cast<float>(monster->GetTiledPosition().x),
-            static_cast<float>(monster->GetTiledPosition().y), true);
+            static_cast<float>(monsterPos.x),
+            static_cast<float>(monsterPos.y), true);
     }
+
     // Finally, we will unblock the positions of the monsters
     for (auto blockedPosition : blockPositions)
     {
