@@ -284,7 +284,7 @@ void Area::Tick(Player* player)
     std::vector<pdcpp::Point<int>> blockPositions = std::vector<pdcpp::Point<int>>();
     for (const auto& monster : livingMonsters)
     {
-        auto monsterPos = monster->GetPosition();
+        auto monsterPos = monster->GetTiledPosition();
         blockPositions.emplace_back(monsterPos);
         collider->block(
             static_cast<float>(monsterPos.x),
@@ -296,7 +296,7 @@ void Area::Tick(Player* player)
     for (const auto& monster : livingMonsters)
     {
         // We avoid the monsters from blocking itself by unblocking its position before ticking it.
-        auto monsterPos = monster->GetPosition();
+        auto monsterPos = monster->GetTiledPosition();
         collider->unblock(
             static_cast<float>(monsterPos.x),
             static_cast<float>(monsterPos.y));
