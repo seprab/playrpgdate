@@ -282,15 +282,18 @@ void Area::Tick(Player* player)
 
     // Then, we will mark the positions of the monsters as blocked in the collider
     std::vector<pdcpp::Point<int>> blockPositions = std::vector<pdcpp::Point<int>>();
-    for (const auto& monster : livingMonsters)
+    for (size_t i = 0; i < livingMonsters.size(); ++i)
     {
+        auto& monster = livingMonsters[i];
         auto monsterPos = monster->GetTiledPosition();
         blockPositions.emplace_back(monsterPos);
         collider->block(
             static_cast<float>(monsterPos.x),
             static_cast<float>(monsterPos.y),
             true);
+        monster->SetCanComputePath((i%staggerAmount) == pathfindingTickCounter); // stagger the pathfinding updates
     }
+    pathfindingTickCounter = (pathfindingTickCounter + 1) % staggerAmount;
 
     // Then, we will tick the monsters. So they can calculate paths and move
     for (const auto& monster : livingMonsters)

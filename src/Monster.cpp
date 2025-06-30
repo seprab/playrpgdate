@@ -20,7 +20,7 @@ void Monster::Tick(Player* player, Area* area)
     {
         pathFindingCooldown--;
     }
-    else if (!pathFound && pathFindFailureCount < Globals::MAX_PATH_FIND_FAILURE_COUNT && ShouldMove(playerTiledPosition))
+    else if (canComputePath && !pathFound && pathFindFailureCount < Globals::MAX_PATH_FIND_FAILURE_COUNT && ShouldMove(playerTiledPosition))
     {
         CalculateNodesToTarget(playerTiledPosition, area);
         pathFindingCooldown = Globals::PATH_FINDING_COOLDOWN; // Reset cooldown after pathfinding
