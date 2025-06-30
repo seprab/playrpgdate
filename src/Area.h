@@ -4,6 +4,7 @@
 #include "Inventory.h"
 #include "Dialogue.h"
 #include "AStarContainer.h"
+#include "Globals.h"
 #include "MapCollision.h"
 #include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
@@ -47,7 +48,7 @@ private:
     pdcpp::Random random = {};
     std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn
     int pathfindingTickCounter; // Counter to stagger pathfinding updates
-    const int staggerAmount = 4; // Number of groups to stagger
+    const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
 
 
 public:
