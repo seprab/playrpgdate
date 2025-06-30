@@ -301,10 +301,10 @@ void Area::Tick(Player* player)
             static_cast<float>(monsterPos.x),
             static_cast<float>(monsterPos.y));
         monster->Tick(player, this);
-        monsterPos = monster->GetPosition();
         collider->block(
             static_cast<float>(monsterPos.x),
-            static_cast<float>(monsterPos.y), true);
+            static_cast<float>(monsterPos.y),
+            true);
     }
 
     // Finally, we will unblock the positions of the monsters
