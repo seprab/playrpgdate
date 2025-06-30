@@ -300,7 +300,18 @@ void Area::Tick(Player* player)
         collider->unblock(
             static_cast<float>(monsterPos.x),
             static_cast<float>(monsterPos.y));
+
+        // remove the monster position from the block positions because its position will change
+        auto it = std::ranges::find(blockPositions, monsterPos);
+        if (it != blockPositions.end())
+        {
+            blockPositions.erase(it);
+        }
+
+
         monster->Tick(player, this);
+        monsterPos = monster->GetTiledPosition();
+        blockPositions.emplace_back(monsterPos);
         collider->block(
             static_cast<float>(monsterPos.x),
             static_cast<float>(monsterPos.y),
