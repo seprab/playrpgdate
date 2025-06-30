@@ -33,6 +33,7 @@ private:
     int pathFindFailureCount = 0;
     pdcpp::Point<int> nextPosition = {0, 0}; // Next position to move to
     bool reachedNode = true; // Flag to check if the node was reached
+    int pathFindingCooldown = 0; // Cooldown for pathfinding to avoid spamming
 };
 
 
