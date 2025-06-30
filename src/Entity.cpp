@@ -8,6 +8,8 @@
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
+std::unordered_map<char*, LCDBitmap*> Entity::bitmapCache;
+
 Entity::Entity(const unsigned int _id):
 id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 {
@@ -21,17 +23,24 @@ id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 
 void Entity::LoadBitmap()
 {
+    if (!image_path) return;
+    auto it = bitmapCache.find(image_path);
+    if (it != bitmapCache.end())
+    {
+        bitmap = it->second;
+        return;
+    }
+
     const char *outErr = nullptr;
     bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(image_path, &outErr);
+
     if (bitmap == nullptr)
     {
         Log::Error("Entity %d couldn't load bitmap %s: %s", id, image_path, outErr);
     }
     else
     {
-        pdcpp::GlobalPlaydateAPI::get()->graphics->getBitmapData(bitmap, &size.x, &size.y, nullptr, nullptr, nullptr);
-        //Log::Info("Entity %d loaded bitmap %s", id, image_path);
-        // TODO: I am loading the same bitmap every time I load an entity, which is not efficient. I should keep it loaded.
+        bitmapCache[image_path] = bitmap;
     }
 }
 

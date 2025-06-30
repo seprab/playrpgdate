@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 #include <memory>
+#include <unordered_map>
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
 #include "pdcpp/graphics/Point.h"
@@ -10,6 +11,9 @@ class EntityManager;
 
 class Entity
 {
+protected:
+    static std::unordered_map<char*, LCDBitmap*> bitmapCache;
+
 public:
     explicit Entity() = default;
     explicit Entity(unsigned int _id);
