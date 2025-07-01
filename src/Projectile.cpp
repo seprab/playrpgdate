@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "Log.h"
+#include "Monster.h"
 
 Projectile::Projectile(pdcpp::Point<int> Position):
 Magic(Position)
@@ -42,4 +43,22 @@ void Projectile::HandleInput()
     exploding = elapsedTime > explosionThreshold;
     position.x += static_cast<int>(cos(launchAngle) * speed);
     position.y += static_cast<int>(sin(launchAngle) * speed);
+}
+
+void Projectile::Damage(const std::shared_ptr<Area>& area)
+{
+    auto projectileCenterdPos = GetCenteredPosition();
+    for (const auto& entity : area->GetCreatures())
+    {
+        float distance = projectileCenterdPos.distance(entity->GetPosition());
+        if (distance < static_cast<float>(size)/2.f)
+        {
+            entity->Damage(0.5f);
+        }
+    }
+}
+
+pdcpp::Point<int> Projectile::GetCenteredPosition() const
+{
+    return {static_cast<int>(position.x + size / 2), static_cast<int>(position.y + size / 2)};
 }
