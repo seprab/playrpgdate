@@ -47,7 +47,7 @@ private:
     [[nodiscard]] Map_Layer ToMapLayer() const;
     pdcpp::Random random = {};
     std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn
-    int pathfindingTickCounter; // Counter to stagger pathfinding updates
+    int pathfindingTickCounter = 0; // Counter to stagger pathfinding updates
     const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
 
 
