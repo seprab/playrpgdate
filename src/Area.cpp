@@ -336,6 +336,11 @@ void Area::Tick(Player* player)
             static_cast<float>(blockedPosition.x),
             static_cast<float>(blockedPosition.y));
     }
+
+    // If any monster has died, we will remove it from the living monsters list
+    std::erase_if(livingMonsters,
+                  [](const std::shared_ptr<Monster>& monster)
+                  { return !monster->IsAlive(); });
 }
 Map_Layer Area::ToMapLayer() const
 {

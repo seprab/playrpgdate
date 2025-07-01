@@ -52,6 +52,7 @@ public:
     void DrawBitmap() const;
     void DrawBitmap(int x, int y);
     bool CalculateFlashing();
+    [[nodiscard]] bool IsAlive() const { return hp > 0; }
 
     virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) = 0;
 
