@@ -66,9 +66,30 @@ void Entity::DrawBitmap(int x, int y)
     DrawBitmap();
 }
 
+bool Entity::CalculateFlashing()
+{
+    if (isFlashing)
+    {
+        flashTimer++;
+        isBitmapVisible = !isBitmapVisible; // Toggle visibility
+        if (flashTimer > Globals::MAX_ENTITY_FLASHING_TICKS)
+        {
+            isFlashing = false;
+            flashTimer = 0;
+            isBitmapVisible = true;
+        }
+        return isBitmapVisible;
+    }
+    return true; // If not flashing, always return true (visible)
+}
+
 void Entity::Draw()
 {
-    DrawBitmap();
+
+    if (CalculateFlashing())
+    {
+        DrawBitmap();
+    }
     DrawHealthBar();
 }
 
@@ -96,6 +117,7 @@ void Entity::Damage(float damage)
 {
     //Log::Info("Entity %s took damage", name);
     hp = std::max(0.f, hp - damage);
+    isFlashing = true;
 }
 
 void Entity::Heal(float heal) {

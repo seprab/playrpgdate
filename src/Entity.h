@@ -51,6 +51,7 @@ public:
     void LoadBitmap(char* path);
     void DrawBitmap() const;
     void DrawBitmap(int x, int y);
+    bool CalculateFlashing();
 
     virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) = 0;
 
@@ -65,6 +66,9 @@ private:
     float maxHP{};
     char* description{};
     LCDBitmap* bitmap{};
+    bool isBitmapVisible = true;
+    int flashTimer = 0;
+    bool isFlashing = false;
 };
 
 #endif
