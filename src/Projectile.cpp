@@ -11,8 +11,9 @@ Magic(Position)
 {
     iLifetime = 2000;
     speed = 8;
-    size = 10;
-    explosionThreshold = 500;
+    size = 6;
+    explosionThreshold = 800;
+    launchAngle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle() * kPI /180.f;
 }
 
 void Projectile::Draw() const
@@ -31,14 +32,14 @@ void Projectile::HandleInput()
 {
     if (exploding)
     {
-        size+=5;
+        size+=sizeIncrement;
+        // Since the ellipse is drawn from the top left corner, we need to adjust the position
+        int positionAdjustment = static_cast<int>(sizeIncrement / 2);
+        position.x -= positionAdjustment;
+        position.y -= positionAdjustment;
         return;
     }
-    exploding = iLifetime - elapsedTime < explosionThreshold;
-    float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle();
-
-    angle = angle * kPI /180.f;
-
-    position.x += (int)(cos(angle) * speed);
-    position.y += (int)(sin(angle) * speed);
+    exploding = elapsedTime > explosionThreshold;
+    position.x += static_cast<int>(cos(launchAngle) * speed);
+    position.y += static_cast<int>(sin(launchAngle) * speed);
 }

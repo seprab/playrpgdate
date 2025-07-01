@@ -22,6 +22,8 @@ private:
     float speed;
     unsigned int size;
     unsigned int explosionThreshold;
+    float launchAngle = 0.0f; // Angle in radians
+    const int sizeIncrement = 3; // Increment size when exploding
 };
 
 
