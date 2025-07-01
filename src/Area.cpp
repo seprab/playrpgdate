@@ -242,10 +242,16 @@ void Area::SpawnCreature()
     if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
     if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
 
+    auto spawnPos = FindSpawnablePosition(0);
+    if (spawnPos.x == 0 && spawnPos.y == 0)
+    {
+        return; // no spawnable position found
+    }
+
     std::shared_ptr<Monster> monster = toSpawnMonsters[0];
     livingMonsters.push_back(monster);
     livingMonsters.back()->LoadBitmap();
-    livingMonsters.back()->SetTiledPosition(this->FindSpawnablePosition(0)); // set a default position for the monster
+    livingMonsters.back()->SetTiledPosition(spawnPos); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
 }
@@ -254,8 +260,10 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
 {
     if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
     {
-        Log::Error("Max spawn attempts reached. Returning fallback position.");
-        return spawnablePositions[0]; // fallback position
+        // I'm commenting the following error to avoid the app crashing.
+        // Instead, I'm cancelling the spawn for this tick.
+        //Log::Error("Max spawn attempts reached. Returning fallback position.");
+        return {0,0};
     }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
     unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
