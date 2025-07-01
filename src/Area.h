@@ -4,6 +4,7 @@
 #include "Inventory.h"
 #include "Dialogue.h"
 #include "AStarContainer.h"
+#include "Globals.h"
 #include "MapCollision.h"
 #include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
@@ -46,6 +47,9 @@ private:
     [[nodiscard]] Map_Layer ToMapLayer() const;
     pdcpp::Random random = {};
     std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn
+    int pathfindingTickCounter = 0; // Counter to stagger pathfinding updates
+    const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
+
 
 public:
     Area() = default;
