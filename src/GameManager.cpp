@@ -1,5 +1,4 @@
 #include "GameManager.h"
-
 #include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/File.h"
@@ -10,6 +9,7 @@ GameManager::GameManager(PlaydateAPI* api)
     ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft");
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
     ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
+    ui->SetOnGameOverSelected([this](){CleanGame();});
     new EntityManager();
 }
 void GameManager::Update()
@@ -166,3 +166,15 @@ void GameManager::SaveGame()
     fileHandle->write(buffer.get(), bufferSize);
     Log::Info("Game saved");
 }
+
+void GameManager::CleanGame()
+{
+    currentCameraOffset = {0,0};
+    pd->graphics->setDrawOffset(currentCameraOffset.x, currentCameraOffset.y);
+    ui->SetOffset(currentCameraOffset);
+    isGameRunning = false;
+    //TODO: Implement destructor for Area and destroy all alive entities
+    activeArea = nullptr;
+    player = nullptr;
+}
+

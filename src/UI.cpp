@@ -121,6 +121,7 @@ void UI::HandleInputs()
             {
                 if (current & kButtonA)
                 {
+                    if (gameOverCallback) gameOverCallback();
                     SwitchScreen(GameScreen::MAIN_MENU);
                     pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
                 }
@@ -262,9 +263,6 @@ void UI::DrawGameScreen() const
 
 void UI::DrawGameOverScreen() const
 {
-    auto playerOffset = EntityManager::GetInstance()->GetPlayer()->GetPosition();
-
-    auto screenBounds = pdcpp::Graphics::getScreenBounds();
     pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.x - 200, offset.y - 60, 400, 120, kColorBlack);
     pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
     int textLen = 0;

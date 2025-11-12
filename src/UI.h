@@ -37,6 +37,7 @@ private:
 
     std::function<void()> newGameCallback;
     std::function<void()> loadGameCallback;
+    std::function<void()> gameOverCallback;
     std::vector<LCDBitmap*> magicIcons;
     LCDBitmap * playerFace;
     std::unique_ptr<App> app;
@@ -53,6 +54,7 @@ public:
 
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
     void SetOnLoadGameSelected(std::function<void()> callback){loadGameCallback = std::move(callback);}
+    void SetOnGameOverSelected(std::function<void()> callback){gameOverCallback = std::move(callback);}
 
 private:
     void DrawLoadingScreen() const;
