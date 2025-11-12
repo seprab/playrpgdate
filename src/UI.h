@@ -11,11 +11,13 @@
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "CircularProgress.h"
+#include "../playdate-cpp-extensions/examples/context_menus/src/App.h"
 
 enum class GameScreen {
     LOADING,
     MAIN_MENU,
-    GAME
+    GAME,
+    GAME_OVER
 };
 
 class UI{
@@ -37,6 +39,7 @@ private:
     std::function<void()> loadGameCallback;
     std::vector<LCDBitmap*> magicIcons;
     LCDBitmap * playerFace;
+    std::unique_ptr<App> app;
 
 public:
     explicit UI(const char*);
@@ -55,6 +58,7 @@ private:
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
+    void DrawGameOverScreen() const;
 };
 
 

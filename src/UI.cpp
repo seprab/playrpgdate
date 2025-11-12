@@ -7,7 +7,12 @@
 #include "Log.h"
 #include "pdcpp/graphics/Image.h"
 #include "EntityManager.h"
-
+#include "pdcpp/graphics/Graphics.h"
+#include <pdcpp/graphics/LookAndFeel.h>
+#include <pdcpp/components/Viewport.h>
+#include <pdcpp/components/Component.h>
+#include <pdcpp/core/InputContext.h>
+#include "pdcpp/components/RingMenuComponent.h"
 
 UI::UI(const char *fontPath)
 {
@@ -65,6 +70,7 @@ void UI::HandleInputs()
 
     switch (currentScreen)
     {
+        default:
         case GameScreen::LOADING:
             if (loadingProgress >= 1.0f && (current))
             {
@@ -102,14 +108,31 @@ void UI::HandleInputs()
                 pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             break;
-        default:
-            break;
+        case GameScreen::GAME:
+            {
+                std::shared_ptr<Player> player = EntityManager::GetInstance()->GetPlayer();
+                if (!player->IsAlive())
+                {
+                    SwitchScreen(GameScreen::GAME_OVER);
+                }
+                break;
+            }
+        case GameScreen::GAME_OVER:
+            {
+                if (current & kButtonA)
+                {
+                    SwitchScreen(GameScreen::MAIN_MENU);
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                break;
+            }
     }
 }
 
 void UI::Draw() const
 {
-    switch (currentScreen) {
+    switch (currentScreen)
+    {
         case GameScreen::LOADING:
             DrawLoadingScreen();
             break;
@@ -118,6 +141,9 @@ void UI::Draw() const
             break;
         case GameScreen::GAME:
             DrawGameScreen();
+            break;
+        case GameScreen::GAME_OVER:
+            DrawGameOverScreen();
             break;
         default:
             break;
@@ -204,31 +230,62 @@ void UI::DrawMainMenu() const
 
 void UI::DrawGameScreen() const
 {
+    std::shared_ptr<Player> player = EntityManager::GetInstance()->GetPlayer();
+    PlaydateAPI* pdapi = pdcpp::GlobalPlaydateAPI::get();
     //load image as a background
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    pdapi->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
+    pdapi->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
 
     // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
-    pdcpp::Point<int> playerTiledPos = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
+    pdcpp::Point<int> playerTiledPos = player->GetTiledPosition();
     char posX[3], posY[3];
     snprintf(posX, sizeof(posX), "%d", playerTiledPos.x);
     snprintf(posY, sizeof(posY), "%d", playerTiledPos.y);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+    pdapi->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
+    pdapi->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
 
 
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+    pdapi->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
     magicCooldown->UpdatePosition(offset.x, offset.y-106);
-    magicCooldown->Draw(EntityManager::GetInstance()->GetPlayer()->GetCooldownPercentage());
+    magicCooldown->Draw(player->GetCooldownPercentage());
 
-    const unsigned int activeMagic = EntityManager::GetInstance()->GetPlayer()->GetSelectedMagic();
+    const unsigned int activeMagic = player->GetSelectedMagic();
     const int indexA = (activeMagic == 0) ? static_cast<int>(magicIcons.size()) - 1 : static_cast<int>(activeMagic) - 1;
     const int indexB = static_cast<int>(activeMagic);
-    const int indexC = static_cast<int>((activeMagic + 1) % static_cast<unsigned int>(magicIcons.size()));    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
+    const int indexC = static_cast<int>((activeMagic + 1) % static_cast<unsigned int>(magicIcons.size()));
+    pdapi->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
+    pdapi->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
+    pdapi->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
 
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(playerFace, offset.x-205, offset.y-130, kBitmapUnflipped);
+    pdapi->graphics->drawBitmap(playerFace, offset.x-205, offset.y-130, kBitmapUnflipped);
+}
+
+void UI::DrawGameOverScreen() const
+{
+    auto playerOffset = EntityManager::GetInstance()->GetPlayer()->GetPosition();
+
+    auto screenBounds = pdcpp::Graphics::getScreenBounds();
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.x - 200, offset.y - 60, 400, 120, kColorBlack);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    int textLen = 0;
+    const char* gameOverTextA = "Game Over";
+    const char* gameOverTextB = "Press A to return to the main menu.";
+
+    pdcpp::Point<int> textPosition = pdcpp::Point<int>(offset.x, offset.y);
+    textLen = static_cast<int>(strlen(gameOverTextA));
+    textLen = pdcpp::GlobalPlaydateAPI::get()->graphics->getTextWidth(font, gameOverTextA, textLen, kASCIIEncoding, 0);
+    textPosition.x -= (textLen/2);
+    textPosition.y -= Globals::PLAYER_SIZE; // Move down for the second line
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(gameOverTextA, textLen, kASCIIEncoding, textPosition.x, textPosition.y);
+
+    textPosition = pdcpp::Point<int>(offset.x, offset.y);
+    textLen = static_cast<int>(strlen(gameOverTextB));
+    textLen = pdcpp::GlobalPlaydateAPI::get()->graphics->getTextWidth(font, gameOverTextB, textLen, kASCIIEncoding, 0);
+    textPosition.x -= (textLen / 2);
+    textPosition.y += Globals::PLAYER_SIZE; // Move down for the second line
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(gameOverTextB, textLen, kASCIIEncoding, textPosition.x, textPosition.y);
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy );
 }
 
 void UI::SwitchScreen(GameScreen newScreen)

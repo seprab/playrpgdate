@@ -61,8 +61,11 @@ void GameManager::Update()
     }
     else
     {
-        player->Tick(activeArea);
-        activeArea->Tick(player.get());
+        if (player->IsAlive())
+        {
+            player->Tick(activeArea);
+            activeArea->Tick(player.get());
+        }
 
         // Calculate camera position
         float cameraSpeed = 0.2f; // Adjust for smoothness
