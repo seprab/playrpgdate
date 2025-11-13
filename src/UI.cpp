@@ -242,8 +242,12 @@ void UI::DrawGameScreen() const
     char posX[3], posY[3];
     snprintf(posX, sizeof(posX), "%d", playerTiledPos.x);
     snprintf(posY, sizeof(posY), "%d", playerTiledPos.y);
-    pdapi->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
-    pdapi->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+    // Ugly fix, so the first frame we avoid drawing the coordinates far from screen boundaries
+    if (offset.x != 0 && offset.y != 0)
+    {
+        pdapi->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
+        pdapi->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+    }
 
 
     pdapi->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
