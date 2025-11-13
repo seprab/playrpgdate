@@ -221,6 +221,16 @@ void Area::Unload()
 {
     mapData.clear();
     delete imageTable;
+    imageTable = nullptr;
+
+    // Clean up all monster vectors
+    livingMonsters.clear();
+    toSpawnMonsters.clear();
+
+    // Clean up other resources
+    spawnablePositions.clear();
+    pathfindingContainer.reset();
+    collider.reset();
 }
 void Area::SetupMonstersToSpawn()
 {

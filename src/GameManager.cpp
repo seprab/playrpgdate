@@ -173,8 +173,14 @@ void GameManager::CleanGame()
     pd->graphics->setDrawOffset(currentCameraOffset.x, currentCameraOffset.y);
     ui->SetOffset(currentCameraOffset);
     isGameRunning = false;
-    //TODO: Implement destructor for Area and destroy all alive entities
-    activeArea = nullptr;
+
+    // Clean up the active area before releasing it
+    if (activeArea != nullptr)
+    {
+        activeArea->Unload();
+        activeArea = nullptr;
+    }
+
     player = nullptr;
 }
 
