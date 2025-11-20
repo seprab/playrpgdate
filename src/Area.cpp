@@ -270,9 +270,9 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
 {
     if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
     {
-        // I'm commenting the following error to avoid the app crashing.
-        // Instead, I'm cancelling the spawn for this tick.
-        //Log::Error("Max spawn attempts reached. Returning fallback position.");
+        // Reaching the maximum spawn attempts is expected in some cases (e.g., no valid positions available).
+        // Cancelling the spawn for this tick and returning fallback position. Logging as a warning for visibility.
+        Log::Warning("Max spawn attempts reached in Area::FindSpawnablePosition. Returning fallback position {0,0}.");
         return {0,0};
     }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
