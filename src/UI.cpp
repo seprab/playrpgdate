@@ -9,9 +9,6 @@
 #include "EntityManager.h"
 #include "pdcpp/graphics/Graphics.h"
 #include <pdcpp/graphics/LookAndFeel.h>
-#include <pdcpp/components/Viewport.h>
-#include <pdcpp/components/Component.h>
-#include <pdcpp/core/InputContext.h>
 
 UI::UI(const char *fontPath)
 {

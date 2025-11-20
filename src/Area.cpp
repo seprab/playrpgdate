@@ -272,7 +272,7 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
     {
         // Reaching the maximum spawn attempts is expected in some cases (e.g., no valid positions available).
         // Cancelling the spawn for this tick and returning fallback position. Logging as a warning for visibility.
-        Log::Warning("Max spawn attempts reached in Area::FindSpawnablePosition. Returning fallback position {0,0}.");
+        Log::Info("Max spawn attempts reached in Area::FindSpawnablePosition. Returning fallback position {0,0}.");
         return {0,0};
     }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();

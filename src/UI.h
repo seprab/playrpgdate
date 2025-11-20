@@ -11,7 +11,6 @@
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "CircularProgress.h"
-#include "../playdate-cpp-extensions/examples/context_menus/src/App.h"
 
 enum class GameScreen {
     LOADING,
@@ -40,7 +39,6 @@ private:
     std::function<void()> gameOverCallback;
     std::vector<LCDBitmap*> magicIcons;
     LCDBitmap * playerFace;
-    std::unique_ptr<App> app;
 
 public:
     explicit UI(const char*);
