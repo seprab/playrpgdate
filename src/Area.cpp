@@ -221,6 +221,16 @@ void Area::Unload()
 {
     mapData.clear();
     delete imageTable;
+    imageTable = nullptr;
+
+    // Clean up all monster vectors
+    livingMonsters.clear();
+    toSpawnMonsters.clear();
+
+    // Clean up other resources
+    spawnablePositions.clear();
+    pathfindingContainer.reset();
+    collider.reset();
 }
 void Area::SetupMonstersToSpawn()
 {
@@ -242,10 +252,16 @@ void Area::SpawnCreature()
     if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
     if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
 
+    auto spawnPos = FindSpawnablePosition(0);
+    if (spawnPos.x == 0 && spawnPos.y == 0)
+    {
+        return; // no spawnable position found
+    }
+
     std::shared_ptr<Monster> monster = toSpawnMonsters[0];
     livingMonsters.push_back(monster);
     livingMonsters.back()->LoadBitmap();
-    livingMonsters.back()->SetTiledPosition(this->FindSpawnablePosition(0)); // set a default position for the monster
+    livingMonsters.back()->SetTiledPosition(spawnPos); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
 }
@@ -254,8 +270,10 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
 {
     if (attemptCount >= Globals::MAX_SPAWN_ATTEMPTS)
     {
-        Log::Error("Max spawn attempts reached. Returning fallback position.");
-        return spawnablePositions[0]; // fallback position
+        // Reaching the maximum spawn attempts is expected in some cases (e.g., no valid positions available).
+        // Cancelling the spawn for this tick and returning fallback position. Logging as a warning for visibility.
+        Log::Info("Max spawn attempts reached in Area::FindSpawnablePosition. Returning fallback position {0,0}.");
+        return {0,0};
     }
     pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
     unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
@@ -328,6 +346,11 @@ void Area::Tick(Player* player)
             static_cast<float>(blockedPosition.x),
             static_cast<float>(blockedPosition.y));
     }
+
+    // If any monster has died, we will remove it from the living monsters list
+    std::erase_if(livingMonsters,
+                  [](const std::shared_ptr<Monster>& monster)
+                  { return !monster->IsAlive(); });
 }
 Map_Layer Area::ToMapLayer() const
 {

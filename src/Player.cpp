@@ -104,9 +104,12 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 }
 void Player::Draw()
 {
-    if (attacking) attack->Draw(GetPosition().x, GetPosition().y);
-    else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
-    else idle->Draw(GetPosition().x, GetPosition().y);
+    if (CalculateFlashing())
+    {
+        if (attacking) attack->Draw(GetPosition().x, GetPosition().y);
+        else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
+        else idle->Draw(GetPosition().x, GetPosition().y);
+    }
     Entity::DrawHealthBar();
     DrawAimDirection();
 #if DEBUG

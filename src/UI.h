@@ -15,7 +15,8 @@
 enum class GameScreen {
     LOADING,
     MAIN_MENU,
-    GAME
+    GAME,
+    GAME_OVER
 };
 
 class UI{
@@ -35,6 +36,7 @@ private:
 
     std::function<void()> newGameCallback;
     std::function<void()> loadGameCallback;
+    std::function<void()> gameOverCallback;
     std::vector<LCDBitmap*> magicIcons;
     LCDBitmap * playerFace;
 
@@ -50,11 +52,13 @@ public:
 
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
     void SetOnLoadGameSelected(std::function<void()> callback){loadGameCallback = std::move(callback);}
+    void SetOnGameOverSelected(std::function<void()> callback){gameOverCallback = std::move(callback);}
 
 private:
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
+    void DrawGameOverScreen() const;
 };
 
 

@@ -16,12 +16,16 @@ public:
 
     void Draw() const override;
     void HandleInput() override;
+    void Damage(const std::shared_ptr<Area>& area) override;
+    pdcpp::Point<int> GetCenteredPosition() const;
 
 private:
     bool exploding = false;
     float speed;
     unsigned int size;
     unsigned int explosionThreshold;
+    float launchAngle = 0.0f; // Angle in radians
+    const int sizeIncrement = 3; // Increment size when exploding
 };
 
 

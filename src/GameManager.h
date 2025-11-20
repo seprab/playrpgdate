@@ -16,6 +16,7 @@ public:
     void LoadNewGame();
     void LoadSavedGame();
     void SaveGame();
+    void CleanGame();
 
 private:
     PlaydateAPI* pd;

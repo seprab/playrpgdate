@@ -24,5 +24,6 @@ namespace  Globals
     constexpr int MONSTER_RANDOM_SPACING = 4; // Random spacing for monster when moving and finding a blocker
     constexpr int MAX_SPAWN_ATTEMPTS = 10; // Maximum number of attempts to spawn a monster
     constexpr int PATH_FINDING_COOLDOWN = 50; // Cooldown for pathfinding in ticks
+    constexpr int MAX_ENTITY_FLASHING_TICKS = 10; // Maximum ticks an entity will flash when damaged
 }
 #endif //GLOBALS_H
