@@ -47,10 +47,10 @@ void Projectile::HandleInput()
 
 void Projectile::Damage(const std::shared_ptr<Area>& area)
 {
-    auto projectileCenterdPos = GetCenteredPosition();
+    auto projectileCenteredPos = GetCenteredPosition();
     for (const auto& entity : area->GetCreatures())
     {
-        float distance = projectileCenterdPos.distance(entity->GetPosition());
+        float distance = projectileCenteredPos.distance(entity->GetPosition());
         if (distance < static_cast<float>(size)/2.f)
         {
             entity->Damage(0.5f);
