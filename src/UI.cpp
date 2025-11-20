@@ -12,7 +12,6 @@
 #include <pdcpp/components/Viewport.h>
 #include <pdcpp/components/Component.h>
 #include <pdcpp/core/InputContext.h>
-#include "pdcpp/components/RingMenuComponent.h"
 
 UI::UI(const char *fontPath)
 {
