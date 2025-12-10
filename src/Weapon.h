@@ -15,7 +15,7 @@ public:
     Weapon()=default;
     Weapon(const Weapon& other) = default;
     Weapon(Weapon&& other) noexcept;
-    Weapon(unsigned int _id, char* _name, char* _description, int _damage);
+    Weapon(unsigned int _id, const std::string& _name, const std::string& _description, int _damage);
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
     [[nodiscard]] int GetDamage() const;
 };

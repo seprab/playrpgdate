@@ -11,7 +11,7 @@
 #include "Monster.h"
 #include "pdcpp/core/Random.h"
 
-Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
+Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
 : Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
 {
     SetName(_name);
@@ -22,12 +22,12 @@ Area::Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
 Area::Area(const Area &other)
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.dataPath), tilesetPath(other.tilesetPath), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
 {
     SetName(other.GetName());
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.GetDataPath()), tilesetPath(other.GetTilesetPath()), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
+        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(std::move(other.dataPath)), tilesetPath(std::move(other.tilesetPath)), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
 {
     SetName(other.GetName());
 }
@@ -41,18 +41,18 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
 
         int decodedId{};
         int decodedTokens{};
-        char* decodedName{};
-        char* decodedData{};
-        char* decodedTileset{};
+        std::string decodedName;
+        std::string decodedData;
+        std::string decodedTileset;
         std::shared_ptr<Dialogue> decodedDialogue;
         std::vector<std::shared_ptr<Door>> decodedDoors{};
         std::vector<std::shared_ptr<Monster>> decodedCreatures;
 
         const int endOfObject = tokens[i].end; //get the end of the Area object
-        decodedId = static_cast<int>(strtol(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"), nullptr, 10));
+        decodedId = std::stoi(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"));
         decodedName = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "name");
         decodedData = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataPath");
-        decodedTokens = static_cast<int>(strtol(Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataTokens"), nullptr, 10));
+        decodedTokens = std::stoi(Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataTokens"));
         decodedTileset = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "tileset");
 
         i++; //move into the first property of the Area object. Otherwise, the while is invalid
@@ -63,13 +63,13 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
                 i++;
                 continue;
             }
-            char* parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
-            if(strcmp(parseProperty, "dialogue") == 0)
+            std::string parseProperty = Utils::Subchar(buffer, tokens[i].start, tokens[i].end);
+            if(parseProperty == "dialogue")
             {
                 i++; //move into the dialogue token
                 decodedDialogue = std::make_shared<Dialogue>(buffer, tokens, i);
             }
-            else if(strcmp(parseProperty, "doors") == 0)
+            else if(parseProperty == "doors")
             {
                 i++; //move into the doors array token
                 int numOfDoors = tokens[i].size;
@@ -77,7 +77,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
                 if (numOfDoors == 0) continue;
                 for (int j = 0; j < numOfDoors; j++)
                 {
-                    char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
+                    std::string door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
                     int decodedDoor = std::stoi(door);
                     auto originalInstance = entityManager->GetEntity(decodedDoor);
                     if (originalInstance == nullptr)
@@ -89,7 +89,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
                 }
                 i=i+numOfDoors;
             }
-            else if(strcmp(parseProperty, "creatures") == 0)
+            else if(parseProperty == "creatures")
             {
                 i++; //move into the creatures array token
                 int numOfCreatures = tokens[i].size;
@@ -110,12 +110,13 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
             else i++;
         }
 
-        decodedAreas.emplace_back(decodedId, decodedName, decodedData, decodedTokens, decodedTileset, decodedDialogue, decodedCreatures);
+        decodedAreas.emplace_back(decodedId, decodedName.c_str(), decodedData, decodedTokens,
+                                   decodedTileset, decodedDialogue, decodedCreatures);
         i = endOfObject-1; //move back to the end of the Area object
     }
     return std::make_shared<std::vector<Area>>(decodedAreas);
 }
-void Area::LoadLayers(const char *fileName, int limitOfTokens)
+void Area::LoadLayers(std::string fileName, int limitOfTokens)
 {
     auto fileHandle = std::make_unique<pdcpp::FileHandle>(fileName, kFileRead);
     auto charBuffer = std::make_unique<char[]>(fileHandle->getDetails().size+1);
@@ -129,8 +130,8 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
     {
         if (t[i].type == JSMN_STRING)
         {
-            char* bufferValue = Utils::Subchar(charBuffer.get(), t[i].start, t[i].end);
-            if (strcmp(bufferValue, "data") == 0)
+            std::string bufferValue = Utils::Subchar(charBuffer.get(), t[i].start, t[i].end);
+            if (bufferValue == "data")
             {
                 i=i+1;
                 Layer layer;
@@ -142,7 +143,7 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
                      * to integer, and it doesn't get to the end of the tile id.
                      */
                     bufferValue = Utils::Subchar(charBuffer.get(), t[i+j+1].start, t[i+j+1].end);
-                    int parsedId = static_cast<int>(strtol(bufferValue, nullptr, 10));
+                    int parsedId = std::stoi(bufferValue);
                     Tile tile{.id =  parsedId, .collision = parsedId != 0};
                     layer.tiles.push_back(tile);
                 }
@@ -151,13 +152,13 @@ void Area::LoadLayers(const char *fileName, int limitOfTokens)
             }
         }
     }
-    height = static_cast<int>(strtol(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "height"), nullptr, 10));
-    width = static_cast<int>(strtol(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "width"), nullptr, 10));
+    height = std::stoi(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "height"));
+    width = std::stoi(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "width"));
     Log::Info("Map loaded, %i width and %i height", width, height);
 }
-void Area::LoadImageTable(const char *fileName)
+void Area::LoadImageTable(std::string fileName)
 {
-    imageTable = new pdcpp::ImageTable(fileName);
+    imageTable = std::make_unique<pdcpp::ImageTable>(fileName);
     LCDBitmap* bitmap = (*imageTable)[0];
     pdcpp::GlobalPlaydateAPI::get()->graphics->getBitmapData(bitmap, &tileWidth, &tileHeight, nullptr, nullptr, nullptr);
 }
@@ -220,7 +221,6 @@ void Area::Load()
 void Area::Unload()
 {
     mapData.clear();
-    delete imageTable;
     imageTable = nullptr;
 
     // Clean up all monster vectors

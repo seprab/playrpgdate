@@ -11,7 +11,7 @@ class Item : public Entity
 {
 public:
     Item() = default;
-    Item(unsigned int _id, char *itemName, char *itemDescription);
+    Item(unsigned int _id, const std::string& itemName, const std::string& itemDescription);
     Item(const Item &item) = default;
     Item(Item &&item) noexcept = default;
 

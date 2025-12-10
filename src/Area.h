@@ -29,14 +29,14 @@ private:
     EntityManager* entityManager = nullptr;
     std::vector<Layer> mapData;
     std::shared_ptr<MapCollision> collider;
-    pdcpp::ImageTable* imageTable = nullptr;
+    std::unique_ptr<pdcpp::ImageTable> imageTable;
     int tokens{};
     int width{};
     int height{};
     int tileWidth{};
     int tileHeight{};
-    char* dataPath = nullptr;
-    char* tilesetPath = nullptr;
+    std::string dataPath;
+    std::string tilesetPath;
     int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
@@ -56,21 +56,20 @@ public:
     Area() = default;
     Area(const Area& other);
     Area(Area&& other) noexcept;
-    Area(unsigned int _id, char* _name, char* _dataPath, int _dataTokens, char* _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
+    Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
 
     [[nodiscard]] int GetTokenCount() const {return tokens;}
-    [[nodiscard]] char* GetDataPath() const {return dataPath;}
-    [[nodiscard]] char* GetTilesetPath() const {return tilesetPath;}
+    [[nodiscard]] const char* GetDataPath() const {return dataPath.c_str();}
+    [[nodiscard]] const char* GetTilesetPath() const {return tilesetPath.c_str();}
     [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return livingMonsters;}
 
     void SetTokenCount(int value){tokens=value;}
-    void SetDataPath(char* value){dataPath=value;}
-    void SetTilesetPath(char* value){tilesetPath=value;}
+    void SetDataPath(const std::string& value){dataPath=value;}
+    void SetTilesetPath(const std::string& value){tilesetPath=value;}
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
 
-    pdcpp::ImageTable* GetImageTable() {return imageTable;}
-    void LoadLayers(const char* fileName, int limitOfTokens);
-    void LoadImageTable(const char* fileName);
+    void LoadLayers(std::string fileName, int limitOfTokens);
+    void LoadImageTable(std::string fileName);
     void DrawTileFromLayer(int layer, int x, int y);
     void Render(int x, int y, int fovX, int fovY);
     bool CheckCollision(int x, int y) const;

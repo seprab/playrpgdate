@@ -5,7 +5,7 @@
 #include "Weapon.h"
 #include "Utils.h"
 
-Weapon::Weapon(unsigned int _id, char* _name, char* _description, int _damage)
+Weapon::Weapon(unsigned int _id, const std::string& _name, const std::string& _description, int _damage)
 : Item(_id, _name, _description), damage(_damage)
 {
 
@@ -27,18 +27,18 @@ std::shared_ptr<void> Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int si
         if (tokens[i].type != JSMN_OBJECT) continue;
 
         unsigned int decodedId{0};
-        char* decodedName{};
+        std::string decodedName;
         int decodedDamage{};
-        char* decodedDescription{};
+        std::string decodedDescription;
 
         const char* objects[] = {"id", "name", "damage", "description"};
         for (const char* & object : objects)
         {
-            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
-            if(strcmp(object, "id") == 0) decodedId = atoi(value);
+            std::string value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+            if(strcmp(object, "id") == 0) decodedId = atoi(value.c_str());
             else if(strcmp(object, "name") == 0) decodedName = value;
             else if(strcmp(object, "description") == 0) decodedDescription = value;
-            else if(strcmp(object, "damage") == 0) decodedDamage = atoi(value);
+            else if(strcmp(object, "damage") == 0) decodedDamage = atoi(value.c_str());
         }
         weapons_decoded.emplace_back(decodedId, decodedName, decodedDescription, decodedDamage);
         i+=(tokens[i].size*2);

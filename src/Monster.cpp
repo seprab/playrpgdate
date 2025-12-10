@@ -9,7 +9,7 @@
 #include "Log.h"
 
 
-Monster::Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
+Monster::Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
 {}
@@ -63,7 +63,7 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
     {
         if (tokens[i].type != JSMN_OBJECT) continue;
 
-        unsigned int decodedId; char* decodedName; char* decodedPath; float decodedMaxHp; int decodedStrength;
+        unsigned int decodedId; std::string decodedName; std::string decodedPath; float decodedMaxHp; int decodedStrength;
         int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
         int decodedWeapon; int decodedArmor;
 
@@ -73,25 +73,25 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
             // doing (tokens[i].size*2) because the object size returns the number of elements inside.
             // for example:
             // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
-            char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+            std::string value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
 
-            if(strcmp(object, "id") == 0) decodedId = static_cast<int>(strtol(value, nullptr, 10));
+            if(strcmp(object, "id") == 0) decodedId = std::stoi(value);
             else if(strcmp(object, "name") == 0) decodedName = value;
             else if(strcmp(object, "image") == 0) decodedPath = value;
-            else if(strcmp(object, "hp") == 0) decodedMaxHp = strtof(value, nullptr);
-            else if(strcmp(object, "str") == 0) decodedStrength = static_cast<int>(strtol(value, nullptr, 10));
-            else if(strcmp(object, "agi") == 0) decodedAgility = static_cast<int>(strtol(value, nullptr, 10));
-            else if(strcmp(object, "con") == 0) decodedConstitution = static_cast<int>(strtol(value, nullptr, 10));
-            else if(strcmp(object, "evasion") == 0) decodedEvasion = strtof(value, nullptr);
+            else if(strcmp(object, "hp") == 0) decodedMaxHp = std::stof(value);
+            else if(strcmp(object, "str") == 0) decodedStrength = std::stoi(value);
+            else if(strcmp(object, "agi") == 0) decodedAgility = std::stoi(value);
+            else if(strcmp(object, "con") == 0) decodedConstitution = std::stoi(value);
+            else if(strcmp(object, "evasion") == 0) decodedEvasion = std::stof(value);
             else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
-            else if(strcmp(object, "weapon") == 0) decodedWeapon = static_cast<int>(strtol(value, nullptr, 10));
-            else if(strcmp(object, "armor") == 0) decodedArmor = static_cast<int>(strtol(value, nullptr, 10));
+            else if(strcmp(object, "weapon") == 0) decodedWeapon = std::stoi(value);
+            else if(strcmp(object, "armor") == 0) decodedArmor = std::stoi(value);
             else Log::Error("Unknown property %s", object);
         }
         creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
                                        decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
                                        decodedWeapon, decodedArmor);
-        Log::Info("Monster ID: %d, name %s", decodedId, decodedName);
+        Log::Info("Monster ID: %d, name %s", decodedId, decodedName.c_str());
 
         i+=(tokens[i].size*2);
     }

@@ -42,30 +42,28 @@ std::shared_ptr<void> EntityManager::GetEntity(unsigned int id)
 template <typename T>
 void EntityManager::LoadJSON(const char* fileName, int limitOfTokens)
 {
-    auto* fileHandle = new pdcpp::FileHandle(fileName, kFileRead);
-    char *charBuffer = new char[fileHandle->getDetails().size + 1];
-    fileHandle->read(charBuffer, fileHandle->getDetails().size);
-    auto* parser = new jsmn_parser;
-    jsmn_init(parser);
-    DecodeJson<T>(parser, charBuffer, fileHandle->getDetails().size, limitOfTokens);
-    delete[] charBuffer;
-    delete fileHandle;
-    delete parser;
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(fileName, kFileRead);
+    auto charBuffer = std::make_unique<char[]>(fileHandle->getDetails().size + 1);
+    fileHandle->read(charBuffer.get(), fileHandle->getDetails().size);
+    auto parser = std::make_unique<jsmn_parser>();
+    jsmn_init(parser.get());
+    DecodeJson<T>(parser.get(), charBuffer.get(), fileHandle->getDetails().size, limitOfTokens);
+    // Automatic cleanup via unique_ptr destructors
 }
 template <typename T>
 void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit)
 {
-    auto t = new jsmntok_t[tokenLimit];
-    int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
+    auto t = std::make_unique<jsmntok_t[]>(tokenLimit);
+    int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t.get());
     Log::Info("Just initialized JSMN with %d tokens", calculatedTokens);
     T dummy{};
-    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens, this);
+    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t.get(), calculatedTokens, this);
     auto items = static_cast<std::vector<T>*>(decodedJson.get());
     for (T item : *items)
     {
         data[item.GetId()] = std::make_shared<T>(item);
     }
-    delete[] t;
+    // Automatic cleanup via unique_ptr destructor
 }
 // Explicit template instantiations
 template void EntityManager::LoadJSON<Area>(const char*, int);

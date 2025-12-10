@@ -7,7 +7,7 @@
 #include "jsmn.h"
 struct Choice
 {
-    const char* text;
+    std::string text;
     int action;
     int target;
 };
@@ -15,7 +15,7 @@ class Dialogue
 {
 public:
     Dialogue() = default;
-    Dialogue(char* _description, std::vector<Choice> _choices);
+    Dialogue(const std::string& _description, std::vector<Choice> _choices);
     Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesIndex);
     Dialogue(const Dialogue& other)=default;
     Dialogue(Dialogue&& other) noexcept;
@@ -26,7 +26,7 @@ public:
     [[nodiscard]] int Activate() const;
 
 private:
-    char* description{};
+    std::string description;
     std::vector<Choice> choices;
 
 };

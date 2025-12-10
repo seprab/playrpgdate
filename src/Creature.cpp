@@ -6,7 +6,7 @@
 #include "Utils.h"
 #include "Log.h"
 
-Creature::Creature(unsigned int _id, char *_name, char* image, float _maxHp, int _strength, int _agility, int _constitution,
+Creature::Creature(unsigned int _id, const std::string& _name, const std::string& image, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
                    : Entity(_id), strength(_strength), agility(_agility),
                    constitution(_constitution), evasion(_evasion), xp(_xp), weapon(_weapon), armor(_armor)

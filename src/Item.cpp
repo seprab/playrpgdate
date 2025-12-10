@@ -5,12 +5,12 @@
 #include "Log.h"
 
 
-Item::Item(const unsigned int _id, char* itemName, char* itemDescription) :
+Item::Item(const unsigned int _id, const std::string& itemName, const std::string& itemDescription) :
 Entity(_id)
 {
     SetName(itemName);
     SetDescription(itemDescription);
-    Log::Info("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
+    Log::Info("Item created with id: %d, name: %s, description: %s", _id, itemName.c_str(), itemDescription.c_str());
 }
 
 std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
@@ -21,14 +21,14 @@ std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size
         if (tokens[i].type == JSMN_OBJECT)
         {
             int decodedId{};
-            char* decodedName{};
-            char* decodedDescription{};
+            std::string decodedName;
+            std::string decodedDescription;
 
             const char* objects[] = {"id", "name", "description"};
             for (const char* & object : objects)
             {
-                char* value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
-                if(strcmp(object, "id") == 0) decodedId = static_cast<int>(strtol(value, nullptr, 10));
+                std::string value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+                if(strcmp(object, "id") == 0) decodedId = std::stoi(value);
                 else if(strcmp(object, "name") == 0) decodedName = value;
                 else if(strcmp(object, "description") == 0) decodedDescription = value;
             }

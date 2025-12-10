@@ -3,7 +3,7 @@
 #include "Dialogue.h"
 #include "Utils.h"
 
-Dialogue::Dialogue(char* _description, std::vector<Choice> _choices)
+Dialogue::Dialogue(const std::string& _description, std::vector<Choice> _choices)
         : description(_description), choices(std::move(_choices))
 {
 
@@ -28,7 +28,7 @@ int Dialogue::Activate() const
     std::cout << description << std::endl;
 
     unsigned int number = 1;
-    for (const Choice choice : choices)
+    for (const Choice& choice : choices)
         std::cout << number++ << ": " << choice.text << std::endl;
 
     unsigned int userInput = 0;
@@ -42,7 +42,7 @@ int Dialogue::Activate() const
 
 Dialogue::Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesIndex)
 {
-    char* _description{};
+    std::string _description;
     std::vector<Choice> _choices{};
     const int dialogueEnd = tokens[choicesIndex].end;
     choicesIndex++;
@@ -53,14 +53,14 @@ Dialogue::Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesInde
             choicesIndex++;
             continue;
         }
-        char* parseProperty = Utils::Subchar(buffer, tokens[choicesIndex].start, tokens[choicesIndex].end);
+        std::string parseProperty = Utils::Subchar(buffer, tokens[choicesIndex].start, tokens[choicesIndex].end);
 
-        if(strcmp(parseProperty, "description") == 0)
+        if(parseProperty == "description")
         {
             _description = Utils::Subchar(buffer, tokens[choicesIndex+1].start, tokens[choicesIndex+1].end);
             choicesIndex+=2;
         }
-        else if(strcmp(parseProperty, "choices") == 0)
+        else if(parseProperty == "choices")
         {
             choicesIndex++; //move into the choices array token
             int endOfChoices = tokens[choicesIndex].end;
@@ -73,11 +73,11 @@ Dialogue::Dialogue(const char *buffer, const jsmntok_t *tokens, int& choicesInde
                     continue;
                 }
                 parseProperty = Utils::Subchar(buffer, tokens[choicesIndex].start, tokens[choicesIndex].end);
-                if(strcmp(parseProperty, "choice") == 0)
+                if(parseProperty == "choice")
                 {
-                    const char* text = Utils::Subchar(buffer, tokens[choicesIndex+1].start, tokens[choicesIndex+1].end);
-                    const char* action = Utils::Subchar(buffer, tokens[choicesIndex+3].start, tokens[choicesIndex+3].end);
-                    const char* target = Utils::Subchar(buffer, tokens[choicesIndex+5].start, tokens[choicesIndex+5].end);
+                    std::string text = Utils::Subchar(buffer, tokens[choicesIndex+1].start, tokens[choicesIndex+1].end);
+                    std::string action = Utils::Subchar(buffer, tokens[choicesIndex+3].start, tokens[choicesIndex+3].end);
+                    std::string target = Utils::Subchar(buffer, tokens[choicesIndex+5].start, tokens[choicesIndex+5].end);
 
                     Choice choice{};
                     choice.text = text;

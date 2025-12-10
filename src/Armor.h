@@ -13,7 +13,7 @@ private:
 
 public:
     Armor()=default;
-    Armor(unsigned int _id, char* _name, char* _description, int _defense);
+    Armor(unsigned int _id, const std::string& _name, const std::string& _description, int _defense);
     Armor(const Armor& other);
     Armor(Armor&& other) noexcept;
 

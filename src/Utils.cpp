@@ -6,36 +6,28 @@
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
-char* Utils::Subchar(const char* source, int start, int end)
+std::string Utils::Subchar(const char* source, int start, int end)
 {
     const int length = end - start;
-    //allocating the memory for the name equals the length of the target + 1 for the null terminator
-    auto subchar = new char[length+1];
-    for(int i = 0; i < length; i++)
-    {
-        subchar[i] = source[start + i];
-    }
-    subchar[length] = '\0'; //null terminator
-    return subchar;
+    // Use std::string constructor for safety and automatic memory management
+    return std::string(source + start, length);
 }
 
-char* Utils::ValueDecoder(char *buffer, jsmntok_t *tokens, int start, int finish, const char *property) {
-    char* parseProperty;
+std::string Utils::ValueDecoder(char *buffer, jsmntok_t *tokens, int start, int finish, const char *property) {
     for (int i = start; i < finish; i++)
     {
         if (tokens[i].type != JSMN_STRING)
         {
             continue;
         }
-        parseProperty = Subchar(buffer, tokens[i].start, tokens[i].end);
-        if(strcmp(parseProperty, property) == 0)
+        std::string parseProperty = Subchar(buffer, tokens[i].start, tokens[i].end);
+        if(parseProperty == property)
         {
-            char* value = Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
-            return value;
+            return Subchar(buffer, tokens[i+1].start, tokens[i+1].end);
         }
     }
     Log::Error("Property %s not found", property);
-    return nullptr;
+    return "";
 }
 
 int Utils::InitializeJSMN(jsmn_parser *parser, char *charBuffer, const size_t len, int tokenLimit, jsmntok_t* t) {

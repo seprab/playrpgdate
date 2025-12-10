@@ -32,7 +32,7 @@ public:
     Creature()=default;
     Creature(const Creature& other);
     Creature(Creature&& other) noexcept;
-    Creature(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
+    Creature(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
 
 

@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
@@ -12,7 +13,7 @@ class EntityManager;
 class Entity
 {
 protected:
-    static std::unordered_map<char*, LCDBitmap*> bitmapCache;
+    static std::unordered_map<std::string, LCDBitmap*> bitmapCache;
 
 public:
     explicit Entity() = default;
@@ -22,9 +23,9 @@ public:
     virtual ~Entity() = default;
 
     [[nodiscard]] unsigned int GetId() const {return id;}
-    [[nodiscard]] const char * GetName() const {return name;}
-    [[nodiscard]] const char * GetDescription() const {return description;}
-    [[nodiscard]] const char * GetImagePath() const {return image_path;}
+    [[nodiscard]] const char* GetName() const {return name.c_str();}
+    [[nodiscard]] const char* GetDescription() const {return description.c_str();}
+    [[nodiscard]] const char* GetImagePath() const {return image_path.c_str();}
     [[nodiscard]] pdcpp::Point<int> GetPosition() const {return position;}
     [[nodiscard]] pdcpp::Point<int> GetTiledPosition() const {return tiledPosition;}
     [[nodiscard]] pdcpp::Point<int> GetCenteredPosition() const {return {position.x + size.x / 2, position.y + size.y / 2};}
@@ -34,9 +35,9 @@ public:
 
     void SetHP(float _hp) {hp = _hp;}
     void SetMaxHP(float _maxHP) {maxHP = _maxHP;}
-    void SetName(const char* _name) {name = _name;}
-    void SetDescription(char* _description) {description = _description;}
-    void SetImagePath(char* _image_path) {image_path = _image_path;}
+    void SetName(const std::string& _name) {name = _name;}
+    void SetDescription(const std::string& _description) {description = _description;}
+    void SetImagePath(const std::string& _image_path) {image_path = _image_path;}
     void SetPosition(pdcpp::Point<int> _position);
     void SetTiledPosition(pdcpp::Point<int> _tiledPosition);
     void SetSize(pdcpp::Point<int> _size) {size = _size;}
@@ -48,7 +49,7 @@ public:
     void DrawHealthBar() const;
 
     void LoadBitmap();
-    void LoadBitmap(char* path);
+    void LoadBitmap(const std::string& path);
     void DrawBitmap() const;
     void DrawBitmap(int x, int y);
     bool CalculateFlashing();
@@ -58,14 +59,14 @@ public:
 
 private:
     unsigned int id{};
-    const char* name{};
-    char* image_path{};
+    std::string name;
+    std::string image_path;
     pdcpp::Point<int> position = pdcpp::Point<int>(0, 0);
     pdcpp::Point<int> tiledPosition{0, 0}; // Position in tiles
     pdcpp::Point<int> size = pdcpp::Point<int>(0, 0);
     float hp{};
     float maxHP{};
-    char* description{};
+    std::string description;
     LCDBitmap* bitmap{};
     bool isBitmapVisible = true;
     int flashTimer = 0;

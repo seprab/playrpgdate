@@ -17,7 +17,7 @@ public:
     Monster() = default;
     Monster(const Monster &other) = default;
     Monster(Monster &&other) noexcept = default;
-    Monster(unsigned int _id, char* _name, char* _image, float _maxHp, int _strength, int _agility,
+    Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
 
     void Tick(Player* player, Area* area);

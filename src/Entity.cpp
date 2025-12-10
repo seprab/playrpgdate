@@ -8,14 +8,11 @@
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
-std::unordered_map<char*, LCDBitmap*> Entity::bitmapCache;
+std::unordered_map<std::string, LCDBitmap*> Entity::bitmapCache;
 
 Entity::Entity(const unsigned int _id):
 id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 {
-    name = nullptr;
-    image_path = nullptr;
-    description = nullptr;
     hp = 0;
     maxHP = 0;
     bitmap = nullptr;
@@ -23,7 +20,7 @@ id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 
 void Entity::LoadBitmap()
 {
-    if (!image_path) return;
+    if (image_path.empty()) return;
     auto it = bitmapCache.find(image_path);
     if (it != bitmapCache.end())
     {
@@ -32,11 +29,11 @@ void Entity::LoadBitmap()
     }
 
     const char *outErr = nullptr;
-    bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(image_path, &outErr);
+    bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(image_path.c_str(), &outErr);
 
     if (bitmap == nullptr)
     {
-        Log::Error("Entity %d couldn't load bitmap %s: %s", id, image_path, outErr);
+        Log::Error("Entity %d couldn't load bitmap %s: %s", id, image_path.c_str(), outErr);
     }
     else
     {
@@ -44,7 +41,7 @@ void Entity::LoadBitmap()
     }
 }
 
-void Entity::LoadBitmap(char *path)
+void Entity::LoadBitmap(const std::string& path)
 {
     image_path = path;
     LoadBitmap();

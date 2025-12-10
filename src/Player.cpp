@@ -25,7 +25,7 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     stab = std::make_unique<AnimationClip>();
     die = std::make_unique<AnimationClip>();
 
-    auto anim =new pdcpp::ImageTable("images/player/animmini");
+    auto anim = std::make_unique<pdcpp::ImageTable>("images/player/animmini");
     SetSize(pdcpp::Point<int>(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE));
     // 16 x 16
     // 16 x 4 = 64
