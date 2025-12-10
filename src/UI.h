@@ -19,8 +19,11 @@ enum class GameScreen {
     GAME_OVER
 };
 
+class EntityManager;
+
 class UI{
 private:
+    EntityManager* entityManager;
     GameScreen currentScreen;
     float loadingProgress;
     int selectedMenuItem;
@@ -41,7 +44,7 @@ private:
     LCDBitmap * playerFace;
 
 public:
-    explicit UI(const char*);
+    explicit UI(const char* fontPath, EntityManager* manager);
     void Update();
     void Draw() const;
     void HandleInputs();

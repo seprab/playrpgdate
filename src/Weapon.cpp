@@ -19,7 +19,7 @@ int Weapon::GetDamage() const {
     return damage;
 }
 
-std::shared_ptr<void> Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Weapon::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
 {
     std::vector<Weapon> weapons_decoded;
     for (int i = 0; i < size; i++)

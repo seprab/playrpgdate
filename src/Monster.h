@@ -21,7 +21,7 @@ public:
              int _constitution, float _evasion, unsigned int _xp, int weapon, int armor);
 
     void Tick(Player* player, Area* area);
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
     void SetCanComputePath(bool value) { canComputePath = value; }
 
 private:

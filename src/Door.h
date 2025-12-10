@@ -21,7 +21,7 @@ public:
     void SetLocked(int _locked);
     [[nodiscard]] int GetKey() const;
     [[nodiscard]] std::pair<int, int> GetAreas() const;
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
 };
 
 #endif

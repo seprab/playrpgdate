@@ -25,7 +25,7 @@ int Armor::GetDefense() const {
     return defense;
 }
 
-std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+std::shared_ptr<void> Armor::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) {
     std::vector<Armor> Armors_decoded;
     for (int i = 0; i < size; i++)
     {

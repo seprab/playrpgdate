@@ -54,7 +54,7 @@ public:
     bool LevelUp();
     [[nodiscard]] unsigned int GetSelectedMagic() const { return selectedMagic; }
     void Save(EntityManager* manager);
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
 
 };
 

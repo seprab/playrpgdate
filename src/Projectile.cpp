@@ -7,8 +7,8 @@
 #include "Log.h"
 #include "Monster.h"
 
-Projectile::Projectile(pdcpp::Point<int> Position):
-Magic(Position)
+Projectile::Projectile(pdcpp::Point<int> Position, Player* _player):
+Magic(Position, _player)
 {
     iLifetime = 2000;
     speed = 8;

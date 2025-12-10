@@ -13,7 +13,7 @@ Entity(_id)
     Log::Info("Item created with id: %d, name: %s, description: %s", _id, itemName, itemDescription);
 }
 
-std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Item::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
 {
     std::vector<Item> items_decoded;
     for (int i = 0; i < size; i++)

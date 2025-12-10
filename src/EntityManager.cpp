@@ -11,23 +11,9 @@
 #include "Utils.h"
 #include "pdcpp/core/File.h"
 
-// Initialize the instance pointer
-EntityManager* EntityManager::instance = nullptr;
-
 EntityManager::EntityManager()
 {
-    if (instance!= nullptr)
-    {
-        Log::Info("EntityManager was already initialized. This is a bug");
-        return;
-    }
-    instance = this;
-
-
-}
-EntityManager* EntityManager::GetInstance()
-{
-    return instance;
+    // No singleton initialization needed
 }
 EntityManager::~EntityManager()
 {
@@ -73,7 +59,7 @@ void EntityManager::DecodeJson(jsmn_parser *parser, char *charBuffer, const size
     int calculatedTokens = Utils::InitializeJSMN(parser, charBuffer, len, tokenLimit, t);
     Log::Info("Just initialized JSMN with %d tokens", calculatedTokens);
     T dummy{};
-    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens);
+    std::shared_ptr<void> decodedJson = dummy.DecodeJson(charBuffer, t, calculatedTokens, this);
     auto items = static_cast<std::vector<T>*>(decodedJson.get());
     for (T item : *items)
     {

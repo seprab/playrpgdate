@@ -26,6 +26,7 @@ struct Layer {
 class Area final : public Entity
 {
 private:
+    EntityManager* entityManager = nullptr;
     std::vector<Layer> mapData;
     std::shared_ptr<MapCollision> collider;
     pdcpp::ImageTable* imageTable = nullptr;
@@ -65,7 +66,7 @@ public:
     void SetTokenCount(int value){tokens=value;}
     void SetDataPath(char* value){dataPath=value;}
     void SetTilesetPath(char* value){tilesetPath=value;}
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
 
     pdcpp::ImageTable* GetImageTable() {return imageTable;}
     void LoadLayers(const char* fileName, int limitOfTokens);
@@ -89,6 +90,8 @@ public:
     [[nodiscard]] int GetTileWidth() const {return tileWidth;};
     [[nodiscard]] int GetTileHeight() const {return tileHeight;};
     [[nodiscard]] MapCollision* GetCollider() const {return collider.get();}
+
+    void SetEntityManager(EntityManager* manager) { entityManager = manager; }
 };
 
 #endif

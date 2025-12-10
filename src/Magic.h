@@ -10,10 +10,12 @@
 #include <memory>
 #include "Area.h"
 class Area;
+class Player;
+
 class Magic{
 public:
     Magic() = delete;
-    explicit Magic(pdcpp::Point<int> Position);
+    explicit Magic(pdcpp::Point<int> Position, Player* player);
     bool operator==(const Magic& other) const {return this == &other;}
 
     void Update(const std::shared_ptr<Area>& area);
@@ -24,6 +26,7 @@ public:
     [[nodiscard]] bool IsAlive() const{return isAlive;}
 
 protected:
+    Player* player;
     bool isAlive = false;
     unsigned int bornTime;
     unsigned int iLifetime{}; //milliseconds

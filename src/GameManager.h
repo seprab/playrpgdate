@@ -20,6 +20,7 @@ public:
 
 private:
     PlaydateAPI* pd;
+    std::unique_ptr<EntityManager> entityManager;
     std::shared_ptr<Player> player;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Area> activeArea;
