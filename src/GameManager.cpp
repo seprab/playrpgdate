@@ -6,11 +6,11 @@
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
 {
-    ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft");
+    entityManager = std::make_unique<EntityManager>();
+    ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft", entityManager.get());
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
     ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
     ui->SetOnGameOverSelected([this](){CleanGame();});
-    new EntityManager();
 }
 void GameManager::Update()
 {
@@ -30,22 +30,22 @@ void GameManager::Update()
         switch (frameCount)
         {
             case 0:
-                EntityManager::GetInstance()->LoadJSON<Item>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Item>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 1:
-                EntityManager::GetInstance()->LoadJSON<Door>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Door>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 2:
-                EntityManager::GetInstance()->LoadJSON<Weapon>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Weapon>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 3:
-                EntityManager::GetInstance()->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 4:
-                EntityManager::GetInstance()->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             case 5:
-                EntityManager::GetInstance()->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
+                entityManager->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
                 break;
             default:
                 progress = 1.f;
@@ -118,29 +118,31 @@ void GameManager::Update()
 GameManager::~GameManager()
 {
     SaveGame();
-    delete EntityManager::GetInstance();
+    // EntityManager is automatically cleaned up by unique_ptr
     Log::Info("GameManager destroyed");
 }
 
 void GameManager::LoadNewGame()
 {
-    activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
+    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
+    activeArea->SetEntityManager(entityManager.get());
     activeArea->Load();
 
     player = std::make_shared<Player>();
     player->SetTiledPosition(pdcpp::Point<int>(23, 32));
-    EntityManager::GetInstance()->SetPlayer(player);
+    entityManager->SetPlayer(player);
     isGameRunning = true;
 }
 
 void GameManager::LoadSavedGame()
 {
-    activeArea = std::static_pointer_cast<Area>(EntityManager::GetInstance()->GetEntity(9002));
+    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
+    activeArea->SetEntityManager(entityManager.get());
     activeArea->Load();
 
     player = std::make_shared<Player>();
     player->SetTiledPosition(pdcpp::Point<int>(23, 32));
-    EntityManager::GetInstance()->SetPlayer(player);
+    entityManager->SetPlayer(player);
     isGameRunning = true;
 
     const char* savePath = "saves/save.data";

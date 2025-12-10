@@ -62,9 +62,9 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     die->LoadBitmaps();
 
     availableMagic = {
-            [](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position); },
-            [](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position); },
-            [](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position); }
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, this); },
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, this); },
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position, this); }
     };
 }
 
@@ -205,6 +205,6 @@ void Player::Save(EntityManager* manager)
     //TODO: Implement player save
 }
 
-std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size) {
+std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) {
     return nullptr;
 }

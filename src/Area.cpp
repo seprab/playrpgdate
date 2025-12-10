@@ -32,7 +32,7 @@ Area::Area(Area &&other) noexcept
     SetName(other.GetName());
 }
 
-std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const int size)
+std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const int size, EntityManager* entityManager)
 {
     std::vector<Area> decodedAreas;
     for (int i = 0; i < size; i++)
@@ -79,7 +79,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
                 {
                     char* door = Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end);
                     int decodedDoor = std::stoi(door);
-                    auto originalInstance = EntityManager::GetInstance()->GetEntity(decodedDoor);
+                    auto originalInstance = entityManager->GetEntity(decodedDoor);
                     if (originalInstance == nullptr)
                     {
                         Log::Error("Door with ID %d not found", decodedDoor);
@@ -97,7 +97,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
                 for (int j = 0; j < numOfCreatures; j++)
                 {
                     int creatureId = std::stoi(Utils::Subchar(buffer, tokens[i+j].start, tokens[i+j].end));
-                    auto originalInstance = EntityManager::GetInstance()->GetEntity(creatureId);
+                    auto originalInstance = entityManager->GetEntity(creatureId);
                     if (originalInstance == nullptr)
                     {
                         Log::Error("Creature with ID %d not found", creatureId);
@@ -275,7 +275,7 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
         Log::Info("Max spawn attempts reached in Area::FindSpawnablePosition. Returning fallback position {0,0}.");
         return {0,0};
     }
-    pdcpp::Point<int> playerPosition = EntityManager::GetInstance()->GetPlayer()->GetTiledPosition();
+    pdcpp::Point<int> playerPosition = entityManager->GetPlayer()->GetTiledPosition();
     unsigned int randomIndex = random.next() % static_cast<unsigned int>(spawnablePositions.size());
     if (playerPosition.distance(spawnablePositions[randomIndex]) < Globals::MONSTER_SPAWN_RADIUS)
     {

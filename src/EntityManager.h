@@ -12,7 +12,6 @@
 class EntityManager
 {
 private:
-    static EntityManager* instance;
     std::map<unsigned int, std::shared_ptr<void>> data;
     std::shared_ptr<Player> player;
 
@@ -22,9 +21,6 @@ public:
     // Deleted copy constructor and assignment operator
     EntityManager(const EntityManager&) = delete;
     EntityManager& operator=(const EntityManager&) = delete;
-
-    // Method to get the instance of the class
-    static EntityManager* GetInstance();
 
     ~EntityManager();
 

@@ -17,7 +17,7 @@ public:
     Armor(const Armor& other);
     Armor(Armor&& other) noexcept;
 
-    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) override;
+    std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
     [[nodiscard]] int GetDefense() const;
 };
 

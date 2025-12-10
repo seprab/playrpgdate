@@ -40,7 +40,7 @@ std::pair<int, int> Door::GetAreas() const
     return areas;
 }
 
-std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size)
+std::shared_ptr<void> Door::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
 {
     std::vector<Door> doors_decoded;
     for (int i = 0; i < size; i++)

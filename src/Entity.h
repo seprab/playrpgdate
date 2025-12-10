@@ -54,7 +54,7 @@ public:
     bool CalculateFlashing();
     [[nodiscard]] bool IsAlive() const { return hp > 0; }
 
-    virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size) = 0;
+    virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) = 0;
 
 private:
     unsigned int id{};

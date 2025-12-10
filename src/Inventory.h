@@ -15,7 +15,7 @@ public:
     Inventory(const Inventory& other);
     Inventory(Inventory&& other) noexcept;
 
-    void Add(unsigned int itemId, int count=1);
+    void Add(unsigned int itemId, EntityManager* entityManager, int count=1);
     std::shared_ptr<Item> Remove(int itemId);
 
     int Count(int itemId);

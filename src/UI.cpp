@@ -10,7 +10,8 @@
 #include "pdcpp/graphics/Graphics.h"
 #include <pdcpp/graphics/LookAndFeel.h>
 
-UI::UI(const char *fontPath)
+UI::UI(const char *fontPath, EntityManager* manager)
+    : entityManager(manager)
 {
     const char* err;
 
@@ -106,7 +107,7 @@ void UI::HandleInputs()
             break;
         case GameScreen::GAME:
             {
-                std::shared_ptr<Player> player = EntityManager::GetInstance()->GetPlayer();
+                std::shared_ptr<Player> player = entityManager->GetPlayer();
                 if (!player->IsAlive())
                 {
                     SwitchScreen(GameScreen::GAME_OVER);
@@ -227,7 +228,7 @@ void UI::DrawMainMenu() const
 
 void UI::DrawGameScreen() const
 {
-    std::shared_ptr<Player> player = EntityManager::GetInstance()->GetPlayer();
+    std::shared_ptr<Player> player = entityManager->GetPlayer();
     PlaydateAPI* pdapi = pdcpp::GlobalPlaydateAPI::get();
     //load image as a background
     pdapi->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);

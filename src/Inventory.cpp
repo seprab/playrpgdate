@@ -34,11 +34,11 @@ void Inventory::Clear()
     items.clear();
 }
 
-void Inventory::Add(const unsigned int itemId, const int count)
+void Inventory::Add(const unsigned int itemId, EntityManager* entityManager, const int count)
 {
     for (int i = 0; i < count; i++)
     {
-        std::shared_ptr<void> item =  EntityManager::GetInstance()->GetEntity(itemId);
+        std::shared_ptr<void> item = entityManager->GetEntity(itemId);
 
         if (item == nullptr)
         {
