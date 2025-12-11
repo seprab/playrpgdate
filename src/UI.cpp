@@ -9,6 +9,7 @@
 #include "EntityManager.h"
 #include "pdcpp/graphics/Graphics.h"
 #include <pdcpp/graphics/LookAndFeel.h>
+#include "pdcpp/graphics/Colors.h"
 #include "UIConstants.h"
 
 UI::UI(const char *fontPath, EntityManager* manager)
@@ -354,14 +355,16 @@ void UI::DrawGameOverScreen() const
     using namespace UIConstants;
     PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
 
-    // Draw semi-transparent panel for game over screen
-    pd->graphics->fillRect(
+    // Draw semi-transparent panel using a 50% dithered pattern
+    // Using pdcpp's Graphics wrapper with a predefined dither pattern
+    pdcpp::Rectangle<int> panelRect(
         offset.x + GameOver::PANEL_OFFSET_X,
         offset.y + GameOver::PANEL_OFFSET_Y,
         GameOver::PANEL_WIDTH,
-        GameOver::PANEL_HEIGHT,
-        Theme::PANEL_COLOR
+        GameOver::PANEL_HEIGHT
     );
+
+    pdcpp::Graphics::fillRectangle(panelRect, pdcpp::Colors::transparent50GrayB);
 
     const char* gameOverText = "Game Over";
     const char* instructionText = "Press A to return to the main menu.";
