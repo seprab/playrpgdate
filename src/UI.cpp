@@ -137,11 +137,10 @@ void UI::Draw() const
         case GameScreen::MAIN_MENU:
             DrawMainMenu();
             break;
-        case GameScreen::GAME:
-            DrawGameScreen();
-            break;
         case GameScreen::GAME_OVER:
             DrawGameOverScreen();
+        case GameScreen::GAME:
+            DrawGameScreen();
             break;
         default:
             break;
