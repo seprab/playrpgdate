@@ -157,30 +157,30 @@ void UI::DrawLoadingScreen() const
     pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
 
     // Draw black banner for text
-    pd->graphics->fillRect(
+    pdcpp::Rectangle<int> banner(
         0, Loading::BANNER_Y,
-        SCREEN_WIDTH, Loading::BANNER_HEIGHT,
-        Theme::PANEL_COLOR
+        SCREEN_WIDTH, Loading::BANNER_HEIGHT
     );
+    pdcpp::Graphics::fillRectangle(banner, pdcpp::Colors::black);
 
     // Draw loading bar frame
-    pd->graphics->drawRect(
+    pdcpp::Rectangle<int> progressBarFrame(
         Loading::PROGRESS_BAR_X, Loading::PROGRESS_BAR_Y,
-        Loading::PROGRESS_BAR_WIDTH, Loading::PROGRESS_BAR_HEIGHT,
-        Theme::PROGRESS_BAR_COLOR
+        Loading::PROGRESS_BAR_WIDTH, Loading::PROGRESS_BAR_HEIGHT
     );
+    pdcpp::Graphics::drawRectangle(progressBarFrame, pdcpp::Colors::white);
 
     // Draw loading progress fill
     int progressWidth = static_cast<int>(
         loadingProgress * (Loading::PROGRESS_BAR_WIDTH - 2 * Loading::PROGRESS_BAR_PADDING)
     );
-    pd->graphics->fillRect(
+    pdcpp::Rectangle<int> progressBar(
         Loading::PROGRESS_BAR_X + Loading::PROGRESS_BAR_PADDING,
         Loading::PROGRESS_BAR_Y + Loading::PROGRESS_BAR_PADDING,
         progressWidth,
-        Loading::PROGRESS_BAR_HEIGHT - 2 * Loading::PROGRESS_BAR_PADDING,
-        Theme::PROGRESS_BAR_COLOR
+        Loading::PROGRESS_BAR_HEIGHT - 2 * Loading::PROGRESS_BAR_PADDING
     );
+    pdcpp::Graphics::fillRectangle(progressBar, pdcpp::Colors::white);
 
     // Animated loading text
     static int frameCount = 0;
@@ -229,11 +229,11 @@ void UI::DrawMainMenu() const
     pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
 
     // Draw menu panel
-    pd->graphics->fillRect(
+    pdcpp::Rectangle<int> panel(
         MainMenu::PANEL_X, MainMenu::PANEL_Y,
-        MainMenu::PANEL_WIDTH, MainMenu::PANEL_HEIGHT,
-        Theme::PANEL_COLOR
+        MainMenu::PANEL_WIDTH, MainMenu::PANEL_HEIGHT
     );
+    pdcpp::Graphics::fillRectangle(panel, pdcpp::Colors::black);
 
     // Draw title
     const char* title = "CardoBlast";
@@ -248,11 +248,12 @@ void UI::DrawMainMenu() const
         if (i == selectedMenuItem)
         {
             // Draw selection highlight
-            pd->graphics->fillRect(
+            pdcpp::Rectangle<int> selectionRect(
                 MainMenu::MENU_ITEM_X, itemY,
-                MainMenu::MENU_ITEM_WIDTH, MainMenu::MENU_ITEM_HEIGHT,
-                Theme::SELECTED_COLOR
+                MainMenu::MENU_ITEM_WIDTH, MainMenu::MENU_ITEM_HEIGHT
             );
+            pdcpp::Graphics::fillRectangle(selectionRect, pdcpp::Colors::white);
+
             // Draw text in inverse color (black on white)
             pd->graphics->drawText(
                 menuItems[i], strlen(menuItems[i]), kASCIIEncoding,

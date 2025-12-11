@@ -6,6 +6,8 @@
 #define CARDOBLAST_UICONSTANTS_H
 
 #include "pd_api.h"
+#include "pdcpp/graphics/Rectangle.h"
+#include "pdcpp/graphics/Point.h"
 
 namespace UIConstants {
     // Screen dimensions
@@ -17,13 +19,13 @@ namespace UIConstants {
     // Loading Screen
     namespace Loading {
         constexpr int BANNER_Y = 170;
-        constexpr int BANNER_HEIGHT = 50;
+        constexpr int BANNER_HEIGHT = 100;
         constexpr int PROGRESS_BAR_X = 50;
-        constexpr int PROGRESS_BAR_Y = 200;
+        constexpr int PROGRESS_BAR_Y = 215;
         constexpr int PROGRESS_BAR_WIDTH = 300;
         constexpr int PROGRESS_BAR_HEIGHT = 10;
         constexpr int PROGRESS_BAR_PADDING = 1;
-        constexpr int TEXT_Y = 180;
+        constexpr int TEXT_Y = 185;
         constexpr int TEXT_X_CENTER = 200;
         constexpr int TEXT_X_LEFT = 100;
         constexpr int ANIMATION_FRAME_DELAY = 10;
