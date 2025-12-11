@@ -10,6 +10,7 @@
 #include <memory>
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
+#include "pdcpp/graphics/Font.h"
 #include "CircularProgress.h"
 #include "UIConstants.h"
 
@@ -30,7 +31,7 @@ private:
     int selectedMenuItem;
     const char* menuItems[2] = {"New Game", "Load Game"};
     int menuItemCount = 2;
-    LCDFont* font;
+    pdcpp::Font font;  // Changed from LCDFont* to pdcpp::Font
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
 
@@ -64,9 +65,7 @@ private:
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
 
-    // Helper methods for drawing
-    void DrawCenteredText(const char* text, int y, LCDColor color = kColorWhite) const;
-    int GetTextWidth(const char* text) const;
+    // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;
 };
 

@@ -13,13 +13,10 @@
 #include "UIConstants.h"
 
 UI::UI(const char *fontPath, EntityManager* manager)
-    : entityManager(manager)
+    : font(fontPath)  // Initialize pdcpp::Font with path
+    , entityManager(manager)
 {
     const char* err;
-
-    font = pdcpp::GlobalPlaydateAPI::get()->graphics->loadFont(fontPath, &err);
-    if (font == nullptr)
-        Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontPath, err);
 
     const char* path = "images/ui/background.png";
     backgroundLoader = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
@@ -51,8 +48,6 @@ UI::UI(const char *fontPath, EntityManager* manager)
 
 void UI::Update()
 {
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setFont(font);
-
     HandleInputs();
     Draw();
 }
@@ -170,7 +165,7 @@ void UI::DrawLoadingScreen() const
     );
     pdcpp::Graphics::drawRectangle(progressBarFrame, pdcpp::Colors::white);
 
-    // Draw loading progress fill
+    // Draw loading progress fill (with padding)
     int progressWidth = static_cast<int>(
         loadingProgress * (Loading::PROGRESS_BAR_WIDTH - 2 * Loading::PROGRESS_BAR_PADDING)
     );
@@ -182,10 +177,16 @@ void UI::DrawLoadingScreen() const
     );
     pdcpp::Graphics::fillRectangle(progressBar, pdcpp::Colors::white);
 
-    // Animated loading text
+    // Animated loading text using Font::drawWrappedText
     static int frameCount = 0;
-    const char* loadingText;
+    std::string loadingText;
     frameCount++;
+
+    // Create text bounds for centered text
+    pdcpp::Rectangle<float> textBounds(
+        0, Loading::TEXT_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
 
     if (loadingProgress < 1.0f)
     {
@@ -197,7 +198,16 @@ void UI::DrawLoadingScreen() const
             case 2: loadingText = "..."; break;
             default: loadingText = ""; break;
         }
-        DrawCenteredText(loadingText, Loading::TEXT_Y, Theme::TEXT_COLOR);
+
+        // Set draw mode to white text on black background
+        SetTextDrawMode(Theme::TEXT_COLOR);
+        font.drawWrappedText(
+            loadingText,
+            textBounds,
+            pdcpp::Font::Center,
+            pdcpp::Font::Top
+        );
+        pd->graphics->setDrawMode(kDrawModeCopy);
     }
     else
     {
@@ -210,11 +220,14 @@ void UI::DrawLoadingScreen() const
             case 3:
             default: loadingText = ""; break;
         }
-        int textWidth = GetTextWidth(loadingText);
+
+        // Set draw mode to white text on black background
         SetTextDrawMode(Theme::TEXT_COLOR);
-        pd->graphics->drawText(
-            loadingText, strlen(loadingText), kASCIIEncoding,
-            Loading::TEXT_X_LEFT, Loading::TEXT_Y
+        font.drawWrappedText(
+            loadingText,
+            textBounds,
+            pdcpp::Font::Center,
+            pdcpp::Font::Top
         );
         pd->graphics->setDrawMode(kDrawModeCopy);
     }
@@ -228,45 +241,66 @@ void UI::DrawMainMenu() const
     // Draw background image
     pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
 
-    // Draw menu panel
+    // Draw menu panel with rounded corners for a nicer look
     pdcpp::Rectangle<int> panel(
         MainMenu::PANEL_X, MainMenu::PANEL_Y,
         MainMenu::PANEL_WIDTH, MainMenu::PANEL_HEIGHT
     );
-    pdcpp::Graphics::fillRectangle(panel, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRoundedRectangle(panel, 8, pdcpp::Colors::black);
 
-    // Draw title
-    const char* title = "CardoBlast";
-    DrawCenteredText(title, MainMenu::TITLE_Y, Theme::TEXT_COLOR);
+    // Draw title using Font::drawWrappedText for automatic centering
+    pdcpp::Rectangle<float> titleBounds(
+        0, MainMenu::TITLE_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(
+        "CardoBlast",
+        titleBounds,
+        pdcpp::Font::Center,
+        pdcpp::Font::Top
+    );
+    pd->graphics->setDrawMode(kDrawModeCopy);
 
     // Draw menu items
     for (int i = 0; i < menuItemCount; i++)
     {
         int itemY = MainMenu::MENU_START_Y + i * MainMenu::MENU_ITEM_SPACING;
-        int textY = itemY + MainMenu::MENU_TEXT_Y_OFFSET;
+
+        // Create bounds for this menu item
+        pdcpp::Rectangle<int> itemRect(
+            MainMenu::MENU_ITEM_X, itemY,
+            MainMenu::MENU_ITEM_WIDTH, MainMenu::MENU_ITEM_HEIGHT
+        );
+
+        // Add horizontal padding for text (10px left, 10px right)
+        pdcpp::Rectangle<float> textBounds = itemRect.toFloat();
+        textBounds.x += 10;
+        textBounds.width -= 20;
 
         if (i == selectedMenuItem)
         {
-            // Draw selection highlight
-            pdcpp::Rectangle<int> selectionRect(
-                MainMenu::MENU_ITEM_X, itemY,
-                MainMenu::MENU_ITEM_WIDTH, MainMenu::MENU_ITEM_HEIGHT
-            );
-            pdcpp::Graphics::fillRectangle(selectionRect, pdcpp::Colors::white);
+            // Draw selection highlight with rounded corners
+            pdcpp::Graphics::fillRoundedRectangle(itemRect, 4, pdcpp::Colors::white);
 
-            // Draw text in inverse color (black on white)
-            pd->graphics->drawText(
-                menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
-                MainMenu::MENU_TEXT_X, textY
+            // Draw text in inverse color (black on white) with padding
+            pd->graphics->setDrawMode(kDrawModeCopy); // Black text on white background
+            font.drawWrappedText(
+                menuItems[i],
+                textBounds,
+                pdcpp::Font::Left,
+                pdcpp::Font::Top
             );
         }
         else
         {
-            // Draw unselected text
+            // Draw unselected text with padding
             SetTextDrawMode(Theme::TEXT_COLOR);
-            pd->graphics->drawText(
-                menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
-                MainMenu::MENU_TEXT_X, textY
+            font.drawWrappedText(
+                menuItems[i],
+                textBounds,
+                pdcpp::Font::Left,
+                pdcpp::Font::Top
             );
             pd->graphics->setDrawMode(kDrawModeCopy);
         }
@@ -354,41 +388,30 @@ void UI::DrawGameScreen() const
 void UI::DrawGameOverScreen() const
 {
     using namespace UIConstants;
-    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
 
-    // Draw semi-transparent panel using a 50% dithered pattern
-    // Using pdcpp's Graphics wrapper with a predefined dither pattern
+    // Draw semi-transparent panel with rounded corners
     pdcpp::Rectangle<int> panelRect(
         offset.x + GameOver::PANEL_OFFSET_X,
         offset.y + GameOver::PANEL_OFFSET_Y,
         GameOver::PANEL_WIDTH,
         GameOver::PANEL_HEIGHT
     );
+    pdcpp::Graphics::fillRoundedRectangle(panelRect, 8, pdcpp::Colors::transparent50GrayB);
 
-    pdcpp::Graphics::fillRectangle(panelRect, pdcpp::Colors::transparent50GrayB);
+    // Use Font::drawWrappedText to draw all text at once with automatic centering
+    // Using "\n\n" creates nice spacing between lines
+    std::string text = "Game Over\n\nPress A to return to the main menu.";
 
-    const char* gameOverText = "Game Over";
-    const char* instructionText = "Press A to return to the main menu.";
-
-    // Draw "Game Over" text (centered, above center)
-    int gameOverTextWidth = GetTextWidth(gameOverText);
-    int gameOverX = offset.x - (gameOverTextWidth / 2);
-    int gameOverY = offset.y - GameOver::LINE_SPACING;
-
+    // Set draw mode to white text
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
     SetTextDrawMode(Theme::TEXT_COLOR);
-    pd->graphics->drawText(
-        gameOverText, strlen(gameOverText), kASCIIEncoding,
-        gameOverX, gameOverY
-    );
 
-    // Draw instruction text (centered, below center)
-    int instructionTextWidth = GetTextWidth(instructionText);
-    int instructionX = offset.x - (instructionTextWidth / 2);
-    int instructionY = offset.y + GameOver::LINE_SPACING;
-
-    pd->graphics->drawText(
-        instructionText, strlen(instructionText), kASCIIEncoding,
-        instructionX, instructionY
+    // The text will be centered both horizontally and vertically in the panel
+    font.drawWrappedText(
+        text,
+        panelRect.toFloat(),
+        pdcpp::Font::Center,   // Horizontally centered
+        pdcpp::Font::Middle    // Vertically centered
     );
 
     pd->graphics->setDrawMode(kDrawModeCopy);
@@ -407,25 +430,6 @@ void UI::UpdateLoadingProgress(float progress)
 }
 
 // Helper methods implementation
-void UI::DrawCenteredText(const char* text, int y, LCDColor color) const
-{
-    int textWidth = GetTextWidth(text);
-    int x = UIConstants::SCREEN_CENTER_X - (textWidth / 2);
-
-    SetTextDrawMode(color);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(
-        text, strlen(text), kASCIIEncoding, x, y
-    );
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode(kDrawModeCopy);
-}
-
-int UI::GetTextWidth(const char* text) const
-{
-    return pdcpp::GlobalPlaydateAPI::get()->graphics->getTextWidth(
-        font, text, strlen(text), kASCIIEncoding, 0
-    );
-}
-
 void UI::SetTextDrawMode(LCDColor color) const
 {
     if (color == kColorWhite)
