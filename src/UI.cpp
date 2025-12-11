@@ -9,15 +9,14 @@
 #include "EntityManager.h"
 #include "pdcpp/graphics/Graphics.h"
 #include <pdcpp/graphics/LookAndFeel.h>
+#include "pdcpp/graphics/Colors.h"
+#include "UIConstants.h"
 
 UI::UI(const char *fontPath, EntityManager* manager)
-    : entityManager(manager)
+    : font(fontPath)  // Initialize pdcpp::Font with path
+    , entityManager(manager)
 {
     const char* err;
-
-    font = pdcpp::GlobalPlaydateAPI::get()->graphics->loadFont(fontPath, &err);
-    if (font == nullptr)
-        Log::Error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontPath, err);
 
     const char* path = "images/ui/background.png";
     backgroundLoader = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
@@ -41,17 +40,14 @@ UI::UI(const char *fontPath, EntityManager* manager)
     if (playerFace == nullptr)
         Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
 
-    magicCooldown = std::make_unique<CircularProgress>(0, 0, 13);
+    magicCooldown = std::make_unique<CircularProgress>(0, 0, UIConstants::GameHUD::COOLDOWN_RADIUS);
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
     selectedMenuItem = 0;
-
 }
 
 void UI::Update()
 {
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setFont(font);
-
     HandleInputs();
     Draw();
 }
@@ -149,39 +145,74 @@ void UI::Draw() const
 
 void UI::DrawLoadingScreen() const
 {
-    //load image as a background
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
-    //And black banner for text
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(0, 170, 400, 50, kColorBlack);
+    using namespace UIConstants;
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    // Draw background image
+    pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
+
+    // Draw black banner for text
+    pdcpp::Rectangle<int> banner(
+        0, Loading::BANNER_Y,
+        SCREEN_WIDTH, Loading::BANNER_HEIGHT
+    );
+    pdcpp::Graphics::fillRectangle(banner, pdcpp::Colors::black);
 
     // Draw loading bar frame
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(50, 200, 300, 10, kColorWhite);
-    // Draw loading progress
-    int progressWidth = static_cast<int>(loadingProgress * 298);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(51, 201, progressWidth, 8, kColorWhite);
+    pdcpp::Rectangle<int> progressBarFrame(
+        Loading::PROGRESS_BAR_X, Loading::PROGRESS_BAR_Y,
+        Loading::PROGRESS_BAR_WIDTH, Loading::PROGRESS_BAR_HEIGHT
+    );
+    pdcpp::Graphics::drawRectangle(progressBarFrame, pdcpp::Colors::white);
 
+    // Draw loading progress fill (with padding)
+    int progressWidth = static_cast<int>(
+        loadingProgress * (Loading::PROGRESS_BAR_WIDTH - 2 * Loading::PROGRESS_BAR_PADDING)
+    );
+    pdcpp::Rectangle<int> progressBar(
+        Loading::PROGRESS_BAR_X + Loading::PROGRESS_BAR_PADDING,
+        Loading::PROGRESS_BAR_Y + Loading::PROGRESS_BAR_PADDING,
+        progressWidth,
+        Loading::PROGRESS_BAR_HEIGHT - 2 * Loading::PROGRESS_BAR_PADDING
+    );
+    pdcpp::Graphics::fillRectangle(progressBar, pdcpp::Colors::white);
 
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-    int textLen = 0;
+    // Animated loading text using Font::drawWrappedText
     static int frameCount = 0;
-    const char* loadingText;
+    std::string loadingText;
     frameCount++;
-    // Draw loading text
+
+    // Create text bounds for centered text
+    pdcpp::Rectangle<float> textBounds(
+        0, Loading::TEXT_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
+
     if (loadingProgress < 1.0f)
     {
-        switch (frameCount / 10 % 3)
+        // Simple dots animation
+        switch ((frameCount / Loading::ANIMATION_FRAME_DELAY) % 3)
         {
             case 0: loadingText = "."; break;
             case 1: loadingText = ".."; break;
             case 2: loadingText = "..."; break;
             default: loadingText = ""; break;
         }
-        textLen = static_cast<int>(strlen(loadingText));
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen, kASCIIEncoding, 200-textLen, 180);
+
+        // Set draw mode to white text on black background
+        SetTextDrawMode(Theme::TEXT_COLOR);
+        font.drawWrappedText(
+            loadingText,
+            textBounds,
+            pdcpp::Font::Center,
+            pdcpp::Font::Top
+        );
+        pd->graphics->setDrawMode(kDrawModeCopy);
     }
     else
     {
-        switch (frameCount / 10 % 4)
+        // Blinking "press button" message
+        switch ((frameCount / Loading::ANIMATION_FRAME_DELAY) % 4)
         {
             case 0: loadingText = "Press any button to continue."; break;
             case 1: loadingText = "Press any button to continue.."; break;
@@ -189,101 +220,201 @@ void UI::DrawLoadingScreen() const
             case 3:
             default: loadingText = ""; break;
         }
-        textLen = static_cast<int>(strlen(loadingText));
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(loadingText, textLen,kASCIIEncoding, 100, 180);
+
+        // Set draw mode to white text on black background
+        SetTextDrawMode(Theme::TEXT_COLOR);
+        font.drawWrappedText(
+            loadingText,
+            textBounds,
+            pdcpp::Font::Center,
+            pdcpp::Font::Top
+        );
+        pd->graphics->setDrawMode(kDrawModeCopy);
     }
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
 }
 
 void UI::DrawMainMenu() const
 {
-    //load image as a background
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(80, 30, 240, 160, kColorBlack);
+    using namespace UIConstants;
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
 
-    // Draw title
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText("CardoBlast", strlen("CardoBlast"), kASCIIEncoding, 150, 50);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+    // Draw background image
+    pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
+
+    // Draw menu panel with rounded corners for a nicer look
+    pdcpp::Rectangle<int> panel(
+        MainMenu::PANEL_X, MainMenu::PANEL_Y,
+        MainMenu::PANEL_WIDTH, MainMenu::PANEL_HEIGHT
+    );
+    pdcpp::Graphics::fillRoundedRectangle(panel, 8, pdcpp::Colors::black);
+
+    // Draw title using Font::drawWrappedText for automatic centering
+    pdcpp::Rectangle<float> titleBounds(
+        0, MainMenu::TITLE_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(
+        "CardoBlast",
+        titleBounds,
+        pdcpp::Font::Center,
+        pdcpp::Font::Top
+    );
+    pd->graphics->setDrawMode(kDrawModeCopy);
 
     // Draw menu items
     for (int i = 0; i < menuItemCount; i++)
     {
+        int itemY = MainMenu::MENU_START_Y + i * MainMenu::MENU_ITEM_SPACING;
+
+        // Create bounds for this menu item
+        pdcpp::Rectangle<int> itemRect(
+            MainMenu::MENU_ITEM_X, itemY,
+            MainMenu::MENU_ITEM_WIDTH, MainMenu::MENU_ITEM_HEIGHT
+        );
+
+        // Add horizontal padding for text (10px left, 10px right)
+        pdcpp::Rectangle<float> textBounds = itemRect.toFloat();
+        textBounds.x += 10;
+        textBounds.width -= 20;
+
         if (i == selectedMenuItem)
         {
-            pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(90, 100 + i * 30, 140, 20, kColorWhite);
-            pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
-                                   100, 102 + i * 30);
+            // Draw selection highlight with rounded corners
+            pdcpp::Graphics::fillRoundedRectangle(itemRect, 4, pdcpp::Colors::white);
+
+            // Draw text in inverse color (black on white) with padding
+            pd->graphics->setDrawMode(kDrawModeCopy); // Black text on white background
+            font.drawWrappedText(
+                menuItems[i],
+                textBounds,
+                pdcpp::Font::Left,
+                pdcpp::Font::Top
+            );
         }
         else
         {
-            pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-            pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(menuItems[i], strlen(menuItems[i]), kASCIIEncoding,
-                                   100, 102 + i * 30);
-            pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
+            // Draw unselected text with padding
+            SetTextDrawMode(Theme::TEXT_COLOR);
+            font.drawWrappedText(
+                menuItems[i],
+                textBounds,
+                pdcpp::Font::Left,
+                pdcpp::Font::Top
+            );
+            pd->graphics->setDrawMode(kDrawModeCopy);
         }
     }
 }
 
 void UI::DrawGameScreen() const
 {
+    using namespace UIConstants;
     std::shared_ptr<Player> player = entityManager->GetPlayer();
-    PlaydateAPI* pdapi = pdcpp::GlobalPlaydateAPI::get();
-    //load image as a background
-    pdapi->graphics->drawBitmap(gameOverlay, offset.x-200, offset.y-120, kBitmapUnflipped);
-    pdapi->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
 
-    // Show player coordinates in the top-right of the screen, x and y in separate rects to make it easier to read
-    pdcpp::Point<int> playerTiledPos = player->GetTiledPosition();
-    char posX[3], posY[3];
-    snprintf(posX, sizeof(posX), "%d", playerTiledPos.x);
-    snprintf(posY, sizeof(posY), "%d", playerTiledPos.y);
-    // Ugly fix, so the first frame we avoid drawing the coordinates far from screen boundaries
+    // Draw game overlay HUD
+    pd->graphics->drawBitmap(
+        gameOverlay,
+        offset.x + GameHUD::OVERLAY_OFFSET_X,
+        offset.y + GameHUD::OVERLAY_OFFSET_Y,
+        kBitmapUnflipped
+    );
+
+    // Draw player coordinates (avoid first frame to prevent drawing off-screen)
     if (offset.x != 0 && offset.y != 0)
     {
-        pdapi->graphics->drawText(posX, strlen(posX), kASCIIEncoding, offset.x + 125, offset.y - 115);
-        pdapi->graphics->drawText(posY, strlen(posY), kASCIIEncoding, offset.x + 170, offset.y - 115);
+        pdcpp::Point<int> playerTiledPos = player->GetTiledPosition();
+        char posX[3], posY[3];
+        snprintf(posX, sizeof(posX), "%d", playerTiledPos.x);
+        snprintf(posY, sizeof(posY), "%d", playerTiledPos.y);
+
+        SetTextDrawMode(Theme::TEXT_COLOR);
+        pd->graphics->drawText(
+            posX, strlen(posX), kASCIIEncoding,
+            offset.x + GameHUD::COORDS_X_OFFSET,
+            offset.y + GameHUD::COORDS_Y_OFFSET_Y
+        );
+        pd->graphics->drawText(
+            posY, strlen(posY), kASCIIEncoding,
+            offset.x + GameHUD::COORDS_Y_OFFSET_X,
+            offset.y + GameHUD::COORDS_Y_OFFSET_Y
+        );
+        pd->graphics->setDrawMode(kDrawModeCopy);
     }
 
-
-    pdapi->graphics->setDrawMode( kDrawModeCopy ); // returning it to default
-    magicCooldown->UpdatePosition(offset.x, offset.y-106);
+    // Draw magic cooldown indicator
+    magicCooldown->UpdatePosition(
+        offset.x,
+        offset.y + GameHUD::MAGIC_COOLDOWN_Y_OFFSET
+    );
     magicCooldown->Draw(player->GetCooldownPercentage());
 
+    // Draw magic icons (previous, current, next)
     const unsigned int activeMagic = player->GetSelectedMagic();
-    const int indexA = (activeMagic == 0) ? static_cast<int>(magicIcons.size()) - 1 : static_cast<int>(activeMagic) - 1;
-    const int indexB = static_cast<int>(activeMagic);
-    const int indexC = static_cast<int>((activeMagic + 1) % static_cast<unsigned int>(magicIcons.size()));
-    pdapi->graphics->drawBitmap(magicIcons[indexA], offset.x-57, offset.y + 87, kBitmapUnflipped);
-    pdapi->graphics->drawBitmap(magicIcons[indexB], offset.x-17, offset.y + 85, kBitmapUnflipped);
-    pdapi->graphics->drawBitmap(magicIcons[indexC], offset.x+23, offset.y + 87, kBitmapUnflipped);
+    const int iconCount = static_cast<int>(magicIcons.size());
+    const int prevIndex = (activeMagic == 0) ? iconCount - 1 : activeMagic - 1;
+    const int currIndex = static_cast<int>(activeMagic);
+    const int nextIndex = (activeMagic + 1) % iconCount;
 
-    pdapi->graphics->drawBitmap(playerFace, offset.x-205, offset.y-130, kBitmapUnflipped);
+    pd->graphics->drawBitmap(
+        magicIcons[prevIndex],
+        offset.x + GameHUD::MAGIC_ICON_LEFT_X_OFFSET,
+        offset.y + GameHUD::MAGIC_ICON_LEFT_Y_OFFSET,
+        kBitmapUnflipped
+    );
+    pd->graphics->drawBitmap(
+        magicIcons[currIndex],
+        offset.x + GameHUD::MAGIC_ICON_CENTER_X_OFFSET,
+        offset.y + GameHUD::MAGIC_ICON_CENTER_Y_OFFSET,
+        kBitmapUnflipped
+    );
+    pd->graphics->drawBitmap(
+        magicIcons[nextIndex],
+        offset.x + GameHUD::MAGIC_ICON_RIGHT_X_OFFSET,
+        offset.y + GameHUD::MAGIC_ICON_RIGHT_Y_OFFSET,
+        kBitmapUnflipped
+    );
+
+    // Draw player face icon
+    pd->graphics->drawBitmap(
+        playerFace,
+        offset.x + GameHUD::PLAYER_FACE_X_OFFSET,
+        offset.y + GameHUD::PLAYER_FACE_Y_OFFSET,
+        kBitmapUnflipped
+    );
 }
 
 void UI::DrawGameOverScreen() const
 {
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(offset.x - 200, offset.y - 60, 400, 120, kColorBlack);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeFillWhite ); // making text to draw in white
-    int textLen = 0;
-    const char* gameOverTextA = "Game Over";
-    const char* gameOverTextB = "Press A to return to the main menu.";
+    using namespace UIConstants;
 
-    pdcpp::Point<int> textPosition = pdcpp::Point<int>(offset.x, offset.y);
-    textLen = static_cast<int>(strlen(gameOverTextA));
-    textLen = pdcpp::GlobalPlaydateAPI::get()->graphics->getTextWidth(font, gameOverTextA, textLen, kASCIIEncoding, 0);
-    textPosition.x -= (textLen/2);
-    textPosition.y -= Globals::PLAYER_SIZE; // Move down for the second line
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(gameOverTextA, textLen, kASCIIEncoding, textPosition.x, textPosition.y);
+    // Draw semi-transparent panel with rounded corners
+    pdcpp::Rectangle<int> panelRect(
+        offset.x + GameOver::PANEL_OFFSET_X,
+        offset.y + GameOver::PANEL_OFFSET_Y,
+        GameOver::PANEL_WIDTH,
+        GameOver::PANEL_HEIGHT
+    );
+    pdcpp::Graphics::fillRoundedRectangle(panelRect, 8, pdcpp::Colors::transparent50GrayB);
 
-    textPosition = pdcpp::Point<int>(offset.x, offset.y);
-    textLen = static_cast<int>(strlen(gameOverTextB));
-    textLen = pdcpp::GlobalPlaydateAPI::get()->graphics->getTextWidth(font, gameOverTextB, textLen, kASCIIEncoding, 0);
-    textPosition.x -= (textLen / 2);
-    textPosition.y += Globals::PLAYER_SIZE; // Move down for the second line
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawText(gameOverTextB, textLen, kASCIIEncoding, textPosition.x, textPosition.y);
+    // Use Font::drawWrappedText to draw all text at once with automatic centering
+    // Using "\n\n" creates nice spacing between lines
+    std::string text = "Game Over\n\nPress A to return to the main menu.";
 
-    pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode( kDrawModeCopy );
+    // Set draw mode to white text
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+    SetTextDrawMode(Theme::TEXT_COLOR);
+
+    // The text will be centered both horizontally and vertically in the panel
+    font.drawWrappedText(
+        text,
+        panelRect.toFloat(),
+        pdcpp::Font::Center,   // Horizontally centered
+        pdcpp::Font::Middle    // Vertically centered
+    );
+
+    pd->graphics->setDrawMode(kDrawModeCopy);
 }
 
 void UI::SwitchScreen(GameScreen newScreen)
@@ -296,4 +427,13 @@ void UI::UpdateLoadingProgress(float progress)
     loadingProgress = progress;
     if (loadingProgress > 1.0f) loadingProgress = 1.0f;
     if (loadingProgress < 0.0f) loadingProgress = 0.0f;
+}
+
+// Helper methods implementation
+void UI::SetTextDrawMode(LCDColor color) const
+{
+    if (color == kColorWhite)
+        pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode(kDrawModeFillWhite);
+    else
+        pdcpp::GlobalPlaydateAPI::get()->graphics->setDrawMode(kDrawModeCopy);
 }

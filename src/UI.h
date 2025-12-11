@@ -10,7 +10,9 @@
 #include <memory>
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
+#include "pdcpp/graphics/Font.h"
 #include "CircularProgress.h"
+#include "UIConstants.h"
 
 enum class GameScreen {
     LOADING,
@@ -29,11 +31,11 @@ private:
     int selectedMenuItem;
     const char* menuItems[2] = {"New Game", "Load Game"};
     int menuItemCount = 2;
-    LCDFont* font;
+    pdcpp::Font font;  // Changed from LCDFont* to pdcpp::Font
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
 
-    const float inputCooldown{0.5f};
+    const float inputCooldown{UIConstants::Input::COOLDOWN};
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
 
@@ -62,6 +64,9 @@ private:
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
+
+    // Helper methods for drawing (kept for compatibility, but prefer Font methods)
+    void SetTextDrawMode(LCDColor color) const;
 };
 
 
