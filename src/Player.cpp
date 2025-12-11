@@ -63,9 +63,9 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     die->LoadBitmaps();
 
     availableMagic = {
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, this); },
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, this); },
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position, this); }
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, weak_from_this()); },
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, weak_from_this()); },
+            [this](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position, weak_from_this()); }
     };
 }
 

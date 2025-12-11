@@ -11,7 +11,7 @@
 class Beam : public Magic{
 public:
     Beam() = delete;
-    explicit Beam(pdcpp::Point<int> Position, Player* player);
+    explicit Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> player);
     bool operator==(const Beam& other) const {return this == &other;}
 
     void Draw() const override;

@@ -12,7 +12,7 @@
 class OrbitingProjectiles : public Magic{
 public:
     OrbitingProjectiles() = delete;
-    explicit OrbitingProjectiles(pdcpp::Point<int> Position, Player* player);
+    explicit OrbitingProjectiles(pdcpp::Point<int> Position, std::weak_ptr<Player> player);
     bool operator==(const OrbitingProjectiles& other) const {return this == &other;}
 
     void Draw() const override;

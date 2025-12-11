@@ -7,8 +7,8 @@
 #include "EntityManager.h"
 #include "Monster.h"
 
-OrbitingProjectiles::OrbitingProjectiles(const pdcpp::Point<int> Position, Player* _player) :
-        Magic(Position, _player) {
+OrbitingProjectiles::OrbitingProjectiles(const pdcpp::Point<int> Position, std::weak_ptr<Player> _player) :
+        Magic(Position, std::move(_player)) {
     iLifetime = 4000;
     size = 10;
     radius = 40;
@@ -24,7 +24,9 @@ void OrbitingProjectiles::Draw() const
 }
 
 void OrbitingProjectiles::HandleInput() {
-    position = player->GetCenteredPosition();
+    std::shared_ptr<Player> p = player.lock();
+    if (!p) return; // player was destroyed
+    position = p->GetCenteredPosition();
     const float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange()* kPI /180.f;
 
     for (int i=0; i< sizeof(angles) / sizeof(angles[0]); i++)
@@ -39,7 +41,9 @@ void OrbitingProjectiles::HandleInput() {
 
 void OrbitingProjectiles::Damage(const std::shared_ptr<Area>& area)
 {
-    position = player->GetCenteredPosition();
+    std::shared_ptr<Player> p = player.lock();
+    if (!p) return; //Player has been destroyed
+    position = p->GetCenteredPosition();
     for (const auto& entity : area->GetCreatures())
     {
         const pdcpp::Point<int> creaturePos = entity->GetPosition();

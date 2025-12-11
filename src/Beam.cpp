@@ -8,8 +8,8 @@
 #include "Log.h"
 #include "Monster.h"
 
-Beam::Beam(pdcpp::Point<int> Position, Player* _player) :
-Magic(Position, _player), startPosition(position), endPosition(Position) {
+Beam::Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> _player) :
+Magic(Position, std::move(_player)), startPosition(position), endPosition(Position) {
     iLifetime = 2000;
     size = 1;
     explosionThreshold = 300;
@@ -27,7 +27,9 @@ void Beam::HandleInput()
     float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle()* kPI /180.f;
     float startDistance = 30.f;
     float length = 150.f;
-    position = player->GetCenteredPosition();
+    std::shared_ptr<Player> p = player.lock();
+    if (!p) return; //Player has been destroyed
+    position = p->GetCenteredPosition();
     startPosition.x = position.x + (int)(cos(angle) * startDistance);
     startPosition.y = position.y + (int)(sin(angle) * startDistance);
     endPosition.x = position.x + (int)(cos(angle) * length);

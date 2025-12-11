@@ -6,8 +6,8 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
 
-Magic::Magic(pdcpp::Point<int> Position, Player* _player):
-position(Position), player(_player)
+Magic::Magic(pdcpp::Point<int> Position, std::weak_ptr<Player> _player):
+position(Position), player(std::move(_player))
 {
     isAlive = true;
     elapsedTime = 0;

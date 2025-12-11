@@ -10,7 +10,7 @@
 class EntityManager;
 class Area;
 
-class Player : public Creature
+class Player : public Creature, public std::enable_shared_from_this<Player>
 {
 private:
     std::string className;

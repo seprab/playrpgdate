@@ -15,7 +15,7 @@ class Player;
 class Magic{
 public:
     Magic() = delete;
-    explicit Magic(pdcpp::Point<int> Position, Player* player);
+    explicit Magic(pdcpp::Point<int> Position, std::weak_ptr<Player> player);
     bool operator==(const Magic& other) const {return this == &other;}
 
     void Update(const std::shared_ptr<Area>& area);
@@ -26,7 +26,7 @@ public:
     [[nodiscard]] bool IsAlive() const{return isAlive;}
 
 protected:
-    Player* player;
+    std::weak_ptr<Player> player;
     bool isAlive = false;
     unsigned int bornTime;
     unsigned int iLifetime{}; //milliseconds
