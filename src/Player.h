@@ -17,6 +17,7 @@ private:
     unsigned int level;
     std::unordered_set<std::string> visitedAreas;
 
+    std::unique_ptr<pdcpp::ImageTable> animationTable;
     // Animation clips
     std::unique_ptr<AnimationClip> idle{};
     std::unique_ptr<AnimationClip> run{};

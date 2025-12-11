@@ -25,39 +25,40 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     stab = std::make_unique<AnimationClip>();
     die = std::make_unique<AnimationClip>();
 
-    auto anim = std::make_unique<pdcpp::ImageTable>("images/player/animmini");
+    animationTable = std::make_unique<pdcpp::ImageTable>("images/player/animmini");
+    auto& anim = *animationTable;  // Reference to the ImageTable
     SetSize(pdcpp::Point<int>(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE));
     // 16 x 16
     // 16 x 4 = 64
     // 16 x 5 = 80
-    idle->AddBitmap((*anim)[0]);
-    idle->AddBitmap((*anim)[1]);
+    idle->AddBitmap(anim[0]);
+    idle->AddBitmap(anim[1]);
     idle->SetDelay(4);
     idle->LoadBitmaps();
 
-    run->AddBitmap((*anim)[4]);
-    run->AddBitmap((*anim)[5]);
-    run->AddBitmap((*anim)[6]);
-    run->AddBitmap((*anim)[7]);
+    run->AddBitmap(anim[4]);
+    run->AddBitmap(anim[5]);
+    run->AddBitmap(anim[6]);
+    run->AddBitmap(anim[7]);
     run->SetDelay(3);
     run->LoadBitmaps();
 
-    attack->AddBitmap((*anim)[8]);
-    attack->AddBitmap((*anim)[9]);
-    attack->AddBitmap((*anim)[10]);
-    attack->AddBitmap((*anim)[11]);
+    attack->AddBitmap(anim[8]);
+    attack->AddBitmap(anim[9]);
+    attack->AddBitmap(anim[10]);
+    attack->AddBitmap(anim[11]);
     attack->SetDelay(0);
     attack->LoadBitmaps();
 
-    stab->AddBitmap((*anim)[12]);
-    stab->AddBitmap((*anim)[13]);
-    stab->AddBitmap((*anim)[14]);
+    stab->AddBitmap(anim[12]);
+    stab->AddBitmap(anim[13]);
+    stab->AddBitmap(anim[14]);
     stab->SetDelay(0);
     stab->LoadBitmaps();
 
-    die->AddBitmap((*anim)[16]);
-    die->AddBitmap((*anim)[17]);
-    die->AddBitmap((*anim)[18]);
+    die->AddBitmap(anim[16]);
+    die->AddBitmap(anim[17]);
+    die->AddBitmap(anim[18]);
     die->SetDelay(4);
     die->LoadBitmaps();
 
