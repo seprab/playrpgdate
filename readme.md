@@ -6,6 +6,7 @@ Why? Usually, Everything I worked on is private, and I wanted to change that.
 
 ## Documentation
 This documentation is divided into several sections, each with its own purpose. You can find the links to the different sections below:
+- [Architecture](Docs/Architecture.md): This section documents key architectural decisions and design patterns used in the codebase.
 - [Next Steps](Docs/NextSteps.md): This section contains the next steps I want to take with this project.
 - [Building](Docs/Building.md): This section contains the instructions to build the project in different environments.
 - [Maps](Docs/Maps.md): This section contains the instructions to create maps for the game.
