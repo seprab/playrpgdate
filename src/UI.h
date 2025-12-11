@@ -11,6 +11,7 @@
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "CircularProgress.h"
+#include "UIConstants.h"
 
 enum class GameScreen {
     LOADING,
@@ -33,7 +34,7 @@ private:
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
 
-    const float inputCooldown{0.5f};
+    const float inputCooldown{UIConstants::Input::COOLDOWN};
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
 
@@ -62,6 +63,11 @@ private:
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
+
+    // Helper methods for drawing
+    void DrawCenteredText(const char* text, int y, LCDColor color = kColorWhite) const;
+    int GetTextWidth(const char* text) const;
+    void SetTextDrawMode(LCDColor color) const;
 };
 
 
