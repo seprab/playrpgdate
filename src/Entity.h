@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <pd_api/pd_api_file.h>
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
 #include "pdcpp/graphics/Point.h"
