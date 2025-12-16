@@ -408,10 +408,18 @@ void UI::DrawGameOverScreen() const
     );
     pdcpp::Graphics::fillRoundedRectangle(panelRectB, 8, pdcpp::Colors::black);
 
+    // Get player stats
+    std::shared_ptr<Player> player = entityManager->GetPlayer();
+    unsigned int kills = player->GetMonstersKilled();
+    unsigned int survivalTime = player->GetSurvivalTimeSeconds();
+    unsigned int minutes = survivalTime / 60;
+    unsigned int seconds = survivalTime % 60;
 
-    // Use Font::drawWrappedText to draw all text at once with automatic centering
-    // Using "\n\n" creates nice spacing between lines
-    std::string text = "Game Over\n\nPress A to return to the main menu.";
+    // Format the stats text
+    char statsBuffer[128];
+    snprintf(statsBuffer, sizeof(statsBuffer),
+        "Game Over\n\nMonsters Killed: %u\nTime Survived: %u:%02u\n\nPress A to return to the main menu.",
+        kills, minutes, seconds);
 
     // Set draw mode to white text
     PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
@@ -419,7 +427,7 @@ void UI::DrawGameOverScreen() const
 
     // The text will be centered both horizontally and vertically in the panel
     font.drawWrappedText(
-        text,
+        statsBuffer,
         panelRectB.toFloat(),
         pdcpp::Font::Center,   // Horizontally centered
         pdcpp::Font::Middle    // Vertically centered

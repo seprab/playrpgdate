@@ -9,6 +9,7 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "EntityManager.h"
 #include "Monster.h"
+#include "Player.h"
 #include "pdcpp/core/Random.h"
 
 Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
@@ -347,10 +348,16 @@ void Area::Tick(Player* player)
             static_cast<float>(blockedPosition.y));
     }
 
-    // If any monster has died, we will remove it from the living monsters list
-    std::erase_if(livingMonsters,
+    // Count dead monsters and increment player's kill count, then remove them from the living monsters list
+    size_t deadMonsters = std::erase_if(livingMonsters,
                   [](const std::shared_ptr<Monster>& monster)
                   { return !monster->IsAlive(); });
+
+    // Increment player's kill count for each dead monster
+    for (size_t i = 0; i < deadMonsters; ++i)
+    {
+        player->IncrementKillCount();
+    }
 }
 Map_Layer Area::ToMapLayer() const
 {

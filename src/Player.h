@@ -39,6 +39,11 @@ private:
     unsigned int autoFireCooldown = 1000; // 1 second
     unsigned int lastAutoFireTime;
 
+    // Game stats tracking
+    unsigned int monstersKilled = 0;
+    unsigned int gameStartTime = 0;
+    unsigned int finalSurvivalTime = 0; // Captured when player dies
+
 public:
     Player();
     Player(const Player& other) = delete;
@@ -50,6 +55,7 @@ public:
     void HandleAutoFire(const std::shared_ptr<Area>& area);
     void Draw() override;
     void DrawAimDirection() const;
+    void Damage(float damage); // Override to capture final survival time
 
     float GetCooldownPercentage() const;
     std::string GetClassName();
@@ -61,6 +67,13 @@ public:
     [[nodiscard]] unsigned int GetSelectedMagic() const { return selectedMagic; }
     void Save(EntityManager* manager);
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
+
+    // Game stats
+    void IncrementKillCount() { monstersKilled++; }
+    [[nodiscard]] unsigned int GetMonstersKilled() const { return monstersKilled; }
+    void SetGameStartTime(unsigned int time) { gameStartTime = time; }
+    [[nodiscard]] unsigned int GetSurvivalTimeSeconds() const;
+    void ResetStats();
 
 };
 

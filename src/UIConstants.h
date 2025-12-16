@@ -74,8 +74,8 @@ namespace UIConstants {
         constexpr int PANELA_WIDTH = PANELA_OFFSET_X * -2;
         constexpr int PANELA_HEIGHT = PANELA_OFFSET_Y * -2;
 
-        constexpr int PANELB_OFFSET_X = -200;
-        constexpr int PANELB_OFFSET_Y = -50;
+        constexpr int PANELB_OFFSET_X = -160;
+        constexpr int PANELB_OFFSET_Y = -80;
         constexpr int PANELB_WIDTH = PANELB_OFFSET_X * -2;
         constexpr int PANELB_HEIGHT = PANELB_OFFSET_Y * -2;
 

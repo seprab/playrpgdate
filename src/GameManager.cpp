@@ -134,6 +134,7 @@ void GameManager::LoadNewGame()
 
     player = std::make_shared<Player>();
     player->SetTiledPosition(pdcpp::Point<int>(23, 32));
+    player->ResetStats(); // Initialize game stats
     entityManager->SetPlayer(player);
     isGameRunning = true;
 }
@@ -146,6 +147,7 @@ void GameManager::LoadSavedGame()
 
     player = std::make_shared<Player>();
     player->SetTiledPosition(pdcpp::Point<int>(23, 32));
+    player->ResetStats(); // Initialize game stats
     entityManager->SetPlayer(player);
     isGameRunning = true;
 

@@ -264,3 +264,39 @@ void Player::Save(EntityManager* manager)
 std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) {
     return nullptr;
 }
+
+unsigned int Player::GetSurvivalTimeSeconds() const
+{
+    // If player is dead, return the final survival time
+    if (!IsAlive() && finalSurvivalTime > 0)
+    {
+        return finalSurvivalTime;
+    }
+
+    // Otherwise, calculate current survival time
+    if (gameStartTime == 0) return 0;
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    return (currentTime - gameStartTime) / 1000; // Convert to seconds
+}
+
+void Player::ResetStats()
+{
+    monstersKilled = 0;
+    finalSurvivalTime = 0;
+    gameStartTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+}
+
+void Player::Damage(float damage)
+{
+    bool wasAlive = IsAlive();
+
+    // Call the base class Damage method
+    Creature::Damage(damage);
+
+    // If the player just died (was alive but now isn't), capture the final survival time
+    if (wasAlive && !IsAlive() && finalSurvivalTime == 0)
+    {
+        unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+        finalSurvivalTime = (currentTime - gameStartTime) / 1000; // Convert to seconds
+    }
+}
