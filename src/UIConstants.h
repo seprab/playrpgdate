@@ -69,10 +69,16 @@ namespace UIConstants {
 
     // Game Over Screen
     namespace GameOver {
-        constexpr int PANEL_OFFSET_X = -200;
-        constexpr int PANEL_OFFSET_Y = -60;
-        constexpr int PANEL_WIDTH = 400;
-        constexpr int PANEL_HEIGHT = 120;
+        constexpr int PANELA_OFFSET_X = -200;
+        constexpr int PANELA_OFFSET_Y = -120;
+        constexpr int PANELA_WIDTH = PANELA_OFFSET_X * -2;
+        constexpr int PANELA_HEIGHT = PANELA_OFFSET_Y * -2;
+
+        constexpr int PANELB_OFFSET_X = -200;
+        constexpr int PANELB_OFFSET_Y = -50;
+        constexpr int PANELB_WIDTH = PANELB_OFFSET_X * -2;
+        constexpr int PANELB_HEIGHT = PANELB_OFFSET_Y * -2;
+
         constexpr int LINE_SPACING = 16;  // Using PLAYER_SIZE from Globals
     }
 

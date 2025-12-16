@@ -134,7 +134,9 @@ void UI::Draw() const
             DrawMainMenu();
             break;
         case GameScreen::GAME_OVER:
+            DrawGameScreen();
             DrawGameOverScreen();
+            break;
         case GameScreen::GAME:
             DrawGameScreen();
             break;
@@ -390,13 +392,22 @@ void UI::DrawGameOverScreen() const
     using namespace UIConstants;
 
     // Draw semi-transparent panel with rounded corners
-    pdcpp::Rectangle<int> panelRect(
-        offset.x + GameOver::PANEL_OFFSET_X,
-        offset.y + GameOver::PANEL_OFFSET_Y,
-        GameOver::PANEL_WIDTH,
-        GameOver::PANEL_HEIGHT
+    pdcpp::Rectangle<int> panelRectA(
+        offset.x + GameOver::PANELA_OFFSET_X,
+        offset.y + GameOver::PANELA_OFFSET_Y,
+        GameOver::PANELA_WIDTH,
+        GameOver::PANELA_HEIGHT
     );
-    pdcpp::Graphics::fillRoundedRectangle(panelRect, 8, pdcpp::Colors::transparent50GrayB);
+    pdcpp::Graphics::fillRoundedRectangle(panelRectA, 8, pdcpp::Colors::transparent50GrayB);
+
+    pdcpp::Rectangle<int> panelRectB(
+        offset.x + GameOver::PANELB_OFFSET_X,
+        offset.y + GameOver::PANELB_OFFSET_Y,
+        GameOver::PANELB_WIDTH,
+        GameOver::PANELB_HEIGHT
+    );
+    pdcpp::Graphics::fillRoundedRectangle(panelRectB, 8, pdcpp::Colors::black);
+
 
     // Use Font::drawWrappedText to draw all text at once with automatic centering
     // Using "\n\n" creates nice spacing between lines
@@ -409,7 +420,7 @@ void UI::DrawGameOverScreen() const
     // The text will be centered both horizontally and vertically in the panel
     font.drawWrappedText(
         text,
-        panelRect.toFloat(),
+        panelRectB.toFloat(),
         pdcpp::Font::Center,   // Horizontally centered
         pdcpp::Font::Middle    // Vertically centered
     );
