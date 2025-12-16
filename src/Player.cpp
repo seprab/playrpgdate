@@ -119,8 +119,8 @@ void Player::Draw()
 }
 void Player::HandleInput()
 {
-    PDButtons clicked;
-    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, nullptr, nullptr);
+    PDButtons clicked, pushed;
+    pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, &pushed, nullptr);
     dx = 0, dy = 0;
     if (clicked & kButtonRight)
     {
@@ -143,7 +143,7 @@ void Player::HandleInput()
     dx *= static_cast<int>(GetMovementSpeed());
     dy *= static_cast<int>(GetMovementSpeed());
 
-    if (clicked & kButtonB)
+    if (pushed & kButtonB)
     {
         selectedMagic++;
         if (selectedMagic >= availableMagic.size())

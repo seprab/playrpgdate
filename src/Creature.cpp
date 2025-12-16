@@ -91,6 +91,7 @@ void Creature::EquipArmor(Armor *_armor) {
 
 int Creature::Attack(Creature *target) {
     target->Damage(static_cast<float>(GetStrength()));
+    return GetStrength();
 }
 
 int Creature::TraverseDoor(Door *door) {
