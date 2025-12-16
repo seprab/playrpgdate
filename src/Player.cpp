@@ -143,13 +143,18 @@ void Player::HandleInput()
     dx *= static_cast<int>(GetMovementSpeed());
     dy *= static_cast<int>(GetMovementSpeed());
 
-    if (pushed & kButtonB)
+    if (pushed & kButtonA)
     {
-        selectedMagic++;
+        selectedMagic = selectedMagic + 1;
         if (selectedMagic >= availableMagic.size())
         {
             selectedMagic = 0;
         }
+    }
+    else if (pushed & kButtonB)
+    {
+        if (selectedMagic == 0) selectedMagic = availableMagic.size() - 1;
+        else selectedMagic = selectedMagic - 1;
     }
 
     const auto currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
@@ -159,7 +164,6 @@ void Player::HandleInput()
         return;
     }
 
-    attacking = (clicked & kButtonA);
     if (attacking)
     {
         lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();

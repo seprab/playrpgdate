@@ -28,7 +28,7 @@ private:
     int dx =0;
     int dy =0;
 
-    bool attacking = false;
+    bool attacking = true;
     unsigned int magicCooldown;
     unsigned int lastMagicCastTime;
     unsigned int selectedMagic = 0;
