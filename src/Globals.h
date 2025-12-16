@@ -25,5 +25,6 @@ namespace  Globals
     constexpr int MAX_SPAWN_ATTEMPTS = 10; // Maximum number of attempts to spawn a monster
     constexpr int PATH_FINDING_COOLDOWN = 50; // Cooldown for pathfinding in ticks
     constexpr int MAX_ENTITY_FLASHING_TICKS = 10; // Maximum ticks an entity will flash when damaged
+    constexpr float AUTO_FIRE_RANGE = 100.0f;
 }
 #endif //GLOBALS_H

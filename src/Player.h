@@ -35,6 +35,10 @@ private:
     std::vector<std::unique_ptr<Magic>> magicLaunched;
     std::vector<std::function<std::unique_ptr<Magic>(const pdcpp::Point<int>&)>> availableMagic;
 
+    // Auto-fire passive ability
+    unsigned int autoFireCooldown = 1000; // 1 second
+    unsigned int lastAutoFireTime;
+
 public:
     Player();
     Player(const Player& other) = delete;
@@ -43,6 +47,7 @@ public:
     void Tick(const std::shared_ptr<Area>& area);
     void Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area);
     void HandleInput();
+    void HandleAutoFire(const std::shared_ptr<Area>& area);
     void Draw() override;
     void DrawAimDirection() const;
 

@@ -9,6 +9,10 @@
 #include "Globals.h"
 #include "Projectile.h"
 #include "OrbitingProjectiles.h"
+#include "AutoProjectile.h"
+#include "Monster.h"
+#include "Area.h"
+#include <limits>
 
 Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
 {
@@ -18,6 +22,7 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     SetMaxHP(100);
     SetMovementScale(5.0f);
     lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    lastAutoFireTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
 
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();
@@ -72,6 +77,7 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
 void Player::Tick(const std::shared_ptr<Area>& area)
 {
     HandleInput();
+    HandleAutoFire(area);
     Move(dx, dy, area);
     //Draw();
 
@@ -195,6 +201,51 @@ void Player::DrawAimDirection() const {
 
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xa, ya, 1, kColorWhite);
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawLine(x, y, xb, yb, 1, kColorWhite);
+}
+
+void Player::HandleAutoFire(const std::shared_ptr<Area>& area)
+{
+    const auto currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    const int autoFireElapsedTime = static_cast<int>(currentTime - lastAutoFireTime);
+
+    if (autoFireElapsedTime < autoFireCooldown)
+    {
+        return;
+    }
+
+    // Find the closest enemy
+    auto creatures = area->GetCreatures();
+    if (creatures.empty())
+    {
+        return;
+    }
+
+    std::shared_ptr<Monster> closestEnemy = nullptr;
+    float minDistance = std::numeric_limits<float>::max();
+    pdcpp::Point<int> playerPos = GetCenteredPosition();
+
+    for (const auto& monster : creatures)
+    {
+        if (!monster->IsAlive())
+        {
+            continue;
+        }
+
+        float distance = playerPos.distance(monster->GetCenteredPosition());
+        if (distance < minDistance)
+        {
+            minDistance = distance;
+            closestEnemy = monster;
+        }
+    }
+
+    if (closestEnemy && minDistance <= Globals::AUTO_FIRE_RANGE)
+    {
+        // Launch auto-targeting projectile
+        auto autoProjectile = std::make_unique<AutoProjectile>(GetCenteredPosition(), weak_from_this(), closestEnemy);
+        magicLaunched.push_back(std::move(autoProjectile));
+        lastAutoFireTime = currentTime;
+    }
 }
 
 bool Player::LevelUp()
