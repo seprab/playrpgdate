@@ -44,6 +44,10 @@ private:
     unsigned int gameStartTime = 0;
     unsigned int finalSurvivalTime = 0; // Captured when player dies
 
+    // Player activity tracking for enemy slowdown
+    bool isPlayerActive = false;
+    unsigned int lastActivityTime = 0;
+
 public:
     Player();
     Player(const Player& other) = delete;
@@ -74,6 +78,9 @@ public:
     void SetGameStartTime(unsigned int time) { gameStartTime = time; }
     [[nodiscard]] unsigned int GetSurvivalTimeSeconds() const;
     void ResetStats();
+
+    // Player activity for enemy slowdown
+    [[nodiscard]] bool IsPlayerActive() const { return isPlayerActive; }
 
 };
 

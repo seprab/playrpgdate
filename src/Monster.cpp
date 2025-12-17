@@ -177,6 +177,35 @@ void Monster::Move(pdcpp::Point<int> target, Area* area)
         */
 
         int moveSpeed = GetMovementSpeed();
+
+        // Apply slowdown ability - this is a special ability with a 10-second cooldown
+        // When activated (player goes idle and cooldown is ready), enemies start at 10% speed
+        // and progressively speed back up to 100% over 2.5 seconds
+        if (area->IsSlowdownActive())
+        {
+            float idleTime = area->GetPlayerIdleTime();
+            float slowdownFactor;
+
+            if (idleTime < 0.5f)
+            {
+                // Initial slowdown period - enemies at 10% speed
+                slowdownFactor = 0.1f;
+            }
+            else if (idleTime < 2.5f)
+            {
+                // Progressive speed-up from 10% to 100% over 2 seconds
+                float progress = (idleTime - 0.5f) / 2.0f; // 0.0 to 1.0
+                slowdownFactor = 0.1f + (progress * 0.9f); // 10% to 100%
+            }
+            else
+            {
+                // Back to normal speed after 2.5 seconds
+                slowdownFactor = 1.0f;
+            }
+
+            moveSpeed = std::max(1, static_cast<int>(static_cast<float>(moveSpeed) * slowdownFactor));
+        }
+
         if (d.x != 0 && d.y != 0)
         {
             // ensure move scale is less when moving in diagonals but never less than 1

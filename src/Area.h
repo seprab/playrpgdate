@@ -51,6 +51,13 @@ private:
     int pathfindingTickCounter = 0; // Counter to stagger pathfinding updates
     const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
 
+    // Player activity tracking for slowdown ability
+    bool playerIsActive = true;
+    float playerIdleTime = 0.0f;
+    unsigned int lastActivityCheckTime = 0;
+    unsigned int lastSlowdownActivationTime = 0;
+    bool slowdownActive = false;
+    const unsigned int SLOWDOWN_COOLDOWN = 10000; // 10 seconds in milliseconds
 
 public:
     Area() = default;
@@ -80,6 +87,11 @@ public:
     void SetupMonstersToSpawn();
     pdcpp::Point<int> FindSpawnablePosition(int attemptCount);
     void LoadSpawnablePositions();
+
+    // Player activity tracking for enemy slowdown
+    [[nodiscard]] bool GetPlayerActivityStatus() const { return playerIsActive; }
+    [[nodiscard]] float GetPlayerIdleTime() const { return playerIdleTime; }
+    [[nodiscard]] bool IsSlowdownActive() const { return slowdownActive; }
 
     [[nodiscard]] std::shared_ptr<AStarContainer> GetPathfindingContainer() const {return pathfindingContainer;}
     [[nodiscard]] std::vector<std::shared_ptr<Door>> GetDoors() const {return doors;}

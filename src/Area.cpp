@@ -20,6 +20,9 @@ Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, in
     {
         bankOfMonsters.push_back(monster);
     }
+    // Initialize slowdown ability - ready to use immediately
+    lastSlowdownActivationTime = 0;
+    lastActivityCheckTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
 Area::Area(const Area &other)
@@ -297,6 +300,43 @@ void Area::LoadSpawnablePositions()
 }
 void Area::Tick(Player* player)
 {
+    // Update player activity tracking for slowdown ability
+    playerIsActive = player->IsPlayerActive();
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+
+    if (playerIsActive)
+    {
+        // Player is active - deactivate slowdown and reset idle timer
+        if (slowdownActive)
+        {
+            slowdownActive = false;
+            // Don't reset lastSlowdownActivationTime - keep cooldown running
+        }
+        playerIdleTime = 0.0f;
+        lastActivityCheckTime = currentTime;
+    }
+    else
+    {
+        // Player is idle - check if we can activate slowdown
+        unsigned int timeSinceLastSlowdown = currentTime - lastSlowdownActivationTime;
+        bool cooldownReady = (timeSinceLastSlowdown >= SLOWDOWN_COOLDOWN);
+
+        if (!slowdownActive && cooldownReady)
+        {
+            // Activate slowdown ability
+            slowdownActive = true;
+            lastSlowdownActivationTime = currentTime;
+            lastActivityCheckTime = currentTime;
+            playerIdleTime = 0.0f;
+        }
+
+        if (slowdownActive)
+        {
+            // Calculate idle time in seconds for slowdown progression
+            playerIdleTime = static_cast<float>(currentTime - lastActivityCheckTime) / 1000.0f;
+        }
+    }
+
     SpawnCreature(); // we'll be spawning creatures as long as there's space for them and haven't reached the max count
 
     // Then, we will mark the positions of the monsters as blocked in the collider

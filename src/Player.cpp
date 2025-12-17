@@ -23,6 +23,8 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     SetMovementScale(5.0f);
     lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     lastAutoFireTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    lastActivityTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    isPlayerActive = true;
 
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();
@@ -128,6 +130,26 @@ void Player::HandleInput()
     PDButtons clicked, pushed;
     pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, &pushed, nullptr);
     dx = 0, dy = 0;
+
+    // Track player activity for enemy slowdown
+    bool movementInput = (clicked & (kButtonUp | kButtonDown | kButtonLeft | kButtonRight));
+    float crankChange = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
+    bool crankRotating = (crankChange > 0.5f || crankChange < -0.5f);
+
+    if (movementInput || crankRotating)
+    {
+        isPlayerActive = true;
+        lastActivityTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    }
+    else
+    {
+        // Check if player has been idle for more than 0.5 seconds
+        unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+        if (currentTime - lastActivityTime > 500) // 500ms threshold
+        {
+            isPlayerActive = false;
+        }
+    }
     if (clicked & kButtonRight)
     {
         dx=1;
