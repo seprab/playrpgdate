@@ -28,6 +28,16 @@ UI::UI(const char *fontPath, EntityManager* manager)
     if (gameOverlay == nullptr)
         Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
 
+    path = "images/ui/pause.png";
+    pauseOverlay = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
+    if (pauseOverlay == nullptr)
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
+    pdcpp::GlobalPlaydateAPI::get()->system->setMenuImage(pauseOverlay, 100);
+
+    // Battery menu item will be created and updated by UpdateBatteryMenuItem()
+    batteryMenuItem = nullptr;
+    statsMenuItem = nullptr;
+
     magicIcons = {
             pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_beam", &err),
             pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_projectile", &err),
@@ -48,6 +58,15 @@ UI::UI(const char *fontPath, EntityManager* manager)
 
 void UI::Update()
 {
+    // Update battery and stats info every 1 second to avoid overhead
+    float currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getElapsedTime();
+    if (currentTime - lastBatteryUpdateTime >= 1.0f)
+    {
+        UpdateBatteryMenuItem();
+        UpdateStatsMenuItem();
+        lastBatteryUpdateTime = currentTime;
+    }
+
     HandleInputs();
     Draw();
 }
@@ -438,6 +457,32 @@ void UI::DrawGameOverScreen() const
 
 void UI::SwitchScreen(GameScreen newScreen)
 {
+    if (newScreen == GameScreen::GAME)
+    {
+        saveMenuItem = pdcpp::GlobalPlaydateAPI::get()->system->addMenuItem("Save", SaveGameCallback, this);
+        backToStartMenuItem = pdcpp::GlobalPlaydateAPI::get()->system->addMenuItem("End run", HomeMenuCallback, this);
+
+        // Stats menu item will be created by UpdateStatsMenuItem() when player exists
+        statsMenuItem = nullptr;
+    }
+    else
+    {
+        if (saveMenuItem)
+        {
+            pdcpp::GlobalPlaydateAPI::get()->system->removeMenuItem(saveMenuItem);
+            saveMenuItem = nullptr;
+        }
+        if (backToStartMenuItem)
+        {
+            pdcpp::GlobalPlaydateAPI::get()->system->removeMenuItem(backToStartMenuItem);
+            backToStartMenuItem = nullptr;
+        }
+        if (statsMenuItem)
+        {
+            pdcpp::GlobalPlaydateAPI::get()->system->removeMenuItem(statsMenuItem);
+            statsMenuItem = nullptr;
+        }
+    }
     currentScreen = newScreen;
 }
 
@@ -446,6 +491,113 @@ void UI::UpdateLoadingProgress(float progress)
     loadingProgress = progress;
     if (loadingProgress > 1.0f) loadingProgress = 1.0f;
     if (loadingProgress < 0.0f) loadingProgress = 0.0f;
+}
+
+void UI::UpdateBatteryMenuItem()
+{
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    // Get current battery status
+    float percentage = pd->system->getBatteryPercentage();
+    float voltage = pd->system->getBatteryVoltage();
+
+    // Format the battery info strings
+    char percentageStr[32];
+    char voltageStr[32];
+    snprintf(percentageStr, sizeof(percentageStr), "%.0f%%", percentage);
+    snprintf(voltageStr, sizeof(voltageStr), "%.2fV", voltage);
+
+    // Remove old menu item if it exists
+    if (batteryMenuItem)
+    {
+        pd->system->removeMenuItem(batteryMenuItem);
+        batteryMenuItem = nullptr;
+    }
+
+    // Create new menu item with updated values
+    // Note: We need to keep these strings alive, so we use static storage
+    static char option1[32];
+    static char option2[32];
+    snprintf(option1, sizeof(option1), "%s", percentageStr);
+    snprintf(option2, sizeof(option2), "%s", voltageStr);
+
+    const char* battery_options[] = {option1, option2};
+    batteryMenuItem = pd->system->addOptionsMenuItem(
+        "Battery",
+        battery_options, 2,
+        nullptr,
+        nullptr);
+}
+
+void UI::UpdateStatsMenuItem()
+{
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    // Only update stats if we're in game modes
+    if (currentScreen != GameScreen::GAME)
+    {
+        Log::Info("UpdateStatsMenuItem: Not in GAME mode, current screen = %d", static_cast<int>(currentScreen));
+        return;
+    }
+
+    std::shared_ptr<Player> player = entityManager->GetPlayer();
+
+    // If player doesn't exist yet, remove stats menu if it exists
+    if (!player)
+    {
+        Log::Info("UpdateStatsMenuItem: Player doesn't exist yet");
+        if (statsMenuItem)
+        {
+            pd->system->removeMenuItem(statsMenuItem);
+            statsMenuItem = nullptr;
+        }
+        return;
+    }
+
+    Log::Info("UpdateStatsMenuItem: Creating stats menu item");
+
+    // Remove old menu item if it exists
+    if (statsMenuItem)
+    {
+        pd->system->removeMenuItem(statsMenuItem);
+        statsMenuItem = nullptr;
+    }
+
+    // Format the stats strings with static storage
+    static char hp[32];
+    static char kills[32];
+    static char time[32];
+    snprintf(hp, sizeof(hp), "HP: %d", player->GetHP());
+    snprintf(kills, sizeof(kills), "Kills: %u", player->GetMonstersKilled());
+    snprintf(time, sizeof(time), "Time: %.0fs", pd->system->getElapsedTime());
+
+    const char* stats_options[] = {hp, kills, time};
+    statsMenuItem = pd->system->addOptionsMenuItem(
+        "Stats",
+        stats_options, 3,
+        nullptr,
+        nullptr);
+
+    Log::Info("UpdateStatsMenuItem: Stats menu created, pointer = %p", statsMenuItem);
+}
+
+// Static callback functions for menu items
+void UI::SaveGameCallback(void* userdata)
+{
+    UI* ui = static_cast<UI*>(userdata);
+    if (ui && ui->saveGameCallback)
+    {
+        ui->saveGameCallback();
+    }
+}
+
+void UI::HomeMenuCallback(void* userdata)
+{
+    UI* ui = static_cast<UI*>(userdata);
+    if (ui)
+    {
+        ui->SwitchScreen(GameScreen::GAME_OVER);
+    }
 }
 
 // Helper methods implementation

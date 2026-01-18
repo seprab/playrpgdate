@@ -13,12 +13,14 @@
 #include "pdcpp/graphics/Font.h"
 #include "CircularProgress.h"
 #include "UIConstants.h"
+#include "pdcpp/core/GlobalPlaydateAPI.h"
 
 enum class GameScreen {
     LOADING,
     MAIN_MENU,
     GAME,
-    GAME_OVER
+    GAME_OVER,
+    PAUSE
 };
 
 class EntityManager;
@@ -35,13 +37,21 @@ private:
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
 
+    PDMenuItem* saveMenuItem = nullptr;
+    PDMenuItem* backToStartMenuItem = nullptr;
+    PDMenuItem* batteryMenuItem = nullptr;
+    PDMenuItem* statsMenuItem = nullptr;
+
     const float inputCooldown{UIConstants::Input::COOLDOWN};
+    float lastBatteryUpdateTime = 0.0f;
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
+    LCDBitmap* pauseOverlay;
 
     std::function<void()> newGameCallback;
     std::function<void()> loadGameCallback;
     std::function<void()> gameOverCallback;
+    std::function<void()> saveGameCallback;
     std::vector<LCDBitmap*> magicIcons;
     LCDBitmap * playerFace;
 
@@ -58,8 +68,11 @@ public:
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
     void SetOnLoadGameSelected(std::function<void()> callback){loadGameCallback = std::move(callback);}
     void SetOnGameOverSelected(std::function<void()> callback){gameOverCallback = std::move(callback);}
+    void SetOnSaveGameSelected(std::function<void()> callback){saveGameCallback = std::move(callback);}
 
 private:
+    void UpdateBatteryMenuItem();
+    void UpdateStatsMenuItem();
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
@@ -67,6 +80,10 @@ private:
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;
+
+    // Static callback functions for menu items
+    static void SaveGameCallback(void* userdata);
+    static void HomeMenuCallback(void* userdata);
 };
 
 

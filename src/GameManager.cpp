@@ -11,6 +11,7 @@ GameManager::GameManager(PlaydateAPI* api)
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
     ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
     ui->SetOnGameOverSelected([this](){CleanGame();});
+    ui->SetOnSaveGameSelected([this](){SaveGame();});
 }
 void GameManager::Update()
 {
