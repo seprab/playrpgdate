@@ -17,6 +17,7 @@ public:
     void LoadSavedGame();
     void SaveGame();
     void CleanGame();
+    void PauseGame() const;
 
 private:
     PlaydateAPI* pd;

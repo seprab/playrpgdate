@@ -12,6 +12,7 @@
 #include "pdcpp/graphics/Point.h"
 #include "pdcpp/graphics/Font.h"
 #include "CircularProgress.h"
+#include "Player.h"
 #include "UIConstants.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
@@ -38,12 +39,9 @@ private:
     std::unique_ptr<CircularProgress> magicCooldown;
 
     PDMenuItem* saveMenuItem = nullptr;
-    PDMenuItem* backToStartMenuItem = nullptr;
-    PDMenuItem* batteryMenuItem = nullptr;
     PDMenuItem* statsMenuItem = nullptr;
 
     const float inputCooldown{UIConstants::Input::COOLDOWN};
-    float lastBatteryUpdateTime = 0.0f;
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
     LCDBitmap* pauseOverlay;
@@ -63,6 +61,7 @@ public:
     void SwitchScreen(GameScreen newScreen);
 
     void UpdateLoadingProgress(float progress);
+    void UpdateStatsMenuItem(const std::shared_ptr<Player>&);
     void SetOffset(pdcpp::Point<int> newOffset) { offset = newOffset; }
 
     void SetOnNewGameSelected(std::function<void()> callback){newGameCallback = std::move(callback);}
@@ -71,12 +70,11 @@ public:
     void SetOnSaveGameSelected(std::function<void()> callback){saveGameCallback = std::move(callback);}
 
 private:
-    void UpdateBatteryMenuItem();
-    void UpdateStatsMenuItem();
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
+    void DrawDebugInfo() const;
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;

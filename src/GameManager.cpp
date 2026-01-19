@@ -118,11 +118,6 @@ void GameManager::Update()
 
 GameManager::~GameManager()
 {
-    if (player && player->IsAlive())
-    {
-        SaveGame();
-    }
-
     // EntityManager is automatically cleaned up by unique_ptr
     Log::Info("GameManager destroyed");
 }
@@ -191,5 +186,10 @@ void GameManager::CleanGame()
     }
 
     player = nullptr;
+}
+
+void GameManager::PauseGame() const
+{
+    ui->UpdateStatsMenuItem(player);
 }
 

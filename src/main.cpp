@@ -61,6 +61,13 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
         // typical 'Lua'-ness.
         pd->system->setUpdateCallback(gameTick, pd);
     }
+    if (event == kEventPause)
+    {
+        if (gameManager)
+        {
+            gameManager->PauseGame();
+        }
+    }
 
     // Destroy the global state to prevent memory leaks
     if (event == kEventTerminate)
