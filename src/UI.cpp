@@ -92,6 +92,7 @@ void UI::HandleInputs()
             }
             if (current & kButtonA)
             {
+                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
                 switch (selectedMenuItem)
                 {
                     case 0: // New Game
@@ -108,7 +109,6 @@ void UI::HandleInputs()
                             exit(0);
                     default: break;
                 }
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
             }
             break;
         case GameScreen::GAME:
@@ -555,9 +555,8 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
     static char time[32];
     snprintf(hp, sizeof(hp), "HP: %.0f", player->GetHP());
     snprintf(kills, sizeof(kills), "Kills: %u", player->GetMonstersKilled());
-    snprintf(time, sizeof(time), "Time: %.0fs", pd->system->getElapsedTime());
+    snprintf(time, sizeof(time), "Time: %.0us", player->GetSurvivalTimeSeconds());
     const char* stats_options[] = {hp, kills, time};
-
     statsMenuItem = pd->system->addOptionsMenuItem(
         "Stats",
         stats_options, 3,

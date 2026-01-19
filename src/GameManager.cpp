@@ -140,83 +140,33 @@ void GameManager::LoadNewGame()
 
 void GameManager::LoadSavedGame()
 {
-    if (!pdcpp::FileHelpers::fileExists(Globals::GAME_SAVE_PATH)) {
-        return; // No file to load
-    }
+    // Setup game world first
+    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
+    activeArea->SetEntityManager(entityManager.get());
+    activeArea->Load();
 
-    // Try to load saved position
-    try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::GAME_SAVE_PATH, FileOptions::kFileReadData);
+    player = std::make_shared<Player>();
+    player->ResetStats(); // Initialize game stats
+    entityManager->SetPlayer(player);
+    isGameRunning = true;
 
-        // Check if file was opened successfully
-        if (!fileHandle) {
-            Log::Error("Failed to open save file, starting at default position");
-            return;
-        }
-
-        size_t bufferSize = sizeof(int) * 2; // x and y coordinates
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
-
-        int bytesRead = fileHandle->read(buffer.get(), bufferSize);
-        if (bytesRead != static_cast<int>(bufferSize)) {
-            Log::Error("Save file corrupted or incomplete, starting at default position");
-            return;
-        }
-
-        pdcpp::Point<int> position {0, 0};
-        memcpy(&position.x, buffer.get(), sizeof(int));
-        memcpy(&position.y, buffer.get() + sizeof(int), sizeof(int));
-
-        activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
-        activeArea->SetEntityManager(entityManager.get());
-        activeArea->Load();
-
-        player = std::make_shared<Player>();
-        player->ResetStats(); // Initialize game stats
-        entityManager->SetPlayer(player);
-        isGameRunning = true;
-
-        player->SetPosition(position);
-        Log::Info("Game loaded successfully, position x: %d, y: %d", position.x, position.y);
-    }
-    catch (...) {
-        Log::Error("Exception while loading save file, starting at default position");
-        player->SetTiledPosition(pdcpp::Point<int>(23, 32));
+    // Try to load save file using new SaveGame framework
+    if (!SaveGame::Load(player, activeArea, Globals::GAME_SAVE_PATH.c_str()))
+    {
+        Log::Error("Failed to load save game, starting at default position");
     }
 }
 
 void GameManager::SaveGame()
 {
-    if (!player) {
-        Log::Error("Cannot save game: player does not exist");
+    if (!player || !activeArea) {
+        Log::Error("Cannot save: player or area is null");
         return;
     }
 
-    try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::GAME_SAVE_PATH, FileOptions::kFileWrite);
-
-        if (!fileHandle) {
-            Log::Error("Failed to open save file for writing");
-            return;
-        }
-
-        size_t bufferSize = sizeof(int) * 2; // x and y coordinates
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
-        pdcpp::Point<int> position = player->GetPosition();
-
-        memcpy(buffer.get(), &position.x, sizeof(int));
-        memcpy(buffer.get() + sizeof(int), &position.y, sizeof(int));
-
-        int bytesWritten = fileHandle->write(buffer.get(), bufferSize);
-        if (bytesWritten != static_cast<int>(bufferSize)) {
-            Log::Error("Failed to write complete save data");
-            return;
-        }
-
-        Log::Info("Game saved successfully, position x: %d, y: %d", position.x, position.y);
-    }
-    catch (...) {
-        Log::Error("Exception while saving game");
+    // Use new SaveGame framework
+    if (!SaveGame::Save(player, activeArea, Globals::GAME_SAVE_PATH.c_str())) {
+        Log::Error("Failed to save game");
     }
 }
 

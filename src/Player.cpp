@@ -16,6 +16,7 @@
 
 Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
 {
+    ResetStats();
     className = "Warrior";
     magicCooldown = 5000;
     SetHP(100);
@@ -296,16 +297,15 @@ unsigned int Player::GetSurvivalTimeSeconds() const
     }
 
     // Otherwise, calculate current survival time
-    if (gameStartTime == 0) return 0;
-    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-    return (currentTime - gameStartTime) / 1000; // Convert to seconds
+    unsigned int elapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getElapsedTime() + gameStartTime;
+    return elapsedTime; // Convert to seconds
 }
 
 void Player::ResetStats()
 {
     monstersKilled = 0;
     finalSurvivalTime = 0;
-    gameStartTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    gameStartTime = 0;
 }
 
 void Player::Damage(float damage)
@@ -318,7 +318,6 @@ void Player::Damage(float damage)
     // If the player just died (was alive but now isn't), capture the final survival time
     if (wasAlive && !IsAlive() && finalSurvivalTime == 0)
     {
-        unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-        finalSurvivalTime = (currentTime - gameStartTime) / 1000; // Convert to seconds
+        finalSurvivalTime =  pdcpp::GlobalPlaydateAPI::get()->system->getElapsedTime() + gameStartTime; // Convert to seconds
     }
 }

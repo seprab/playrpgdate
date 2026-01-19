@@ -75,7 +75,9 @@ public:
     // Game stats
     void IncrementKillCount() { monstersKilled++; }
     [[nodiscard]] unsigned int GetMonstersKilled() const { return monstersKilled; }
+    void SetMonstersKilled(unsigned int kills) { monstersKilled = kills; }
     void SetGameStartTime(unsigned int time) { gameStartTime = time; }
+    [[nodiscard]] unsigned int GetGameStartTime() const { return gameStartTime; }
     [[nodiscard]] unsigned int GetSurvivalTimeSeconds() const;
     void ResetStats();
 
