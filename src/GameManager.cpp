@@ -6,12 +6,14 @@
 GameManager::GameManager(PlaydateAPI* api)
 : pd(api)
 {
+    LoadMaxScore();
     entityManager = std::make_unique<EntityManager>();
     ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft", entityManager.get());
     ui->SetOnNewGameSelected([this](){LoadNewGame();});
     ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
     ui->SetOnGameOverSelected([this](){CleanGame();});
     ui->SetOnSaveGameSelected([this](){SaveGame();});
+    ui->SetMaxScorePointer(&maxScore);
 }
 void GameManager::Update()
 {
@@ -119,6 +121,7 @@ void GameManager::Update()
 GameManager::~GameManager()
 {
     // EntityManager is automatically cleaned up by unique_ptr
+    SaveMaxScore();
     Log::Info("GameManager destroyed");
 }
 
@@ -137,23 +140,17 @@ void GameManager::LoadNewGame()
 
 void GameManager::LoadSavedGame()
 {
-    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
-    activeArea->SetEntityManager(entityManager.get());
-    activeArea->Load();
-
-    player = std::make_shared<Player>();
-    player->ResetStats(); // Initialize game stats
-    entityManager->SetPlayer(player);
-    isGameRunning = true;
+    if (!pdcpp::FileHelpers::fileExists(Globals::GAME_SAVE_PATH)) {
+        return; // No file to load
+    }
 
     // Try to load saved position
     try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::SAVE_PATH, FileOptions::kFileReadData);
+        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::GAME_SAVE_PATH, FileOptions::kFileReadData);
 
         // Check if file was opened successfully
         if (!fileHandle) {
             Log::Error("Failed to open save file, starting at default position");
-            player->SetTiledPosition(pdcpp::Point<int>(23, 32));
             return;
         }
 
@@ -163,13 +160,21 @@ void GameManager::LoadSavedGame()
         int bytesRead = fileHandle->read(buffer.get(), bufferSize);
         if (bytesRead != static_cast<int>(bufferSize)) {
             Log::Error("Save file corrupted or incomplete, starting at default position");
-            player->SetTiledPosition(pdcpp::Point<int>(23, 32));
             return;
         }
 
         pdcpp::Point<int> position {0, 0};
         memcpy(&position.x, buffer.get(), sizeof(int));
         memcpy(&position.y, buffer.get() + sizeof(int), sizeof(int));
+
+        activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
+        activeArea->SetEntityManager(entityManager.get());
+        activeArea->Load();
+
+        player = std::make_shared<Player>();
+        player->ResetStats(); // Initialize game stats
+        entityManager->SetPlayer(player);
+        isGameRunning = true;
 
         player->SetPosition(position);
         Log::Info("Game loaded successfully, position x: %d, y: %d", position.x, position.y);
@@ -188,7 +193,7 @@ void GameManager::SaveGame()
     }
 
     try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::SAVE_PATH, FileOptions::kFileWrite);
+        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::GAME_SAVE_PATH, FileOptions::kFileWrite);
 
         if (!fileHandle) {
             Log::Error("Failed to open save file for writing");
@@ -235,5 +240,64 @@ void GameManager::CleanGame()
 void GameManager::PauseGame() const
 {
     ui->UpdateStatsMenuItem(player);
+}
+
+void GameManager::SaveMaxScore()
+{
+    try {
+        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileWrite);
+
+        if (!fileHandle) {
+            Log::Error("Failed to open save file for writing");
+            return;
+        }
+
+        size_t bufferSize = sizeof(int); // one single int
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+
+        memcpy(buffer.get(), &maxScore, sizeof(int));
+
+        int bytesWritten = fileHandle->write(buffer.get(), bufferSize);
+        if (bytesWritten != static_cast<int>(bufferSize)) {
+            Log::Error("Failed to write complete save data");
+            return;
+        }
+
+        Log::Info("Max score saved successfully: %d", maxScore);
+    }
+    catch (...) {
+        Log::Error("Exception while saving game");
+    }
+}
+
+void GameManager::LoadMaxScore()
+{
+    if (!pdcpp::FileHelpers::fileExists(Globals::MAX_SCORE_PATH)) {
+        maxScore = 0;
+        return; // No file to load
+    }
+    try {
+        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileReadData);
+
+        // Check if file was opened successfully
+        if (!fileHandle) {
+            return;
+        }
+
+        size_t bufferSize = sizeof(int); // Max score is an int
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+
+        int bytesRead = fileHandle->read(buffer.get(), bufferSize);
+        if (bytesRead != static_cast<int>(bufferSize)) {
+            Log::Error("Max score file corrupted or incomplete");
+            return;
+        }
+
+        memcpy(&maxScore, buffer.get(), sizeof(int));
+        Log::Info("Max score loaded successfully: %d", maxScore);
+    }
+    catch (...) {
+        Log::Error("Exception while loading max score file");
+    }
 }
 

@@ -116,6 +116,10 @@ void UI::HandleInputs()
                 std::shared_ptr<Player> player = entityManager->GetPlayer();
                 if (!player->IsAlive())
                 {
+                    if (player->GetMonstersKilled() > *maxScorePtr)
+                    {
+                        *maxScorePtr = player->GetMonstersKilled();
+                    }
                     SwitchScreen(GameScreen::GAME_OVER);
                 }
                 break;
@@ -276,6 +280,20 @@ void UI::DrawMainMenu() const
         pdcpp::Font::Top
     );
     pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw Max Score using Font::drawWrappedText for automatic centering
+    pdcpp::Rectangle<float> maxLocalScoreBounds(
+        MainMenu::MAX_LOCAL_SCORE_X, MainMenu::MAX_LOCAL_SCORE_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(
+    "Max\nLocal\nKills:\n" + std::to_string(*maxScorePtr),
+    maxLocalScoreBounds,
+    pdcpp::Font::Center,
+    pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
 
     // Draw menu items
     for (int i = 0; i < menuItemCount; i++)
@@ -555,7 +573,9 @@ void UI::SaveGameCallback(void* userdata)
     if (ui && ui->saveGameCallback)
     {
         ui->saveGameCallback();
-        exit(0);
+        ui->gameOverCallback();
+        ui->SwitchScreen(GameScreen::MAIN_MENU);
+        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
     }
 }
 

@@ -59,7 +59,7 @@ public:
     void Draw() const;
     void HandleInputs();
     void SwitchScreen(GameScreen newScreen);
-
+    void SetMaxScorePointer(int* scorePtr) { maxScorePtr = scorePtr; }
     void UpdateLoadingProgress(float progress);
     void UpdateStatsMenuItem(const std::shared_ptr<Player>&);
     void SetOffset(pdcpp::Point<int> newOffset) { offset = newOffset; }
@@ -70,6 +70,7 @@ public:
     void SetOnSaveGameSelected(std::function<void()> callback){saveGameCallback = std::move(callback);}
 
 private:
+    int* maxScorePtr = nullptr;
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;

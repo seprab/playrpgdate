@@ -18,6 +18,8 @@ public:
     void SaveGame();
     void CleanGame();
     void PauseGame() const;
+    void SaveMaxScore();
+    [[nodiscard]] int GetMaxScore() const { return maxScore; }
 
 private:
     PlaydateAPI* pd;
@@ -27,6 +29,8 @@ private:
     std::shared_ptr<Area> activeArea;
     pdcpp::Point<int> currentCameraOffset = {0,0};
     bool isGameRunning = false;
+    int maxScore = 0;
+    void LoadMaxScore();
 };
 
 

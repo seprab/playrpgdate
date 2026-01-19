@@ -39,6 +39,8 @@ namespace UIConstants {
         constexpr int PANEL_HEIGHT = 160;
         constexpr int TITLE_Y = 50;
         constexpr int TITLE_X = 150;
+        constexpr int MAX_LOCAL_SCORE_Y = 90;
+        constexpr int MAX_LOCAL_SCORE_X = 75;
         constexpr int MENU_START_Y = 100;
         constexpr int MENU_ITEM_SPACING = 30;
         constexpr int MENU_ITEM_HEIGHT = 20;
