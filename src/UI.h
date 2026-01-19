@@ -82,7 +82,6 @@ private:
 
     // Static callback functions for menu items
     static void SaveGameCallback(void* userdata);
-    static void HomeMenuCallback(void* userdata);
 };
 
 
