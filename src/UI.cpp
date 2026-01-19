@@ -104,6 +104,8 @@ void UI::HandleInputs()
                         SwitchScreen(GameScreen::GAME);
                         if (loadGameCallback) loadGameCallback();
                         break;
+                    case 2: // Close
+                            exit(0);
                     default: break;
                 }
                 pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
@@ -466,7 +468,7 @@ void UI::DrawDebugInfo() const
 
     // Reset draw offset to (0,0) for UI drawing
     // GameManager will reset it again next frame, so no need to restore
-    pd->graphics->setDrawOffset(0, 0);
+    //pd->graphics->setDrawOffset(0, 0); // when uncommented this, I no longer see automatic projectiles from player
 
     // Get battery status
     float percentage = pd->system->getBatteryPercentage();
