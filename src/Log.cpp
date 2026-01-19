@@ -1,5 +1,6 @@
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
+#include "pd_api.h"
 
 const char*Log::infoPrefix = "[INFO] ";
 const char*Log::errorPrefix = "[ERROR] ";
@@ -55,6 +56,8 @@ template void Log::Info<>(char const*, char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned int, char const*);
 template void Log::Info<>(char const*, unsigned int, char const*, char const*);
+template void Log::Info<>(char const*, void*);
+template void Log::Info<>(char const*, PDMenuItem*);
 
 template void Log::Error<>(const char*);
 template void Log::Error<>(const char*, int);

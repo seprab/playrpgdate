@@ -28,6 +28,14 @@ UI::UI(const char *fontPath, EntityManager* manager)
     if (gameOverlay == nullptr)
         Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
 
+    path = "images/ui/pause.png";
+    pauseOverlay = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path, &err);
+    if (pauseOverlay == nullptr)
+        Log::Error("%s:%i Couldn't load background image: %s", __FILE__, __LINE__, path, err);
+    pdcpp::GlobalPlaydateAPI::get()->system->setMenuImage(pauseOverlay, 100);
+
+    statsMenuItem = nullptr;
+
     magicIcons = {
             pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_beam", &err),
             pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_projectile", &err),
@@ -96,6 +104,8 @@ void UI::HandleInputs()
                         SwitchScreen(GameScreen::GAME);
                         if (loadGameCallback) loadGameCallback();
                         break;
+                    case 2: // Close
+                            exit(0);
                     default: break;
                 }
                 pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
@@ -106,6 +116,10 @@ void UI::HandleInputs()
                 std::shared_ptr<Player> player = entityManager->GetPlayer();
                 if (!player->IsAlive())
                 {
+                    if (player->GetMonstersKilled() > *maxScorePtr)
+                    {
+                        *maxScorePtr = player->GetMonstersKilled();
+                    }
                     SwitchScreen(GameScreen::GAME_OVER);
                 }
                 break;
@@ -143,6 +157,9 @@ void UI::Draw() const
         default:
             break;
     }
+
+    // Always draw debug info
+    DrawDebugInfo();
 }
 
 void UI::DrawLoadingScreen() const
@@ -263,6 +280,20 @@ void UI::DrawMainMenu() const
         pdcpp::Font::Top
     );
     pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw Max Score using Font::drawWrappedText for automatic centering
+    pdcpp::Rectangle<float> maxLocalScoreBounds(
+        MainMenu::MAX_LOCAL_SCORE_X, MainMenu::MAX_LOCAL_SCORE_Y,
+        SCREEN_WIDTH, static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(
+    "Max\nLocal\nKills:\n" + std::to_string(*maxScorePtr),
+    maxLocalScoreBounds,
+    pdcpp::Font::Center,
+    pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
 
     // Draw menu items
     for (int i = 0; i < menuItemCount; i++)
@@ -438,6 +469,7 @@ void UI::DrawGameOverScreen() const
 
 void UI::SwitchScreen(GameScreen newScreen)
 {
+    pdcpp::GlobalPlaydateAPI::get()->system->removeAllMenuItems();
     currentScreen = newScreen;
 }
 
@@ -446,6 +478,105 @@ void UI::UpdateLoadingProgress(float progress)
     loadingProgress = progress;
     if (loadingProgress > 1.0f) loadingProgress = 1.0f;
     if (loadingProgress < 0.0f) loadingProgress = 0.0f;
+}
+
+void UI::DrawDebugInfo() const
+{
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    // Reset draw offset to (0,0) for UI drawing
+    // GameManager will reset it again next frame, so no need to restore
+    //pd->graphics->setDrawOffset(0, 0); // when uncommented this, I no longer see automatic projectiles from player
+
+    // Get battery status
+    float percentage = pd->system->getBatteryPercentage();
+    float voltage = pd->system->getBatteryVoltage();
+
+    // Format battery info
+    char batteryText[32];
+    snprintf(batteryText, sizeof(batteryText), "Batt: %.0f%% %.2fV", percentage, voltage);
+
+    // Load smaller font for debug info
+    const char* err;
+    LCDFont* smallFont = pd->graphics->loadFont("/System/Fonts/Asheville-Sans-14-Bold.pft", &err);
+    if (smallFont) {
+        pd->graphics->setFont(smallFont);
+    }
+
+    // Measure text to create background panel
+    int textWidth = pd->graphics->getTextWidth(smallFont, batteryText, strlen(batteryText), kASCIIEncoding, 0);
+    int textHeight = pd->graphics->getFontHeight(smallFont);
+
+    // Draw at bottom-left corner
+    int screenHeight = pd->display->getHeight();
+    int padding = 2;
+    int textX = padding;
+    int textY = screenHeight - textHeight - padding;
+
+    // Draw black background panel
+    pdcpp::Rectangle<int> panel(
+        textX - padding,
+        textY - padding,
+        textWidth + padding * 2,
+        textHeight + padding * 2
+    );
+    pdcpp::Graphics::fillRectangle(panel, pdcpp::Colors::black);
+
+    // Draw white text on black background
+    SetTextDrawMode(UIConstants::Theme::TEXT_COLOR);
+    pd->graphics->drawText(batteryText, strlen(batteryText), kASCIIEncoding, textX, textY);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+}
+
+void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
+{
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    // Only update stats if we're in game modes
+    // Remove old menu item if it exists
+    if (statsMenuItem)
+    {
+        pd->system->removeMenuItem(statsMenuItem);
+        statsMenuItem = nullptr;
+    }
+    if (saveMenuItem)
+    {
+        pd->system->removeMenuItem(saveMenuItem);
+        saveMenuItem = nullptr;
+    }
+    if (currentScreen != GameScreen::GAME || !player)
+    {
+        return;
+    }
+
+    // Format the stats strings with static storage
+    static char hp[32];
+    static char kills[32];
+    static char time[32];
+    snprintf(hp, sizeof(hp), "HP: %.0f", player->GetHP());
+    snprintf(kills, sizeof(kills), "Kills: %u", player->GetMonstersKilled());
+    snprintf(time, sizeof(time), "Time: %.0fs", pd->system->getElapsedTime());
+    const char* stats_options[] = {hp, kills, time};
+
+    statsMenuItem = pd->system->addOptionsMenuItem(
+        "Stats",
+        stats_options, 3,
+        nullptr,
+        nullptr);
+    saveMenuItem = pdcpp::GlobalPlaydateAPI::get()->system->addMenuItem("Save & Exit", SaveGameCallback, this);
+}
+
+// Static callback functions for menu items
+void UI::SaveGameCallback(void* userdata)
+{
+    UI* ui = static_cast<UI*>(userdata);
+    if (ui && ui->saveGameCallback)
+    {
+        ui->saveGameCallback();
+        ui->gameOverCallback();
+        ui->SwitchScreen(GameScreen::MAIN_MENU);
+        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+    }
 }
 
 // Helper methods implementation
