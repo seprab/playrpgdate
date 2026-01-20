@@ -7,6 +7,9 @@
 #include "Globals.h"
 #include "Player.h"
 #include "Log.h"
+#include "Weapon.h"
+#include "Armor.h"
+#include <algorithm>
 
 
 Monster::Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
@@ -16,6 +19,100 @@ Monster::Monster(unsigned int _id, const std::string& _name, const std::string& 
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
+    switch (movementType)
+    {
+        case MovementType::AStar:
+            HandleAStarMovement(playerTiledPosition, area);
+            break;
+        case MovementType::NoClip:
+            HandleNoClipMovement(playerTiledPosition);
+            break;
+        case MovementType::Stationary:
+            pathFound = false;
+            path.clear();
+            break;
+        case MovementType::RangedKite:
+            HandleRangedKiteMovement(playerTiledPosition, area);
+            break;
+    }
+    if (ShouldAttack(playerTiledPosition))
+    {
+        player->Damage(static_cast<float>(GetStrength()));
+    }
+}
+
+std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
+{
+    std::vector<Monster> creatures_decoded;
+    for (int i = 0; i < size; i++)
+    {
+        if (tokens[i].type != JSMN_OBJECT) continue;
+
+        unsigned int decodedId; std::string decodedName; std::string decodedPath; float decodedMaxHp; int decodedStrength;
+        int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
+        int decodedWeapon; int decodedArmor;
+        MovementType decodedMovement = MovementType::AStar;
+
+        const char* objects[] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor", "movement"};
+        for (const char* & object : objects)
+        {
+            // doing (tokens[i].size*2) because the object size returns the number of elements inside.
+            // for example:
+            // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
+            std::string value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
+
+            if(strcmp(object, "id") == 0) decodedId = std::stoi(value);
+            else if(strcmp(object, "name") == 0) decodedName = value;
+            else if(strcmp(object, "image") == 0) decodedPath = value;
+            else if(strcmp(object, "hp") == 0) decodedMaxHp = std::stof(value);
+            else if(strcmp(object, "str") == 0) decodedStrength = std::stoi(value);
+            else if(strcmp(object, "agi") == 0) decodedAgility = std::stoi(value);
+            else if(strcmp(object, "con") == 0) decodedConstitution = std::stoi(value);
+            else if(strcmp(object, "evasion") == 0) decodedEvasion = std::stof(value);
+            else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
+            else if(strcmp(object, "weapon") == 0) decodedWeapon = std::stoi(value);
+            else if(strcmp(object, "armor") == 0) decodedArmor = std::stoi(value);
+            else if(strcmp(object, "movement") == 0)
+            {
+                if (value == "noclip") decodedMovement = MovementType::NoClip;
+                else if (value == "stationary") decodedMovement = MovementType::Stationary;
+                else if (value == "ranged") decodedMovement = MovementType::RangedKite;
+                else decodedMovement = MovementType::AStar;
+            }
+            else Log::Error("Unknown property %s", object);
+        }
+        creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
+                                       decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
+                                       decodedWeapon, decodedArmor);
+        creatures_decoded.back().SetMovementType(decodedMovement);
+        if (entityManager)
+        {
+            if (decodedWeapon > 0)
+            {
+                auto weaponEntity = entityManager->GetEntity(static_cast<unsigned int>(decodedWeapon));
+                if (weaponEntity)
+                {
+                    creatures_decoded.back().EquipWeapon(std::static_pointer_cast<Weapon>(weaponEntity).get());
+                }
+            }
+            if (decodedArmor > 0)
+            {
+                auto armorEntity = entityManager->GetEntity(static_cast<unsigned int>(decodedArmor));
+                if (armorEntity)
+                {
+                    creatures_decoded.back().EquipArmor(std::static_pointer_cast<Armor>(armorEntity).get());
+                }
+            }
+        }
+        Log::Info("Monster ID: %d, name %s", decodedId, decodedName.c_str());
+
+        i+=(tokens[i].size*2);
+    }
+    return std::make_shared<std::vector<Monster>>(creatures_decoded);
+}
+
+void Monster::HandleAStarMovement(const pdcpp::Point<int>& playerTiledPosition, Area* area)
+{
     if (pathFindingCooldown > 0)
     {
         pathFindingCooldown--;
@@ -50,52 +147,82 @@ void Monster::Tick(Player* player, Area* area)
             pathFindFailureCount = 0; // Give the chance to try again after a long time
         }
     }
-    if (ShouldAttack(playerTiledPosition))
-    {
-        player->Damage(static_cast<float>(GetStrength()));
-    }
 }
 
-std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
+void Monster::HandleNoClipMovement(const pdcpp::Point<int>& playerTiledPosition)
 {
-    std::vector<Monster> creatures_decoded;
-    for (int i = 0; i < size; i++)
+    pathFound = false;
+    path.clear();
+    if (!ShouldMove(playerTiledPosition))
     {
-        if (tokens[i].type != JSMN_OBJECT) continue;
-
-        unsigned int decodedId; std::string decodedName; std::string decodedPath; float decodedMaxHp; int decodedStrength;
-        int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
-        int decodedWeapon; int decodedArmor;
-
-        const char* objects[] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor"};
-        for (const char* & object : objects)
-        {
-            // doing (tokens[i].size*2) because the object size returns the number of elements inside.
-            // for example:
-            // { "id": 1, "name": "Sergio" } its size = 2. But the tokens are 4.
-            std::string value = Utils::ValueDecoder(buffer, tokens, i, i+(tokens[i].size*2), object);
-
-            if(strcmp(object, "id") == 0) decodedId = std::stoi(value);
-            else if(strcmp(object, "name") == 0) decodedName = value;
-            else if(strcmp(object, "image") == 0) decodedPath = value;
-            else if(strcmp(object, "hp") == 0) decodedMaxHp = std::stof(value);
-            else if(strcmp(object, "str") == 0) decodedStrength = std::stoi(value);
-            else if(strcmp(object, "agi") == 0) decodedAgility = std::stoi(value);
-            else if(strcmp(object, "con") == 0) decodedConstitution = std::stoi(value);
-            else if(strcmp(object, "evasion") == 0) decodedEvasion = std::stof(value);
-            else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
-            else if(strcmp(object, "weapon") == 0) decodedWeapon = std::stoi(value);
-            else if(strcmp(object, "armor") == 0) decodedArmor = std::stoi(value);
-            else Log::Error("Unknown property %s", object);
-        }
-        creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
-                                       decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
-                                       decodedWeapon, decodedArmor);
-        Log::Info("Monster ID: %d, name %s", decodedId, decodedName.c_str());
-
-        i+=(tokens[i].size*2);
+        return;
     }
-    return std::make_shared<std::vector<Monster>>(creatures_decoded);
+    MoveNoClip(playerTiledPosition);
+}
+
+void Monster::HandleRangedKiteMovement(const pdcpp::Point<int>& playerTiledPosition, Area* area)
+{
+    float distance = GetTiledPosition().distance(playerTiledPosition);
+    if (distance > Globals::MONSTER_AWARENESS_RADIUS)
+    {
+        pathFound = false;
+        path.clear();
+        return;
+    }
+
+    bool shouldMove = false;
+    pdcpp::Point<int> target = playerTiledPosition;
+
+    if (distance < Globals::MONSTER_KITE_MIN_RANGE)
+    {
+        target = GetKiteTarget(playerTiledPosition, area);
+        shouldMove = true;
+    }
+    else if (distance > Globals::MONSTER_KITE_MAX_RANGE)
+    {
+        shouldMove = true;
+    }
+    else
+    {
+        pathFound = false;
+        path.clear();
+        return;
+    }
+
+    if (target.x != lastPathTarget.x || target.y != lastPathTarget.y)
+    {
+        pathFound = false;
+        path.clear();
+        lastPathTarget = target;
+    }
+
+    if (pathFindingCooldown > 0)
+    {
+        pathFindingCooldown--;
+    }
+    else if (shouldMove && canComputePath && !pathFound && pathFindFailureCount < Globals::MAX_PATH_FIND_FAILURE_COUNT)
+    {
+        CalculateNodesToTarget(target, area);
+        pathFindingCooldown = Globals::PATH_FINDING_COOLDOWN;
+    }
+
+    if (pathFound)
+    {
+        if (!path.empty())
+        {
+            if (reachedNode)
+            {
+                nextPosition = path.back();
+                path.pop_back();
+                reachedNode = false;
+            }
+            Move(nextPosition, area);
+        }
+        else
+        {
+            pathFound = false;
+        }
+    }
 }
 
 bool Monster::ShouldMove(pdcpp::Point<int> playerPosition) const
@@ -277,6 +404,59 @@ void Monster::Move(pdcpp::Point<int> target, Area* area)
     {
         reachedNode = true;
     }
+}
+
+void Monster::MoveNoClip(pdcpp::Point<int> target)
+{
+    const pdcpp::Point<int> iPos = {GetPosition().x, GetPosition().y};
+    const pdcpp::Point<int> fPos = {target.x * Globals::MAP_TILE_SIZE, target.y * Globals::MAP_TILE_SIZE};
+    const pdcpp::Point<int> d = {(fPos.x - iPos.x), (fPos.y - iPos.y)};
+
+    if (d.x == 0 && d.y == 0)
+    {
+        return;
+    }
+
+    float length = sqrtf(static_cast<float>(d.x * d.x + d.y * d.y));
+    if (length <= 0.0f)
+    {
+        return;
+    }
+
+    int moveSpeed = GetMovementSpeed();
+    if (d.x != 0 && d.y != 0)
+    {
+        moveSpeed = std::max(1, static_cast<int>(static_cast<float>(moveSpeed) * Globals::MONSTER_DIAGONAL_MOVE_SCALE));
+    }
+
+    pdcpp::Point<int> dn {static_cast<int>((static_cast<float>(d.x) / length) * static_cast<float>(moveSpeed)),
+                          static_cast<int>((static_cast<float>(d.y) / length) * static_cast<float>(moveSpeed))};
+    if (dn.x == 0 && d.x != 0) dn.x = (d.x > 0) ? 1 : -1;
+    if (dn.y == 0 && d.y != 0) dn.y = (d.y > 0) ? 1 : -1;
+
+    SetPosition({iPos.x + dn.x, iPos.y + dn.y});
+}
+
+pdcpp::Point<int> Monster::GetKiteTarget(const pdcpp::Point<int>& playerTiledPosition, const Area* area) const
+{
+    const pdcpp::Point<int> monsterTiled = GetTiledPosition();
+    int dx = monsterTiled.x - playerTiledPosition.x;
+    int dy = monsterTiled.y - playerTiledPosition.y;
+
+    if (dx == 0 && dy == 0)
+    {
+        dx = 1;
+    }
+
+    int stepX = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
+    int stepY = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
+
+    int targetX = monsterTiled.x + stepX * Globals::MONSTER_KITE_STEP;
+    int targetY = monsterTiled.y + stepY * Globals::MONSTER_KITE_STEP;
+
+    targetX = std::clamp(targetX, 0, area->GetWidth() - 1);
+    targetY = std::clamp(targetY, 0, area->GetHeight() - 1);
+    return {targetX, targetY};
 }
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const

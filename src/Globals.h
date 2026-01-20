@@ -18,6 +18,9 @@ namespace  Globals
     constexpr int MONSTER_SPAWN_RADIUS = 20; // Radius within which monsters can spawn around the player
     constexpr int MONSTER_ATTACK_RANGE = 2; // Range within which monsters can attack the player
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; // Scale factor for diagonal movement speed of monsters
+    constexpr int MONSTER_KITE_MIN_RANGE = 3; // Minimum distance for kiting monsters
+    constexpr int MONSTER_KITE_MAX_RANGE = 7; // Maximum distance for kiting monsters
+    constexpr int MONSTER_KITE_STEP = 4; // Tiles to move away when kiting
     constexpr int MONSTER_MAX_LIVING_COUNT = 10; // Maximum number of monsters that can be present in an area
     constexpr int MONSTER_TOTAL_TO_SPAWN = 50; // Total number of monsters to spawn in an area
     constexpr int TICKS_BETWEEN_MONSTER_SPAWNS = 60; // Number of ticks between monster spawns
@@ -26,6 +29,8 @@ namespace  Globals
     constexpr int PATH_FINDING_COOLDOWN = 50; // Cooldown for pathfinding in ticks
     constexpr int MAX_ENTITY_FLASHING_TICKS = 10; // Maximum ticks an entity will flash when damaged
     constexpr float AUTO_FIRE_RANGE = 100.0f;
+    constexpr unsigned int XP_BASE = 10;
+    constexpr unsigned int XP_FACTOR = 5;
     constexpr const char* GAME_SAVE_PATH = "saves/save.json";
     constexpr const char* MAX_SCORE_PATH = "saves/maxscore.data";
 }

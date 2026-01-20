@@ -398,15 +398,29 @@ void Area::Tick(Player* player)
             static_cast<float>(blockedPosition.y));
     }
 
-    // Count dead monsters and increment player's kill count, then remove them from the living monsters list
-    size_t deadMonsters = std::erase_if(livingMonsters,
+    // Count dead monsters and accumulate XP before removing them
+    size_t deadMonsters = 0;
+    unsigned int xpGained = 0;
+    for (const auto& monster : livingMonsters)
+    {
+        if (!monster->IsAlive())
+        {
+            deadMonsters++;
+            xpGained += monster->GetXP();
+        }
+    }
+    std::erase_if(livingMonsters,
                   [](const std::shared_ptr<Monster>& monster)
                   { return !monster->IsAlive(); });
 
-    // Increment player's kill count for each dead monster
+    // Increment player's kill count and award XP for each dead monster
     for (size_t i = 0; i < deadMonsters; ++i)
     {
         player->IncrementKillCount();
+    }
+    if (xpGained > 0)
+    {
+        player->AddXP(xpGained);
     }
 }
 Map_Layer Area::ToMapLayer() const

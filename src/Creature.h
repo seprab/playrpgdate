@@ -45,6 +45,7 @@ public:
     [[nodiscard]] float GetEvasion() const;
     void SetEvasion(float _evasion);
     [[nodiscard]] unsigned int GetXP() const;
+    void SetXP(unsigned int value) { xp = value; }
     void SetMovementScale(int value){movementScale = value;}
 
 
@@ -52,6 +53,8 @@ public:
     Weapon* GetEquippedWeapon();
     Armor* GetEquippedArmor();
     [[nodiscard]] int GetMovementSpeed() const {return movementScale; }
+    [[nodiscard]] int GetWeaponDamage() const;
+    [[nodiscard]] int GetArmorDefense() const;
 
     void EquipWeapon(Weapon* weapon);
     void EquipArmor(Armor* armor);

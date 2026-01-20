@@ -8,6 +8,7 @@
 #include <functional>
 #include <utility>
 #include <memory>
+#include <string>
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "pdcpp/graphics/Font.h"
@@ -40,6 +41,8 @@ private:
 
     PDMenuItem* saveMenuItem = nullptr;
     PDMenuItem* statsMenuItem = nullptr;
+    PDMenuItem* skillPointMenuItem = nullptr;
+    std::string skillPointMenuTitle;
 
     const float inputCooldown{UIConstants::Input::COOLDOWN};
     LCDBitmap* backgroundLoader;
@@ -50,7 +53,8 @@ private:
     std::function<void()> loadGameCallback;
     std::function<void()> gameOverCallback;
     std::function<void()> saveGameCallback;
-    std::vector<LCDBitmap*> magicIcons;
+    mutable std::vector<LCDBitmap*> magicIcons;
+    mutable std::vector<std::string> magicIconPaths;
     LCDBitmap * playerFace;
 
 public:
@@ -75,12 +79,14 @@ private:
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
+    void RefreshSkillIcons(const std::shared_ptr<Player>& player) const;
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;
 
     // Static callback functions for menu items
     static void SaveGameCallback(void* userdata);
+    static void SpendSkillPointCallback(void* userdata);
 };
 
 

@@ -36,13 +36,8 @@ UI::UI(const char *fontPath, EntityManager* manager)
 
     statsMenuItem = nullptr;
 
-    magicIcons = {
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_beam", &err),
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_projectile", &err),
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_orbiting_projectile", &err)
-    };
-    if (magicIcons[0] == nullptr || magicIcons[1] == nullptr || magicIcons[2] == nullptr)
-        Log::Error("Error loading magic icons: %s", err);
+    magicIcons.clear();
+    magicIconPaths.clear();
 
     playerFace = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_player_face", &err);
     if (playerFace == nullptr)
@@ -379,30 +374,34 @@ void UI::DrawGameScreen() const
     magicCooldown->Draw(player->GetCooldownPercentage());
 
     // Draw magic icons (previous, current, next)
-    const unsigned int activeMagic = player->GetSelectedMagic();
+    RefreshSkillIcons(player);
     const int iconCount = static_cast<int>(magicIcons.size());
-    const int prevIndex = (activeMagic == 0) ? iconCount - 1 : activeMagic - 1;
-    const int currIndex = static_cast<int>(activeMagic);
-    const int nextIndex = (activeMagic + 1) % iconCount;
+    if (iconCount > 0)
+    {
+        unsigned int activeMagic = player->GetSelectedMagic() % static_cast<unsigned int>(iconCount);
+        const int prevIndex = (activeMagic == 0) ? iconCount - 1 : static_cast<int>(activeMagic - 1);
+        const int currIndex = static_cast<int>(activeMagic);
+        const int nextIndex = (activeMagic + 1) % iconCount;
 
-    pd->graphics->drawBitmap(
-        magicIcons[prevIndex],
-        offset.x + GameHUD::MAGIC_ICON_LEFT_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_LEFT_Y_OFFSET,
-        kBitmapUnflipped
-    );
-    pd->graphics->drawBitmap(
-        magicIcons[currIndex],
-        offset.x + GameHUD::MAGIC_ICON_CENTER_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_CENTER_Y_OFFSET,
-        kBitmapUnflipped
-    );
-    pd->graphics->drawBitmap(
-        magicIcons[nextIndex],
-        offset.x + GameHUD::MAGIC_ICON_RIGHT_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_RIGHT_Y_OFFSET,
-        kBitmapUnflipped
-    );
+        pd->graphics->drawBitmap(
+            magicIcons[prevIndex],
+            offset.x + GameHUD::MAGIC_ICON_LEFT_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_LEFT_Y_OFFSET,
+            kBitmapUnflipped
+        );
+        pd->graphics->drawBitmap(
+            magicIcons[currIndex],
+            offset.x + GameHUD::MAGIC_ICON_CENTER_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_CENTER_Y_OFFSET,
+            kBitmapUnflipped
+        );
+        pd->graphics->drawBitmap(
+            magicIcons[nextIndex],
+            offset.x + GameHUD::MAGIC_ICON_RIGHT_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_RIGHT_Y_OFFSET,
+            kBitmapUnflipped
+        );
+    }
 
     // Draw player face icon
     pd->graphics->drawBitmap(
@@ -411,6 +410,58 @@ void UI::DrawGameScreen() const
         offset.y + GameHUD::PLAYER_FACE_Y_OFFSET,
         kBitmapUnflipped
     );
+}
+
+void UI::RefreshSkillIcons(const std::shared_ptr<Player>& player) const
+{
+    if (!player)
+    {
+        return;
+    }
+
+    const size_t skillCount = player->GetSkillCount();
+    if (skillCount == 0)
+    {
+        magicIcons.clear();
+        magicIconPaths.clear();
+        return;
+    }
+
+    bool needsRefresh = magicIconPaths.size() != skillCount;
+    if (!needsRefresh)
+    {
+        for (size_t i = 0; i < skillCount; ++i)
+        {
+            if (magicIconPaths[i] != player->GetSkillIconPath(static_cast<unsigned int>(i)))
+            {
+                needsRefresh = true;
+                break;
+            }
+        }
+    }
+
+    if (!needsRefresh)
+    {
+        return;
+    }
+
+    magicIcons.clear();
+    magicIconPaths.clear();
+    magicIcons.reserve(skillCount);
+    magicIconPaths.reserve(skillCount);
+
+    const char* err = nullptr;
+    for (size_t i = 0; i < skillCount; ++i)
+    {
+        const std::string& path = player->GetSkillIconPath(static_cast<unsigned int>(i));
+        LCDBitmap* icon = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path.c_str(), &err);
+        if (icon == nullptr)
+        {
+            Log::Error("Error loading skill icon %s: %s", path.c_str(), err);
+        }
+        magicIcons.push_back(icon);
+        magicIconPaths.push_back(path);
+    }
 }
 
 void UI::DrawGameOverScreen() const
@@ -491,6 +542,11 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
         pd->system->removeMenuItem(saveMenuItem);
         saveMenuItem = nullptr;
     }
+    if (skillPointMenuItem)
+    {
+        pd->system->removeMenuItem(skillPointMenuItem);
+        skillPointMenuItem = nullptr;
+    }
     if (currentScreen != GameScreen::GAME || !player)
     {
         return;
@@ -510,6 +566,18 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
         nullptr,
         nullptr);
     saveMenuItem = pdcpp::GlobalPlaydateAPI::get()->system->addMenuItem("Save & Exit", SaveGameCallback, this);
+
+    // Skill point spending menu
+    if (player->GetSkillPoints() > 0)
+    {
+        static const char* skill_options[] = {"STR +1", "AGI +1", "CON +1", "HP +5"};
+        skillPointMenuTitle = "Spend Skill (" + std::to_string(player->GetSkillPoints()) + ")";
+        skillPointMenuItem = pd->system->addOptionsMenuItem(
+            skillPointMenuTitle.c_str(),
+            skill_options, 4,
+            SpendSkillPointCallback,
+            this);
+    }
 }
 
 // Static callback functions for menu items
@@ -523,6 +591,44 @@ void UI::SaveGameCallback(void* userdata)
         ui->SwitchScreen(GameScreen::MAIN_MENU);
         pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
     }
+}
+
+void UI::SpendSkillPointCallback(void* userdata)
+{
+    UI* ui = static_cast<UI*>(userdata);
+    if (!ui || !ui->skillPointMenuItem)
+    {
+        return;
+    }
+
+    std::shared_ptr<Player> player = ui->entityManager->GetPlayer();
+    if (!player || player->GetSkillPoints() == 0)
+    {
+        return;
+    }
+
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+    int selectedIndex = pd->system->getMenuItemValue(ui->skillPointMenuItem);
+
+    switch (selectedIndex)
+    {
+        case 0:
+            player->SpendSkillPoint(Player::StatType::Strength);
+            break;
+        case 1:
+            player->SpendSkillPoint(Player::StatType::Agility);
+            break;
+        case 2:
+            player->SpendSkillPoint(Player::StatType::Constitution);
+            break;
+        case 3:
+            player->SpendSkillPoint(Player::StatType::MaxHp);
+            break;
+        default:
+            break;
+    }
+
+    ui->UpdateStatsMenuItem(player);
 }
 
 // Helper methods implementation

@@ -13,16 +13,15 @@
 #include "Monster.h"
 #include "Area.h"
 #include <limits>
+#include <algorithm>
 
 Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
 {
     ResetStats();
     className = "Warrior";
-    magicCooldown = 5000;
     SetHP(100);
     SetMaxHP(100);
     SetMovementScale(5.0f);
-    lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     lastAutoFireTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     lastActivityTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     isPlayerActive = true;
@@ -70,11 +69,19 @@ Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(
     die->SetDelay(4);
     die->LoadBitmaps();
 
-    availableMagic = {
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, weak_from_this()); },
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, weak_from_this()); },
-            [this](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position, weak_from_this()); }
+    skills = {
+            {"Beam", "images/ui/icon_magic_beam", 2000,
+                [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, weak_from_this()); }},
+            {"Projectile", "images/ui/icon_magic_projectile", 1500,
+                [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, weak_from_this()); }},
+            {"Orbiting", "images/ui/icon_magic_orbiting_projectile", 5000,
+                [this](const pdcpp::Point<int>& position) { return std::make_unique<OrbitingProjectiles>(position, weak_from_this()); }},
+            {"Rapid Shot", "images/ui/icon_magic_projectile", 800,
+                [this](const pdcpp::Point<int>& position) { return std::make_unique<Projectile>(position, weak_from_this(), 10.0f, 4, 500, 0.25f); }},
+            {"Heavy Beam", "images/ui/icon_magic_beam", 3500,
+                [this](const pdcpp::Point<int>& position) { return std::make_unique<Beam>(position, weak_from_this(), 3, 200.0f, 500, 0.7f); }}
     };
+    lastSkillCastTimes.assign(skills.size(), pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds());
 }
 
 void Player::Tick(const std::shared_ptr<Area>& area)
@@ -172,39 +179,125 @@ void Player::HandleInput()
     dx *= static_cast<int>(GetMovementSpeed());
     dy *= static_cast<int>(GetMovementSpeed());
 
+    if (skills.empty())
+    {
+        return;
+    }
+
     if (pushed & kButtonA)
     {
         selectedMagic = selectedMagic + 1;
-        if (selectedMagic >= availableMagic.size())
+        if (selectedMagic >= skills.size())
         {
             selectedMagic = 0;
         }
     }
     else if (pushed & kButtonB)
     {
-        if (selectedMagic == 0) selectedMagic = availableMagic.size() - 1;
+        if (selectedMagic == 0) selectedMagic = skills.size() - 1;
         else selectedMagic = selectedMagic - 1;
     }
 
     const auto currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-    const int magicCastElapsedTime = static_cast<int>(currentTime - lastMagicCastTime);
-    if (magicCastElapsedTime < magicCooldown)
+    const int magicCastElapsedTime = static_cast<int>(currentTime - lastSkillCastTimes[selectedMagic]);
+    if (magicCastElapsedTime < static_cast<int>(skills[selectedMagic].cooldownMs))
     {
         return;
     }
 
     if (attacking)
     {
-        lastMagicCastTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
         std::unique_ptr<Magic> magic;
-        magic = availableMagic[selectedMagic](GetCenteredPosition());
+        lastSkillCastTimes[selectedMagic] = currentTime;
+        magic = skills[selectedMagic].factory(GetCenteredPosition());
         magicLaunched.push_back(std::move(magic));
     }
 }
 float Player::GetCooldownPercentage() const
 {
-    unsigned int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds() - lastMagicCastTime;
-    return static_cast<float>(magicCastElapsedTime) / static_cast<float>(magicCooldown);
+    if (skills.empty())
+    {
+        return 1.0f;
+    }
+    unsigned int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds()
+        - lastSkillCastTimes[selectedMagic];
+    float cooldown = static_cast<float>(skills[selectedMagic].cooldownMs);
+    if (cooldown <= 0.0f)
+    {
+        return 1.0f;
+    }
+    return std::min(1.0f, static_cast<float>(magicCastElapsedTime) / cooldown);
+}
+
+std::string Player::GetClassName()
+{
+    return className;
+}
+
+unsigned int Player::GetLevel()
+{
+    return level;
+}
+
+void Player::SetSelectedMagic(unsigned int value)
+{
+    if (skills.empty())
+    {
+        selectedMagic = 0;
+        return;
+    }
+    selectedMagic = value % static_cast<unsigned int>(skills.size());
+}
+
+std::unordered_set<std::string>& Player::GetVisitedArea()
+{
+    return visitedAreas;
+}
+
+unsigned int Player::GetXPToLevelUp(unsigned int currentLevel)
+{
+    return Globals::XP_BASE + (currentLevel * currentLevel * Globals::XP_FACTOR);
+}
+
+void Player::AddXP(unsigned int amount)
+{
+    SetXP(GetXP() + amount);
+    while (GetXP() >= GetXPToLevelUp(level))
+    {
+        SetXP(GetXP() - GetXPToLevelUp(level));
+        LevelUp();
+    }
+}
+
+bool Player::SpendSkillPoint(StatType statType)
+{
+    if (skillPoints == 0)
+    {
+        return false;
+    }
+
+    switch (statType)
+    {
+        case StatType::Strength:
+            SetStrength(GetStrength() + 1);
+            break;
+        case StatType::Agility:
+            SetAgility(GetAgility() + 1);
+            break;
+        case StatType::Constitution:
+            SetConstitution(GetConstitution() + 1);
+            break;
+        case StatType::MaxHp:
+        {
+            float newMax = GetMaxHP() + 5.0f;
+            SetMaxHP(newMax);
+            SetHP(std::min(newMax, GetHP() + 5.0f));
+            break;
+        }
+    }
+
+    skillPoints--;
+    return true;
 }
 
 void Player::DrawAimDirection() const {
@@ -273,8 +366,8 @@ void Player::HandleAutoFire(const std::shared_ptr<Area>& area)
 
 bool Player::LevelUp()
 {
-    //TODO: Implement player level up
     level++;
+    skillPoints++;
     SetHP(GetMaxHP());
     return true;
 }
@@ -306,6 +399,9 @@ void Player::ResetStats()
     monstersKilled = 0;
     finalSurvivalTime = 0;
     gameStartTime = 0;
+    level = 0;
+    skillPoints = 0;
+    SetXP(0);
 }
 
 void Player::Damage(float damage)

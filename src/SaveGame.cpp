@@ -63,8 +63,12 @@ std::string SaveGame::SerializePlayer(const std::shared_ptr<Player>& player)
     json << "    \"monstersKilled\": " << player->GetMonstersKilled() << ",\n";
     json << "    \"gameStartTime\": " << player->GetSurvivalTimeSeconds() << ",\n";
     json << "    \"xp\": " << player->GetXP() << ",\n";
+    json << "    \"level\": " << player->GetLevel() << ",\n";
+    json << "    \"skillPoints\": " << player->GetSkillPoints() << ",\n";
+    json << "    \"selectedSkill\": " << player->GetSelectedMagic() << ",\n";
     json << "    \"strength\": " << player->GetStrength() << ",\n";
     json << "    \"agility\": " << player->GetAgility() << ",\n";
+    json << "    \"constitution\": " << player->GetConstitution() << ",\n";
     json << "    \"evasion\": " << player->GetEvasion() << "\n";
     json << "  }";
 
@@ -215,6 +219,9 @@ bool SaveGame::DeserializePlayer(const std::shared_ptr<Player>& player, const ch
     if ((val = findValue("hp"))) {
         player->SetHP(atof(val));
     }
+    if ((val = findValue("maxHp"))) {
+        player->SetMaxHP(atof(val));
+    }
 
     // Monsters Killed
     if ((val = findValue("monstersKilled"))) {
@@ -226,8 +233,33 @@ bool SaveGame::DeserializePlayer(const std::shared_ptr<Player>& player, const ch
         player->SetGameStartTime(atoi(val));
     }
 
-    // Stats - note: these might not have setters, so this is optional
-    // You may need to add setters to Player class
+    // XP / Level / Skills
+    if ((val = findValue("xp"))) {
+        player->SetXP(static_cast<unsigned int>(atoi(val)));
+    }
+    if ((val = findValue("level"))) {
+        player->SetLevel(static_cast<unsigned int>(atoi(val)));
+    }
+    if ((val = findValue("skillPoints"))) {
+        player->SetSkillPoints(static_cast<unsigned int>(atoi(val)));
+    }
+    if ((val = findValue("selectedSkill"))) {
+        player->SetSelectedMagic(static_cast<unsigned int>(atoi(val)));
+    }
+
+    // Stats
+    if ((val = findValue("strength"))) {
+        player->SetStrength(atoi(val));
+    }
+    if ((val = findValue("agility"))) {
+        player->SetAgility(atoi(val));
+    }
+    if ((val = findValue("constitution"))) {
+        player->SetConstitution(atoi(val));
+    }
+    if ((val = findValue("evasion"))) {
+        player->SetEvasion(static_cast<float>(atof(val)));
+    }
 
     Log::Info("Player deserialized successfully");
     return true;

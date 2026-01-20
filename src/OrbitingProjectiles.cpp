@@ -7,11 +7,17 @@
 #include "EntityManager.h"
 #include "Monster.h"
 
-OrbitingProjectiles::OrbitingProjectiles(const pdcpp::Point<int> Position, std::weak_ptr<Player> _player) :
+OrbitingProjectiles::OrbitingProjectiles(const pdcpp::Point<int> Position, std::weak_ptr<Player> _player)
+    : OrbitingProjectiles(Position, std::move(_player), 10, 40, 0.1f)
+{}
+
+OrbitingProjectiles::OrbitingProjectiles(const pdcpp::Point<int> Position, std::weak_ptr<Player> _player,
+                                         unsigned int _size, short int _radius, float _damage) :
         Magic(Position, std::move(_player)) {
     iLifetime = 4000;
-    size = 10;
-    radius = 40;
+    size = _size;
+    radius = _radius;
+    damagePerHit = _damage;
 }
 
 void OrbitingProjectiles::Draw() const
@@ -63,7 +69,7 @@ void OrbitingProjectiles::Damage(const std::shared_ptr<Area>& area)
                 if (abs(normalizedAngle - angles[i]) < 0.2f)
                 {
                     // Damage the creature
-                    entity->Damage(0.1f);
+                    entity->Damage(damagePerHit);
                     break;
                 }
             }

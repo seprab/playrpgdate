@@ -9,6 +9,7 @@
 		"con": 2,
 		"evasion": 0.015625,
 		"xp": 1,
+		"movement": "ranged",
 		"weapon": 501,
 		"armor": 400
 	},
@@ -22,6 +23,7 @@
 		"con": 3,
 		"evasion": 0.03125,
 		"xp": 2,
+		"movement": "noclip",
 		"weapon": 502,
 		"armor": 401
 	},
@@ -35,6 +37,7 @@
 		"con": 4,
 		"evasion": 0.0625,
 		"xp": 3,
+		"movement": "stationary",
 		"weapon": 503,
 		"armor": 402
 	},
@@ -165,6 +168,7 @@
 		"con": 14,
 		"evasion": 64,
 		"xp": 13,
+		"movement": "ranged",
 		"weapon": 513,
 		"armor": 412
 	},

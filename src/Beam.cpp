@@ -8,11 +8,18 @@
 #include "Log.h"
 #include "Monster.h"
 
-Beam::Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> _player) :
-Magic(Position, std::move(_player)), startPosition(position), endPosition(Position) {
+Beam::Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> _player)
+    : Beam(Position, std::move(_player), 1, 150.0f, 300, 0.4f)
+{}
+
+Beam::Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> _player,
+           unsigned int _size, float _length, unsigned int _explosionThreshold, float _damage) :
+    Magic(Position, std::move(_player)), startPosition(position), endPosition(Position) {
     iLifetime = 2000;
-    size = 1;
-    explosionThreshold = 300;
+    size = _size;
+    beamLength = _length;
+    explosionThreshold = _explosionThreshold;
+    damagePerHit = _damage;
 }
 
 void Beam::Draw() const {
@@ -26,7 +33,7 @@ void Beam::HandleInput()
 {
     float angle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle()* kPI /180.f;
     float startDistance = 30.f;
-    float length = 150.f;
+    float length = beamLength;
     std::shared_ptr<Player> p = player.lock();
     if (!p) return; //Player has been destroyed
     position = p->GetCenteredPosition();
@@ -60,7 +67,7 @@ void Beam::Damage(const std::shared_ptr<Area>& area)
         const double denominator = sqrt(pow((yf - yi), 2) + pow((xf - xi), 2));
         if ((numerator / denominator) < size)
         {
-            entity->Damage(0.4f);
+            entity->Damage(damagePerHit);
         }
     }
 }
