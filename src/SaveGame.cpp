@@ -19,40 +19,35 @@ bool SaveGame::Save(
         return false;
     }
 
-    try {
-        // Build JSON document
-        std::ostringstream json;
-        json << "{\n";
-        json << "  \"version\": 1,\n";
-        json << "  \"player\": " << SerializePlayer(player) << ",\n";
-        json << "  \"area\": {\n";
-        json << "    \"id\": " << area->GetId() << ",\n";
-        json << "    \"monsters\": " << SerializeMonsters(area) << "\n";
-        json << "  }\n";
-        json << "}\n";
+    // Build JSON document
+    std::ostringstream json;
+    json << "{\n";
+    json << "  \"version\": 1,\n";
+    json << "  \"player\": " << SerializePlayer(player) << ",\n";
+    json << "  \"area\": {\n";
+    json << "    \"id\": " << area->GetId() << ",\n";
+    json << "    \"monsters\": " << SerializeMonsters(area) << "\n";
+    json << "  }\n";
+    json << "}\n";
 
-        std::string jsonStr = json.str();
+    std::string jsonStr = json.str();
 
-        // Write to file
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(filePath, FileOptions::kFileWrite);
-        if (!fileHandle) {
-            Log::Error("SaveGame::Save - Failed to open file: %s", filePath);
-            return false;
-        }
-
-        int bytesWritten = fileHandle->write(const_cast<void*>(static_cast<const void*>(jsonStr.c_str())), jsonStr.length());
-        if (bytesWritten != static_cast<int>(jsonStr.length())) {
-            Log::Error("SaveGame::Save - Failed to write complete data");
-            return false;
-        }
-
-        Log::Info("Game saved successfully to %s", filePath);
-        return true;
-    }
-    catch (...) {
-        Log::Error("SaveGame::Save - Exception occurred");
+    // Write to file
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(filePath, FileOptions::kFileWrite);
+    if (!fileHandle) {
+        Log::Error("SaveGame::Save - Failed to open file: %s", filePath);
         return false;
     }
+
+    int bytesWritten = fileHandle->write(const_cast<void*>(static_cast<const void*>(jsonStr.c_str())), jsonStr.length());
+    if (bytesWritten != static_cast<int>(jsonStr.length())) {
+        Log::Error("SaveGame::Save - Failed to write complete data");
+        return false;
+    }
+
+    Log::Info("Game saved successfully to %s", filePath);
+    return true;
+    
 }
 
 std::string SaveGame::SerializePlayer(const std::shared_ptr<Player>& player)
@@ -118,63 +113,58 @@ bool SaveGame::Load(
         return false;
     }
 
-    try {
-        // Read file
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(filePath, FileOptions::kFileReadData);
-        if (!fileHandle) {
-            Log::Error("SaveGame::Load - Failed to open file: %s", filePath);
-            return false;
-        }
-
-        // Read entire file into buffer
-        const size_t MAX_SAVE_SIZE = 64 * 1024; // 64KB max save file
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(MAX_SAVE_SIZE);
-        int bytesRead = fileHandle->read(buffer.get(), MAX_SAVE_SIZE - 1);
-
-        if (bytesRead <= 0) {
-            Log::Error("SaveGame::Load - Failed to read file or file empty");
-            return false;
-        }
-
-        buffer[bytesRead] = '\0'; // Null terminate
-
-        // Parse JSON
-        jsmn_parser parser;
-        jsmn_init(&parser);
-
-        // First pass: count tokens
-        int tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, nullptr, 0);
-        if (tokenCount < 0) {
-            Log::Error("SaveGame::Load - JSON parse error: %d", tokenCount);
-            return false;
-        }
-
-        // Allocate tokens
-        std::vector<jsmntok_t> tokens(tokenCount);
-        jsmn_init(&parser);
-        tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, tokens.data(), tokenCount);
-
-        if (tokenCount < 0) {
-            Log::Error("SaveGame::Load - JSON parse error: %d", tokenCount);
-            return false;
-        }
-
-        // Parse player data
-        if (!DeserializePlayer(player, buffer.get(), bytesRead)) {
-            Log::Error("SaveGame::Load - Failed to deserialize player");
-            return false;
-        }
-
-        // Parse monsters data (if needed)
-        // DeserializeMonsters(area, buffer.get(), bytesRead);
-
-        Log::Info("Game loaded successfully from %s", filePath);
-        return true;
-    }
-    catch (...) {
-        Log::Error("SaveGame::Load - Exception occurred");
+    
+    // Read file
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(filePath, FileOptions::kFileReadData);
+    if (!fileHandle) {
+        Log::Error("SaveGame::Load - Failed to open file: %s", filePath);
         return false;
     }
+
+    // Read entire file into buffer
+    const size_t MAX_SAVE_SIZE = 64 * 1024; // 64KB max save file
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(MAX_SAVE_SIZE);
+    int bytesRead = fileHandle->read(buffer.get(), MAX_SAVE_SIZE - 1);
+
+    if (bytesRead <= 0) {
+        Log::Error("SaveGame::Load - Failed to read file or file empty");
+        return false;
+    }
+
+    buffer[bytesRead] = '\0'; // Null terminate
+
+    // Parse JSON
+    jsmn_parser parser;
+    jsmn_init(&parser);
+
+    // First pass: count tokens
+    int tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, nullptr, 0);
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::Load - JSON parse error: %d", tokenCount);
+        return false;
+    }
+
+    // Allocate tokens
+    std::vector<jsmntok_t> tokens(tokenCount);
+    jsmn_init(&parser);
+    tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, tokens.data(), tokenCount);
+
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::Load - JSON parse error: %d", tokenCount);
+        return false;
+    }
+
+    // Parse player data
+    if (!DeserializePlayer(player, buffer.get(), bytesRead)) {
+        Log::Error("SaveGame::Load - Failed to deserialize player");
+        return false;
+    }
+
+    // Parse monsters data (if needed)
+    // DeserializeMonsters(area, buffer.get(), bytesRead);
+
+    Log::Info("Game loaded successfully from %s", filePath);
+    return true;
 }
 
 bool SaveGame::DeserializePlayer(const std::shared_ptr<Player>& player, const char* json, size_t length)

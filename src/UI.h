@@ -32,8 +32,8 @@ private:
     GameScreen currentScreen;
     float loadingProgress;
     int selectedMenuItem;
-    const char* menuItems[3] = {"New Game", "Load Game", "Close"};
-    int menuItemCount = 3;
+    const char* menuItems[2] = {"New Game", "Load Game"};
+    int menuItemCount = 2;
     pdcpp::Font font;  // Changed from LCDFont* to pdcpp::Font
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
@@ -75,7 +75,6 @@ private:
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
-    void DrawDebugInfo() const;
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;

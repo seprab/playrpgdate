@@ -105,8 +105,6 @@ void UI::HandleInputs()
                         SwitchScreen(GameScreen::GAME);
                         if (loadGameCallback) loadGameCallback();
                         break;
-                    case 2: // Close
-                            exit(0);
                     default: break;
                 }
             }
@@ -157,9 +155,6 @@ void UI::Draw() const
         default:
             break;
     }
-
-    // Always draw debug info
-    DrawDebugInfo();
 }
 
 void UI::DrawLoadingScreen() const
@@ -478,54 +473,6 @@ void UI::UpdateLoadingProgress(float progress)
     loadingProgress = progress;
     if (loadingProgress > 1.0f) loadingProgress = 1.0f;
     if (loadingProgress < 0.0f) loadingProgress = 0.0f;
-}
-
-void UI::DrawDebugInfo() const
-{
-    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
-
-    // Reset draw offset to (0,0) for UI drawing
-    // GameManager will reset it again next frame, so no need to restore
-    //pd->graphics->setDrawOffset(0, 0); // when uncommented this, I no longer see automatic projectiles from player
-
-    // Get battery status
-    float percentage = pd->system->getBatteryPercentage();
-    float voltage = pd->system->getBatteryVoltage();
-
-    // Format battery info
-    char batteryText[32];
-    snprintf(batteryText, sizeof(batteryText), "Batt: %.0f%% %.2fV", percentage, voltage);
-
-    // Load smaller font for debug info
-    const char* err;
-    LCDFont* smallFont = pd->graphics->loadFont("/System/Fonts/Asheville-Sans-14-Bold.pft", &err);
-    if (smallFont) {
-        pd->graphics->setFont(smallFont);
-    }
-
-    // Measure text to create background panel
-    int textWidth = pd->graphics->getTextWidth(smallFont, batteryText, strlen(batteryText), kASCIIEncoding, 0);
-    int textHeight = pd->graphics->getFontHeight(smallFont);
-
-    // Draw at bottom-left corner
-    int screenHeight = pd->display->getHeight();
-    int padding = 2;
-    int textX = padding;
-    int textY = screenHeight - textHeight - padding;
-
-    // Draw black background panel
-    pdcpp::Rectangle<int> panel(
-        textX - padding,
-        textY - padding,
-        textWidth + padding * 2,
-        textHeight + padding * 2
-    );
-    pdcpp::Graphics::fillRectangle(panel, pdcpp::Colors::black);
-
-    // Draw white text on black background
-    SetTextDrawMode(UIConstants::Theme::TEXT_COLOR);
-    pd->graphics->drawText(batteryText, strlen(batteryText), kASCIIEncoding, textX, textY);
-    pd->graphics->setDrawMode(kDrawModeCopy);
 }
 
 void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)

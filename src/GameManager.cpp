@@ -151,7 +151,7 @@ void GameManager::LoadSavedGame()
     isGameRunning = true;
 
     // Try to load save file using new SaveGame framework
-    if (!SaveGame::Load(player, activeArea, Globals::GAME_SAVE_PATH.c_str()))
+    if (!SaveGame::Load(player, activeArea, Globals::GAME_SAVE_PATH))
     {
         Log::Error("Failed to load save game, starting at default position");
     }
@@ -165,7 +165,7 @@ void GameManager::SaveGame()
     }
 
     // Use new SaveGame framework
-    if (!SaveGame::Save(player, activeArea, Globals::GAME_SAVE_PATH.c_str())) {
+    if (!SaveGame::Save(player, activeArea, Globals::GAME_SAVE_PATH)) {
         Log::Error("Failed to save game");
     }
 }
@@ -194,30 +194,25 @@ void GameManager::PauseGame() const
 
 void GameManager::SaveMaxScore()
 {
-    try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileWrite);
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileWrite);
 
-        if (!fileHandle) {
-            Log::Error("Failed to open save file for writing");
-            return;
-        }
-
-        size_t bufferSize = sizeof(int); // one single int
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
-
-        memcpy(buffer.get(), &maxScore, sizeof(int));
-
-        int bytesWritten = fileHandle->write(buffer.get(), bufferSize);
-        if (bytesWritten != static_cast<int>(bufferSize)) {
-            Log::Error("Failed to write complete save data");
-            return;
-        }
-
-        Log::Info("Max score saved successfully: %d", maxScore);
+    if (!fileHandle) {
+        Log::Error("Failed to open save file for writing");
+        return;
     }
-    catch (...) {
-        Log::Error("Exception while saving game");
+
+    size_t bufferSize = sizeof(int); // one single int
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+
+    memcpy(buffer.get(), &maxScore, sizeof(int));
+
+    int bytesWritten = fileHandle->write(buffer.get(), bufferSize);
+    if (bytesWritten != static_cast<int>(bufferSize)) {
+        Log::Error("Failed to write complete save data");
+        return;
     }
+
+    Log::Info("Max score saved successfully: %d", maxScore);
 }
 
 void GameManager::LoadMaxScore()
@@ -226,28 +221,24 @@ void GameManager::LoadMaxScore()
         maxScore = 0;
         return; // No file to load
     }
-    try {
-        auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileReadData);
 
-        // Check if file was opened successfully
-        if (!fileHandle) {
-            return;
-        }
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(Globals::MAX_SCORE_PATH, FileOptions::kFileReadData);
 
-        size_t bufferSize = sizeof(int); // Max score is an int
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
-
-        int bytesRead = fileHandle->read(buffer.get(), bufferSize);
-        if (bytesRead != static_cast<int>(bufferSize)) {
-            Log::Error("Max score file corrupted or incomplete");
-            return;
-        }
-
-        memcpy(&maxScore, buffer.get(), sizeof(int));
-        Log::Info("Max score loaded successfully: %d", maxScore);
+    // Check if file was opened successfully
+    if (!fileHandle) {
+        return;
     }
-    catch (...) {
-        Log::Error("Exception while loading max score file");
+
+    size_t bufferSize = sizeof(int); // Max score is an int
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
+
+    int bytesRead = fileHandle->read(buffer.get(), bufferSize);
+    if (bytesRead != static_cast<int>(bufferSize)) {
+        Log::Error("Max score file corrupted or incomplete");
+        return;
     }
+
+    memcpy(&maxScore, buffer.get(), sizeof(int));
+    Log::Info("Max score loaded successfully: %d", maxScore);
 }
 

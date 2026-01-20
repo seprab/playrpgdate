@@ -26,7 +26,7 @@ namespace  Globals
     constexpr int PATH_FINDING_COOLDOWN = 50; // Cooldown for pathfinding in ticks
     constexpr int MAX_ENTITY_FLASHING_TICKS = 10; // Maximum ticks an entity will flash when damaged
     constexpr float AUTO_FIRE_RANGE = 100.0f;
-    constexpr std::string GAME_SAVE_PATH = "saves/save.json";
-    constexpr std::string MAX_SCORE_PATH = "saves/maxscore.data";
+    constexpr const char* GAME_SAVE_PATH = "saves/save.json";
+    constexpr const char* MAX_SCORE_PATH = "saves/maxscore.data";
 }
 #endif //GLOBALS_H
