@@ -38,6 +38,7 @@ private:
     std::string dataPath;
     std::string tilesetPath;
     int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
+    int monstersSpawnedCount = 0; // total count of monsters that have been spawned (alive or dead)
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Monster>> bankOfMonsters; // the type of monsters to spawn in the area
@@ -69,6 +70,12 @@ public:
     [[nodiscard]] const char* GetDataPath() const {return dataPath.c_str();}
     [[nodiscard]] const char* GetTilesetPath() const {return tilesetPath.c_str();}
     [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return livingMonsters;}
+    [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetMonsterBank() const {return bankOfMonsters;}
+    [[nodiscard]] int GetMonstersSpawnedCount() const {return monstersSpawnedCount;}
+    void AddLivingMonster(const std::shared_ptr<Monster>& monster) {livingMonsters.push_back(monster);}
+    void ClearLivingMonsters() {livingMonsters.clear();}
+    void ClearToSpawnMonsters() {toSpawnMonsters.clear();}
+    void SetMonstersSpawnedCount(int count) {monstersSpawnedCount = count;}
 
     void SetTokenCount(int value){tokens=value;}
     void SetDataPath(const std::string& value){dataPath=value;}

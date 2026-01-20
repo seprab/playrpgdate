@@ -26,6 +26,7 @@ bool SaveGame::Save(
     json << "  \"player\": " << SerializePlayer(player) << ",\n";
     json << "  \"area\": {\n";
     json << "    \"id\": " << area->GetId() << ",\n";
+    json << "    \"monstersSpawned\": " << area->GetMonstersSpawnedCount() << ",\n";
     json << "    \"monsters\": " << SerializeMonsters(area) << "\n";
     json << "  }\n";
     json << "}\n";
@@ -72,28 +73,22 @@ std::string SaveGame::SerializePlayer(const std::shared_ptr<Player>& player)
 
 std::string SaveGame::SerializeMonsters(const std::shared_ptr<Area>& area)
 {
-    // Note: This requires Area to expose its monsters list
-    // For now, return empty array - you'll need to add GetMonsters() to Area class
     std::ostringstream json;
     json << "[]";
-
-    // TODO: Implement when Area exposes monster list
-    // std::vector<std::shared_ptr<Monster>> monsters = area->GetMonsters();
-    // json << "[\n";
-    // for (size_t i = 0; i < monsters.size(); i++) {
-    //     auto& monster = monsters[i];
-    //     if (monster && monster->IsAlive()) {
-    //         pdcpp::Point<int> pos = monster->GetPosition();
-    //         json << "    { ";
-    //         json << "\"id\": " << monster->GetID() << ", ";
-    //         json << "\"hp\": " << monster->GetHP() << ", ";
-    //         json << "\"position\": { \"x\": " << pos.x << ", \"y\": " << pos.y << " }";
-    //         json << " }";
-    //         if (i < monsters.size() - 1) json << ",";
-    //         json << "\n";
-    //     }
-    // }
-    // json << "  ]";
+     std::vector<std::shared_ptr<Monster>> monsters = area->GetCreatures(); // This method already return living monsters only
+     json << "[\n";
+     for (size_t i = 0; i < monsters.size(); i++) {
+         auto& monster = monsters[i];
+         pdcpp::Point<int> pos = monster->GetPosition();
+         json << "    { ";
+         json << "\"id\": " << monster->GetId() << ", ";
+         json << "\"hp\": " << monster->GetHP() << ", ";
+         json << "\"position\": { \"x\": " << pos.x << ", \"y\": " << pos.y << " }";
+         json << " }";
+         if (i < monsters.size() - 1) json << ",";
+         json << "\n";
+     }
+     json << "  ]";
 
     return json.str();
 }
@@ -160,8 +155,11 @@ bool SaveGame::Load(
         return false;
     }
 
-    // Parse monsters data (if needed)
-    // DeserializeMonsters(area, buffer.get(), bytesRead);
+    // Parse monsters data
+    if (!DeserializeMonsters(area, buffer.get(), bytesRead)) {
+        Log::Error("SaveGame::Load - Failed to deserialize monsters");
+        return false;
+    }
 
     Log::Info("Game loaded successfully from %s", filePath);
     return true;
@@ -238,7 +236,208 @@ bool SaveGame::DeserializePlayer(const std::shared_ptr<Player>& player, const ch
 
 bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char* json, size_t length)
 {
-    // TODO: Implement monster deserialization when needed
+    jsmn_parser parser;
+    jsmn_init(&parser);
+
+    // Count tokens
+    int tokenCount = jsmn_parse(&parser, json, length, nullptr, 0);
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::DeserializeMonsters - Failed to parse JSON");
+        return false;
+    }
+
+    std::vector<jsmntok_t> tokens(tokenCount);
+    jsmn_init(&parser);
+    tokenCount = jsmn_parse(&parser, json, length, tokens.data(), tokenCount);
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::DeserializeMonsters - Failed to parse JSON tokens");
+        return false;
+    }
+
+    // Find the "monstersSpawned" count in the JSON
+    int monstersSpawnedCount = 0;
+    for (int i = 0; i < tokenCount - 1; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            int len = tokens[i].end - tokens[i].start;
+            if (strncmp(json + tokens[i].start, "monstersSpawned", len) == 0 && len == 15) {
+                if (tokens[i + 1].type == JSMN_PRIMITIVE) {
+                    char buf[32];
+                    int valLen = tokens[i + 1].end - tokens[i + 1].start;
+                    if (valLen < 32) {
+                        strncpy(buf, json + tokens[i + 1].start, valLen);
+                        buf[valLen] = '\0';
+                        monstersSpawnedCount = atoi(buf);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    // Set the spawned count on the area
+    area->SetMonstersSpawnedCount(monstersSpawnedCount);
+
+    // Find the "monsters" array in the JSON
+    int monstersArrayIndex = -1;
+    for (int i = 0; i < tokenCount - 1; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            int len = tokens[i].end - tokens[i].start;
+            if (strncmp(json + tokens[i].start, "monsters", len) == 0 && len == 8) {
+                monstersArrayIndex = i + 1;
+                break;
+            }
+        }
+    }
+
+    if (monstersArrayIndex == -1 || tokens[monstersArrayIndex].type != JSMN_ARRAY) {
+        Log::Info("SaveGame::DeserializeMonsters - No monsters array found or not an array");
+        return true; // Not an error, just no monsters to restore
+    }
+
+    int monsterCount = tokens[monstersArrayIndex].size;
+    if (monsterCount == 0) {
+        Log::Info("SaveGame::DeserializeMonsters - No monsters to restore");
+        return true;
+    }
+
+    // Clear existing living monsters and spawn queue before restoring saved ones
+    area->ClearLivingMonsters();
+    area->ClearToSpawnMonsters();
+
+    // Get the bank of monsters (templates) from the area
+    std::vector<std::shared_ptr<Monster>> bankOfMonsters = area->GetMonsterBank();
+
+    // Parse each monster in the array
+    int currentTokenIndex = monstersArrayIndex + 1;
+    for (int m = 0; m < monsterCount; m++) {
+        if (currentTokenIndex >= tokenCount || tokens[currentTokenIndex].type != JSMN_OBJECT) {
+            Log::Error("SaveGame::DeserializeMonsters - Invalid monster object at index %d", m);
+            continue;
+        }
+
+        int monsterObjSize = tokens[currentTokenIndex].size;
+        int monsterStartIndex = currentTokenIndex;
+
+        // Extract monster data
+        unsigned int monsterId = 0;
+        float monsterHp = 0.0f;
+        int posX = 0, posY = 0;
+
+        // Parse the monster object
+        currentTokenIndex++; // Move to first key in object
+        for (int field = 0; field < monsterObjSize; field++) {
+            if (currentTokenIndex >= tokenCount) break;
+
+            // Get key
+            if (tokens[currentTokenIndex].type != JSMN_STRING) {
+                currentTokenIndex += 2; // Skip this key-value pair
+                continue;
+            }
+
+            int keyLen = tokens[currentTokenIndex].end - tokens[currentTokenIndex].start;
+            const char* key = json + tokens[currentTokenIndex].start;
+            currentTokenIndex++; // Move to value
+
+            if (currentTokenIndex >= tokenCount) break;
+
+            // Parse value based on key
+            if (strncmp(key, "id", keyLen) == 0 && keyLen == 2) {
+                if (tokens[currentTokenIndex].type == JSMN_PRIMITIVE) {
+                    char buf[32];
+                    int valLen = tokens[currentTokenIndex].end - tokens[currentTokenIndex].start;
+                    if (valLen < 32) {
+                        strncpy(buf, json + tokens[currentTokenIndex].start, valLen);
+                        buf[valLen] = '\0';
+                        monsterId = atoi(buf);
+                    }
+                }
+                currentTokenIndex++;
+            }
+            else if (strncmp(key, "hp", keyLen) == 0 && keyLen == 2) {
+                if (tokens[currentTokenIndex].type == JSMN_PRIMITIVE) {
+                    char buf[32];
+                    int valLen = tokens[currentTokenIndex].end - tokens[currentTokenIndex].start;
+                    if (valLen < 32) {
+                        strncpy(buf, json + tokens[currentTokenIndex].start, valLen);
+                        buf[valLen] = '\0';
+                        monsterHp = atof(buf);
+                    }
+                }
+                currentTokenIndex++;
+            }
+            else if (strncmp(key, "position", keyLen) == 0 && keyLen == 8) {
+                // This is an object with x and y
+                if (tokens[currentTokenIndex].type == JSMN_OBJECT) {
+                    int posObjSize = tokens[currentTokenIndex].size;
+                    currentTokenIndex++; // Move into the position object
+
+                    for (int posField = 0; posField < posObjSize; posField++) {
+                        if (currentTokenIndex >= tokenCount) break;
+
+                        if (tokens[currentTokenIndex].type == JSMN_STRING) {
+                            int posKeyLen = tokens[currentTokenIndex].end - tokens[currentTokenIndex].start;
+                            const char* posKey = json + tokens[currentTokenIndex].start;
+                            currentTokenIndex++; // Move to value
+
+                            if (currentTokenIndex >= tokenCount) break;
+
+                            if (tokens[currentTokenIndex].type == JSMN_PRIMITIVE) {
+                                char buf[32];
+                                int valLen = tokens[currentTokenIndex].end - tokens[currentTokenIndex].start;
+                                if (valLen < 32) {
+                                    strncpy(buf, json + tokens[currentTokenIndex].start, valLen);
+                                    buf[valLen] = '\0';
+
+                                    if (strncmp(posKey, "x", posKeyLen) == 0 && posKeyLen == 1) {
+                                        posX = atoi(buf);
+                                    } else if (strncmp(posKey, "y", posKeyLen) == 0 && posKeyLen == 1) {
+                                        posY = atoi(buf);
+                                    }
+                                }
+                            }
+                            currentTokenIndex++;
+                        }
+                    }
+                } else {
+                    currentTokenIndex++; // Skip if not an object
+                }
+            }
+            else {
+                // Unknown field, skip value
+                currentTokenIndex++;
+            }
+        }
+
+        // Now find the monster template from bankOfMonsters and restore it
+        std::shared_ptr<Monster> monsterTemplate = nullptr;
+        for (const auto& bankMonster : bankOfMonsters) {
+            if (bankMonster->GetId() == monsterId) {
+                monsterTemplate = bankMonster;
+                break;
+            }
+        }
+
+        if (!monsterTemplate) {
+            Log::Error("SaveGame::DeserializeMonsters - Monster template with id %u not found in bank", monsterId);
+            continue;
+        }
+
+        // Create a copy of the monster template
+        auto restoredMonster = std::make_shared<Monster>(*monsterTemplate);
+
+        // Restore saved state
+        restoredMonster->SetHP(monsterHp);
+        restoredMonster->LoadBitmap();
+        restoredMonster->SetTiledPosition(pdcpp::Point<int>(posX, posY));
+
+        // Add to living monsters
+        area->AddLivingMonster(restoredMonster);
+
+        Log::Info("SaveGame::DeserializeMonsters - Restored monster id=%u, hp=%.1f, pos=(%d,%d)",
+                  monsterId, monsterHp, posX, posY);
+    }
+
+    Log::Info("SaveGame::DeserializeMonsters - Successfully processed %d monsters", monsterCount);
     return true;
 }
 

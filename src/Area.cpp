@@ -238,7 +238,16 @@ void Area::Unload()
 }
 void Area::SetupMonstersToSpawn()
 {
-    for (int i=0; i< Globals::MONSTER_TOTAL_TO_SPAWN; i++)
+    // Calculate how many monsters still need to be spawned
+    // This accounts for monsters that were already spawned when loading a saved game
+    int monstersToSetup = Globals::MONSTER_TOTAL_TO_SPAWN - monstersSpawnedCount;
+
+    // Ensure we don't spawn negative monsters
+    if (monstersToSetup <= 0) {
+        return;
+    }
+
+    for (int i=0; i< monstersToSetup; i++)
     {
         unsigned int randomIndex = random.next() % static_cast<unsigned int>(bankOfMonsters.size());
         auto monster = std::make_shared<Monster>(*bankOfMonsters[randomIndex]);
@@ -268,6 +277,7 @@ void Area::SpawnCreature()
     livingMonsters.back()->SetTiledPosition(spawnPos); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
+    monstersSpawnedCount++; // track total spawned monsters
 }
 /// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
 pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)

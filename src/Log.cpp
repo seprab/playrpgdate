@@ -56,6 +56,7 @@ template void Log::Info<>(char const*, char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned int, char const*);
 template void Log::Info<>(char const*, unsigned int, char const*, char const*);
+template void Log::Info<>(char const*, unsigned int, float, int, int);
 template void Log::Info<>(char const*, void*);
 template void Log::Info<>(char const*, PDMenuItem*);
 
