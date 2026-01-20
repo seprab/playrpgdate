@@ -140,21 +140,49 @@ void GameManager::LoadNewGame()
 
 void GameManager::LoadSavedGame()
 {
-    // Setup game world first
-    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
+    // First, check if save file exists and extract area ID
+    unsigned int areaId = 0;
+    if (!SaveGame::GetAreaIdFromSave(Globals::GAME_SAVE_PATH, areaId))
+    {
+        Log::Error("GameManager::LoadSavedGame - Failed to read save file or extract area ID");
+        ui->SwitchScreen(GameScreen::MAIN_MENU); // Return to main menu if save file is invalid
+        return;
+    }
+
+    // Get the area from entity manager based on saved area ID
+    activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(areaId));
+    if (!activeArea)
+    {
+        Log::Error("GameManager::LoadSavedGame - Area with ID %u not found in entity manager", areaId);
+        ui->SwitchScreen(GameScreen::MAIN_MENU); // Return to main menu if area doesn't exist
+        return;
+    }
+
+    // Setup the area
     activeArea->SetEntityManager(entityManager.get());
     activeArea->Load();
 
+    // Create player
     player = std::make_shared<Player>();
-    player->ResetStats(); // Initialize game stats
+    player->ResetStats(); // Initialize default stats (will be overwritten by save data)
     entityManager->SetPlayer(player);
-    isGameRunning = true;
 
-    // Try to load save file using new SaveGame framework
+    // Load save data into player and area
     if (!SaveGame::Load(player, activeArea, Globals::GAME_SAVE_PATH))
     {
-        Log::Error("Failed to load save game, starting at default position");
+        Log::Error("GameManager::LoadSavedGame - Failed to load save game data");
+        // Clean up since load failed
+        activeArea->Unload();
+        activeArea.reset();
+        player.reset();
+        entityManager->SetPlayer(nullptr);
+        ui->SwitchScreen(GameScreen::MAIN_MENU); // Return to main menu on failure
+        return;
     }
+
+    // Only set game as running if everything succeeded
+    isGameRunning = true;
+    Log::Info("GameManager::LoadSavedGame - Game loaded successfully from area %u", areaId);
 }
 
 void GameManager::SaveGame()

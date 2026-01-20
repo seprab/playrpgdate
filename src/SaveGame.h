@@ -46,6 +46,14 @@ public:
         const char* filePath
     );
 
+    /**
+     * Get area ID from save file without fully loading the game
+     * @param filePath Path to save file (e.g., "saves/save.json")
+     * @param outAreaId Output parameter for area ID
+     * @return true if successful and area ID was found, false otherwise
+     */
+    static bool GetAreaIdFromSave(const char* filePath, unsigned int& outAreaId);
+
 private:
     // Helper to build JSON string for player
     static std::string SerializePlayer(const std::shared_ptr<Player>& player);

@@ -74,7 +74,6 @@ std::string SaveGame::SerializePlayer(const std::shared_ptr<Player>& player)
 std::string SaveGame::SerializeMonsters(const std::shared_ptr<Area>& area)
 {
     std::ostringstream json;
-    json << "[]";
      std::vector<std::shared_ptr<Monster>> monsters = area->GetCreatures(); // This method already return living monsters only
      json << "[\n";
      for (size_t i = 0; i < monsters.size(); i++) {
@@ -428,7 +427,7 @@ bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char
         // Restore saved state
         restoredMonster->SetHP(monsterHp);
         restoredMonster->LoadBitmap();
-        restoredMonster->SetTiledPosition(pdcpp::Point<int>(posX, posY));
+        restoredMonster->SetPosition(pdcpp::Point<int>(posX, posY));
 
         // Add to living monsters
         area->AddLivingMonster(restoredMonster);
@@ -439,6 +438,104 @@ bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char
 
     Log::Info("SaveGame::DeserializeMonsters - Successfully processed %d monsters", monsterCount);
     return true;
+}
+
+bool SaveGame::GetAreaIdFromSave(const char* filePath, unsigned int& outAreaId)
+{
+    if (!pdcpp::FileHelpers::fileExists(filePath)) {
+        Log::Info("SaveGame::GetAreaIdFromSave - Save file does not exist: %s", filePath);
+        return false;
+    }
+
+    // Read file
+    auto fileHandle = std::make_unique<pdcpp::FileHandle>(filePath, FileOptions::kFileReadData);
+    if (!fileHandle) {
+        Log::Error("SaveGame::GetAreaIdFromSave - Failed to open file: %s", filePath);
+        return false;
+    }
+
+    // Read entire file into buffer
+    const size_t MAX_SAVE_SIZE = 64 * 1024; // 64KB max save file
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(MAX_SAVE_SIZE);
+    int bytesRead = fileHandle->read(buffer.get(), MAX_SAVE_SIZE - 1);
+
+    if (bytesRead <= 0) {
+        Log::Error("SaveGame::GetAreaIdFromSave - Failed to read file or file empty");
+        return false;
+    }
+
+    buffer[bytesRead] = '\0'; // Null terminate
+
+    // Parse JSON
+    jsmn_parser parser;
+    jsmn_init(&parser);
+
+    // Count tokens
+    int tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, nullptr, 0);
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::GetAreaIdFromSave - JSON parse error: %d", tokenCount);
+        return false;
+    }
+
+    std::vector<jsmntok_t> tokens(tokenCount);
+    jsmn_init(&parser);
+    tokenCount = jsmn_parse(&parser, buffer.get(), bytesRead, tokens.data(), tokenCount);
+    if (tokenCount < 0) {
+        Log::Error("SaveGame::GetAreaIdFromSave - JSON parse error: %d", tokenCount);
+        return false;
+    }
+
+    // Find the "area" object and then "id" within it
+    bool foundArea = false;
+    for (int i = 0; i < tokenCount - 1; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            int len = tokens[i].end - tokens[i].start;
+            if (strncmp(buffer.get() + tokens[i].start, "area", len) == 0 && len == 4) {
+                foundArea = true;
+                // Next token should be the area object
+                int areaObjIndex = i + 1;
+                if (tokens[areaObjIndex].type == JSMN_OBJECT) {
+                    int areaObjSize = tokens[areaObjIndex].size;
+                    int currentIndex = areaObjIndex + 1;
+
+                    // Look for "id" key within the area object
+                    for (int j = 0; j < areaObjSize; j++) {
+                        if (currentIndex >= tokenCount) break;
+
+                        if (tokens[currentIndex].type == JSMN_STRING) {
+                            int keyLen = tokens[currentIndex].end - tokens[currentIndex].start;
+                            const char* key = buffer.get() + tokens[currentIndex].start;
+
+                            if (strncmp(key, "id", keyLen) == 0 && keyLen == 2) {
+                                // Next token is the value
+                                currentIndex++;
+                                if (currentIndex < tokenCount && tokens[currentIndex].type == JSMN_PRIMITIVE) {
+                                    char buf[32];
+                                    int valLen = tokens[currentIndex].end - tokens[currentIndex].start;
+                                    if (valLen < 32) {
+                                        strncpy(buf, buffer.get() + tokens[currentIndex].start, valLen);
+                                        buf[valLen] = '\0';
+                                        outAreaId = static_cast<unsigned int>(atoi(buf));
+                                        Log::Info("SaveGame::GetAreaIdFromSave - Found area ID: %u", outAreaId);
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        currentIndex += 2; // Skip key-value pair
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    if (!foundArea) {
+        Log::Error("SaveGame::GetAreaIdFromSave - 'area' object not found in save file");
+    } else {
+        Log::Error("SaveGame::GetAreaIdFromSave - 'id' field not found in area object");
+    }
+    return false;
 }
 
 std::string SaveGame::EscapeJSON(const std::string& str)
