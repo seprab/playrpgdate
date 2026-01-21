@@ -133,6 +133,18 @@ void Player::Draw()
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
 #endif
 }
+
+void Player::DrawMagic() const
+{
+    // Draw all active magic projectiles on top of the map
+    for(const auto& magic : magicLaunched)
+    {
+        if (magic && magic->IsAlive())
+        {
+            magic->Draw();
+        }
+    }
+}
 void Player::HandleInput()
 {
     PDButtons clicked, pushed;

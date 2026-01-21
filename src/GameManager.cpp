@@ -119,6 +119,7 @@ void GameManager::Update()
 
         activeArea->Render(drawOffset.x, drawOffset.y, Globals::PLAYER_FOV_X, Globals::PLAYER_FOV_Y);
         player->Draw();
+        player->DrawMagic(); // Draw magic projectiles on top of the map
         ui->SetOffset(drawOffset);
     }
 

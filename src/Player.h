@@ -77,6 +77,7 @@ public:
     void HandleInput();
     void HandleAutoFire(const std::shared_ptr<Area>& area);
     void Draw() override;
+    void DrawMagic() const;
     void DrawAimDirection() const;
     void Damage(float damage); // Override to capture final survival time
 

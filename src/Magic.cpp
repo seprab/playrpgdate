@@ -25,7 +25,7 @@ void Magic::Update(const std::shared_ptr<Area>& area)
         Terminate();
     }
     HandleInput();
-    Draw();
+    // Draw() is now called separately in Player::DrawMagic() to ensure proper rendering order
     Damage(area);
 }
 void Magic::Terminate()
