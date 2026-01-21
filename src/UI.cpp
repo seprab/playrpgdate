@@ -47,6 +47,11 @@ UI::UI(const char *fontPath, EntityManager* manager)
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
     selectedMenuItem = 0;
+
+    // Initialize level-up popup state
+    showLevelUpPopup = false;
+    levelUpSelectedOption = 0;
+    pendingLevelUps = 0;
 }
 
 void UI::Update()
@@ -106,6 +111,65 @@ void UI::HandleInputs()
             break;
         case GameScreen::GAME:
             {
+                // Handle level-up popup input if it's showing
+                if (showLevelUpPopup)
+                {
+                    std::shared_ptr<Player> player = entityManager->GetPlayer();
+                    if (!player)
+                    {
+                        break;
+                    }
+
+                    if (current & kButtonUp)
+                    {
+                        levelUpSelectedOption = (levelUpSelectedOption - 1 + 4) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (current & kButtonDown)
+                    {
+                        levelUpSelectedOption = (levelUpSelectedOption + 1) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (current & kButtonA)
+                    {
+                        // Spend the skill point based on selection
+                        switch (levelUpSelectedOption)
+                        {
+                            case 0:
+                                player->SpendSkillPoint(Player::StatType::Strength);
+                                break;
+                            case 1:
+                                player->SpendSkillPoint(Player::StatType::Agility);
+                                break;
+                            case 2:
+                                player->SpendSkillPoint(Player::StatType::Constitution);
+                                break;
+                            case 3:
+                                player->SpendSkillPoint(Player::StatType::MaxHp);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // Check if there are more skill points to spend
+                        if (player->GetSkillPoints() > 0)
+                        {
+                            // Reset selection for next point
+                            levelUpSelectedOption = 0;
+                        }
+                        else
+                        {
+                            // Close popup when all skill points are spent
+                            showLevelUpPopup = false;
+                            pendingLevelUps = 0;
+                        }
+
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    break; // Don't process game input while popup is showing
+                }
+
+                // Normal game input handling
                 std::shared_ptr<Player> player = entityManager->GetPlayer();
                 if (!player->IsAlive())
                 {
@@ -146,6 +210,11 @@ void UI::Draw() const
             break;
         case GameScreen::GAME:
             DrawGameScreen();
+            // Draw level-up popup on top of the game screen if it's showing
+            if (showLevelUpPopup)
+            {
+                DrawLevelUpPopup();
+            }
             break;
         default:
             break;
@@ -160,21 +229,25 @@ void UI::DrawLoadingScreen() const
     // Draw background image
     pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
 
-    // Draw black banner for text
-    pdcpp::Rectangle<int> banner(
-        0, Loading::BANNER_Y,
-        SCREEN_WIDTH, Loading::BANNER_HEIGHT
+    // Draw compact background panel for loading area with rounded corners
+    const int panelWidth = 320;
+    const int panelHeight = 55;
+    const int panelX = (SCREEN_WIDTH - panelWidth) / 2;
+    const int panelY = Loading::BANNER_Y + 5;
+    pdcpp::Rectangle<int> loadingPanel(
+        panelX, panelY,
+        panelWidth, panelHeight
     );
-    pdcpp::Graphics::fillRectangle(banner, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRoundedRectangle(loadingPanel, 8, pdcpp::Colors::black);
 
-    // Draw loading bar frame
+    // Draw loading bar frame (square corners - too small for rounded corners to work properly)
     pdcpp::Rectangle<int> progressBarFrame(
         Loading::PROGRESS_BAR_X, Loading::PROGRESS_BAR_Y,
         Loading::PROGRESS_BAR_WIDTH, Loading::PROGRESS_BAR_HEIGHT
     );
     pdcpp::Graphics::drawRectangle(progressBarFrame, pdcpp::Colors::white);
 
-    // Draw loading progress fill (with padding)
+    // Draw loading progress fill (with padding, square corners)
     int progressWidth = static_cast<int>(
         loadingProgress * (Loading::PROGRESS_BAR_WIDTH - 2 * Loading::PROGRESS_BAR_PADDING)
     );
@@ -477,6 +550,7 @@ void UI::DrawGameOverScreen() const
     );
     pdcpp::Graphics::fillRoundedRectangle(panelRectA, 8, pdcpp::Colors::transparent50GrayB);
 
+    // Draw game over black panel
     pdcpp::Rectangle<int> panelRectB(
         offset.x + GameOver::PANELB_OFFSET_X,
         offset.y + GameOver::PANELB_OFFSET_Y,
@@ -517,6 +591,14 @@ void UI::SwitchScreen(GameScreen newScreen)
 {
     pdcpp::GlobalPlaydateAPI::get()->system->removeAllMenuItems();
     currentScreen = newScreen;
+
+    // Hide level-up popup when switching screens
+    if (newScreen != GameScreen::GAME)
+    {
+        showLevelUpPopup = false;
+        levelUpSelectedOption = 0;
+        pendingLevelUps = 0;
+    }
 }
 
 void UI::UpdateLoadingProgress(float progress)
@@ -542,11 +624,6 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
         pd->system->removeMenuItem(saveMenuItem);
         saveMenuItem = nullptr;
     }
-    if (skillPointMenuItem)
-    {
-        pd->system->removeMenuItem(skillPointMenuItem);
-        skillPointMenuItem = nullptr;
-    }
     if (currentScreen != GameScreen::GAME || !player)
     {
         return;
@@ -566,18 +643,6 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
         nullptr,
         nullptr);
     saveMenuItem = pdcpp::GlobalPlaydateAPI::get()->system->addMenuItem("Save & Exit", SaveGameCallback, this);
-
-    // Skill point spending menu
-    if (player->GetSkillPoints() > 0)
-    {
-        static const char* skill_options[] = {"STR +1", "AGI +1", "CON +1", "HP +5"};
-        skillPointMenuTitle = "Spend Skill (" + std::to_string(player->GetSkillPoints()) + ")";
-        skillPointMenuItem = pd->system->addOptionsMenuItem(
-            skillPointMenuTitle.c_str(),
-            skill_options, 4,
-            SpendSkillPointCallback,
-            this);
-    }
 }
 
 // Static callback functions for menu items
@@ -593,42 +658,114 @@ void UI::SaveGameCallback(void* userdata)
     }
 }
 
-void UI::SpendSkillPointCallback(void* userdata)
+void UI::DrawLevelUpPopup() const
 {
-    UI* ui = static_cast<UI*>(userdata);
-    if (!ui || !ui->skillPointMenuItem)
-    {
-        return;
-    }
-
-    std::shared_ptr<Player> player = ui->entityManager->GetPlayer();
-    if (!player || player->GetSkillPoints() == 0)
-    {
-        return;
-    }
-
+    using namespace UIConstants;
     PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
-    int selectedIndex = pd->system->getMenuItemValue(ui->skillPointMenuItem);
 
-    switch (selectedIndex)
+    std::shared_ptr<Player> player = entityManager->GetPlayer();
+    if (!player)
     {
-        case 0:
-            player->SpendSkillPoint(Player::StatType::Strength);
-            break;
-        case 1:
-            player->SpendSkillPoint(Player::StatType::Agility);
-            break;
-        case 2:
-            player->SpendSkillPoint(Player::StatType::Constitution);
-            break;
-        case 3:
-            player->SpendSkillPoint(Player::StatType::MaxHp);
-            break;
-        default:
-            break;
+        return;
     }
 
-    ui->UpdateStatsMenuItem(player);
+    // Draw semi-transparent outer panel like game over screen
+    pdcpp::Rectangle<int> panelRectA(
+        offset.x + GameOver::PANELA_OFFSET_X,
+        offset.y + GameOver::PANELA_OFFSET_Y,
+        GameOver::PANELA_WIDTH,
+        GameOver::PANELA_HEIGHT
+    );
+    pdcpp::Graphics::fillRoundedRectangle(panelRectA, 8, pdcpp::Colors::transparent50GrayB);
+
+    // Draw main popup panel in center (larger than game over to fit content)
+    const int panelWidth = 320;
+    const int panelHeight = 220;
+    const int panelX = offset.x - (panelWidth / 2);
+    const int panelY = offset.y - (panelHeight / 2);
+
+    pdcpp::Rectangle<int> panel(panelX, panelY, panelWidth, panelHeight);
+    pdcpp::Graphics::fillRoundedRectangle(panel, 8, pdcpp::Colors::black);
+
+    // Draw title
+    const int titleY = panelY + 10;
+    pdcpp::Rectangle<float> titleBounds(
+        static_cast<float>(panelX), static_cast<float>(titleY),
+        static_cast<float>(panelWidth), static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText("LEVEL UP!", titleBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw current stats and level info
+    char statsBuffer[128];
+    snprintf(statsBuffer, sizeof(statsBuffer),
+        "Level %u | Skill Points: %u\nSTR:%d  AGI:%d  CON:%d  HP:%.0f/%.0f",
+        player->GetLevel(), player->GetSkillPoints(),
+        player->GetStrength(), player->GetAgility(), player->GetConstitution(),
+        player->GetHP(), player->GetMaxHP());
+    const int statsY = titleY + font.getFontHeight() + 6;
+    pdcpp::Rectangle<float> statsBounds(
+        static_cast<float>(panelX + 10), static_cast<float>(statsY),
+        static_cast<float>(panelWidth - 20), static_cast<float>(font.getFontHeight() * 3)
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(statsBuffer, statsBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw stat options
+    const char* statOptions[] = {
+        "Strength +1",
+        "Agility +1",
+        "Constitution +1",
+        "Max HP +5"
+    };
+    const int optionStartY = statsY + (font.getFontHeight() * 2) + 12;
+    const int optionSpacing = 21;
+
+    for (int i = 0; i < 4; i++)
+    {
+        int optionY = optionStartY + (i * optionSpacing);
+
+        // Draw selection background for selected option
+        if (i == levelUpSelectedOption)
+        {
+            pdcpp::Rectangle<int> selectionBox(
+                panelX + 15, optionY - 2,
+                panelWidth - 30, font.getFontHeight() + 4
+            );
+            pdcpp::Graphics::fillRoundedRectangle(selectionBox, 4, pdcpp::Colors::white);
+
+            // Draw option text in black on white background
+            pdcpp::Rectangle<float> optionBounds(
+                static_cast<float>(panelX + 25), static_cast<float>(optionY),
+                static_cast<float>(panelWidth - 50), static_cast<float>(font.getFontHeight())
+            );
+            pd->graphics->setDrawMode(kDrawModeCopy);
+            font.drawWrappedText(statOptions[i], optionBounds, pdcpp::Font::Left, pdcpp::Font::Top);
+        }
+        else
+        {
+            // Draw option text in white for unselected options
+            pdcpp::Rectangle<float> optionBounds(
+                static_cast<float>(panelX + 25), static_cast<float>(optionY),
+                static_cast<float>(panelWidth - 50), static_cast<float>(font.getFontHeight())
+            );
+            SetTextDrawMode(Theme::TEXT_COLOR);
+            font.drawWrappedText(statOptions[i], optionBounds, pdcpp::Font::Left, pdcpp::Font::Top);
+            pd->graphics->setDrawMode(kDrawModeCopy);
+        }
+    }
+
+    // Draw instruction text at bottom
+    const int instructionY = panelY + panelHeight - font.getFontHeight() - 8;
+    pdcpp::Rectangle<float> instructionBounds(
+        static_cast<float>(panelX), static_cast<float>(instructionY),
+        static_cast<float>(panelWidth), static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText("Up/Down: Select  |  A: Confirm", instructionBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
 }
 
 // Helper methods implementation

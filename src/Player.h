@@ -64,6 +64,9 @@ private:
     bool isPlayerActive = false;
     unsigned int lastActivityTime = 0;
 
+    // Level-up tracking
+    bool justLeveledUp = false;
+
 public:
     Player();
     Player(const Player& other) = delete;
@@ -107,6 +110,10 @@ public:
 
     // Player activity for enemy slowdown
     [[nodiscard]] bool IsPlayerActive() const { return isPlayerActive; }
+
+    // Level-up notification
+    [[nodiscard]] bool JustLeveledUp() const { return justLeveledUp; }
+    void ClearLevelUpFlag() { justLeveledUp = false; }
 
 };
 

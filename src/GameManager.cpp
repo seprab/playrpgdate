@@ -64,7 +64,15 @@ void GameManager::Update()
     }
     else
     {
-        if (player->IsAlive())
+        // Check if player just leveled up and show popup
+        if (player->JustLeveledUp() && !ui->IsLevelUpPopupShowing())
+        {
+            ui->ShowLevelUpPopup();
+            player->ClearLevelUpFlag();
+        }
+
+        // Only tick game logic if level-up popup is not showing
+        if (!ui->IsLevelUpPopupShowing() && player->IsAlive())
         {
             player->Tick(activeArea);
             activeArea->Tick(player.get());

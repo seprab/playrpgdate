@@ -369,6 +369,7 @@ bool Player::LevelUp()
     level++;
     skillPoints++;
     SetHP(GetMaxHP());
+    justLeveledUp = true; // Set flag to trigger level-up popup
     Log::Info("Leveled up to level %i, required exp to next level %i ", level, GetXPToLevelUp(level+1));
     return true;
 }

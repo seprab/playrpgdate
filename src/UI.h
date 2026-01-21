@@ -41,10 +41,13 @@ private:
 
     PDMenuItem* saveMenuItem = nullptr;
     PDMenuItem* statsMenuItem = nullptr;
-    PDMenuItem* skillPointMenuItem = nullptr;
-    std::string skillPointMenuTitle;
 
     const float inputCooldown{UIConstants::Input::COOLDOWN};
+
+    // Level-up popup state
+    mutable bool showLevelUpPopup = false;
+    mutable int levelUpSelectedOption = 0;
+    mutable unsigned int pendingLevelUps = 0;
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
     LCDBitmap* pauseOverlay;
@@ -73,12 +76,17 @@ public:
     void SetOnGameOverSelected(std::function<void()> callback){gameOverCallback = std::move(callback);}
     void SetOnSaveGameSelected(std::function<void()> callback){saveGameCallback = std::move(callback);}
 
+    // Level-up popup methods
+    void ShowLevelUpPopup() { showLevelUpPopup = true; levelUpSelectedOption = 0; pendingLevelUps++; }
+    [[nodiscard]] bool IsLevelUpPopupShowing() const { return showLevelUpPopup; }
+
 private:
     int* maxScorePtr = nullptr;
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
+    void DrawLevelUpPopup() const;
     void RefreshSkillIcons(const std::shared_ptr<Player>& player) const;
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
@@ -86,7 +94,6 @@ private:
 
     // Static callback functions for menu items
     static void SaveGameCallback(void* userdata);
-    static void SpendSkillPointCallback(void* userdata);
 };
 
 
