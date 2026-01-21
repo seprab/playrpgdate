@@ -3,18 +3,15 @@
 //
 
 #include "Monster.h"
-
 #include "Globals.h"
 #include "Player.h"
 #include "Log.h"
-#include "Weapon.h"
-#include "Armor.h"
 #include <algorithm>
 
 
 Monster::Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
-             int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
-    : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, _evasion, _xp, weapon, armor)
+                 int _constitution, float _evasion, unsigned int _xp, int weapon, int armor) // Keeping weapon and armor on zeros to reduce json token utilization.
+    : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, 0, _xp, 0, 0)
 {}
 void Monster::Tick(Player* player, Area* area)
 {
@@ -49,11 +46,10 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
         if (tokens[i].type != JSMN_OBJECT) continue;
 
         unsigned int decodedId; std::string decodedName; std::string decodedPath; float decodedMaxHp; int decodedStrength;
-        int decodedAgility; int decodedConstitution; float decodedEvasion; unsigned int decodedXp;
-        int decodedWeapon; int decodedArmor;
+        int decodedAgility; int decodedConstitution; unsigned int decodedXp;
         MovementType decodedMovement = MovementType::AStar;
 
-        const char* objects[] = {"id", "name", "image", "hp", "str", "agi", "con", "evasion", "xp", "weapon", "armor", "movement"};
+        const char* objects[] = {"id", "name", "image", "hp", "str", "agi", "con", "xp", "movement"};
         for (const char* & object : objects)
         {
             // doing (tokens[i].size*2) because the object size returns the number of elements inside.
@@ -68,10 +64,7 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
             else if(strcmp(object, "str") == 0) decodedStrength = std::stoi(value);
             else if(strcmp(object, "agi") == 0) decodedAgility = std::stoi(value);
             else if(strcmp(object, "con") == 0) decodedConstitution = std::stoi(value);
-            else if(strcmp(object, "evasion") == 0) decodedEvasion = std::stof(value);
             else if(strcmp(object, "xp") == 0) decodedXp = std::stoi(value);
-            else if(strcmp(object, "weapon") == 0) decodedWeapon = std::stoi(value);
-            else if(strcmp(object, "armor") == 0) decodedArmor = std::stoi(value);
             else if(strcmp(object, "movement") == 0)
             {
                 if (value == "noclip") decodedMovement = MovementType::NoClip;
@@ -82,28 +75,9 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
             else Log::Error("Unknown property %s", object);
         }
         creatures_decoded.emplace_back(decodedId, decodedName, decodedPath, decodedMaxHp, decodedStrength,
-                                       decodedAgility, decodedConstitution, decodedEvasion, decodedXp,
-                                       decodedWeapon, decodedArmor);
+                                       decodedAgility, decodedConstitution, 0, decodedXp,
+                                       0, 0);
         creatures_decoded.back().SetMovementType(decodedMovement);
-        if (entityManager)
-        {
-            if (decodedWeapon > 0)
-            {
-                auto weaponEntity = entityManager->GetEntity(static_cast<unsigned int>(decodedWeapon));
-                if (weaponEntity)
-                {
-                    creatures_decoded.back().EquipWeapon(std::static_pointer_cast<Weapon>(weaponEntity).get());
-                }
-            }
-            if (decodedArmor > 0)
-            {
-                auto armorEntity = entityManager->GetEntity(static_cast<unsigned int>(decodedArmor));
-                if (armorEntity)
-                {
-                    creatures_decoded.back().EquipArmor(std::static_pointer_cast<Armor>(armorEntity).get());
-                }
-            }
-        }
         Log::Info("Monster ID: %d, name %s", decodedId, decodedName.c_str());
 
         i+=(tokens[i].size*2);
