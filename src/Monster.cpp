@@ -78,7 +78,7 @@ std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int s
                                        decodedAgility, decodedConstitution, 0, decodedXp,
                                        0, 0);
         creatures_decoded.back().SetMovementType(decodedMovement);
-        Log::Info("Monster ID: %d, name %s", decodedId, decodedName.c_str());
+        Log::Info("Monster ID: %d, name %s, XP: %i", decodedId, decodedName.c_str(), decodedXp);
 
         i+=(tokens[i].size*2);
     }
