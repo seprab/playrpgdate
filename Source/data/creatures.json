@@ -8,7 +8,7 @@
 		"agi": 3,
 		"con": 2,
 		"xp": 1,
-		"movement": "astar"
+		"movement": "noclip"
 	},
 	{
 		"id": 102,
@@ -19,7 +19,7 @@
 		"agi": 4,
 		"con": 3,
 		"xp": 2,
-		"movement": "noclip"
+		"movement": "astar"
 	},
 	{
 		"id": 103,
@@ -107,7 +107,7 @@
 		"agi": 12,
 		"con": 11,
 		"xp": 10,
-		"movement": "astar"
+		"movement": "ranged"
 	},
 	{
 		"id": 111,
@@ -118,7 +118,7 @@
 		"agi": 13,
 		"con": 12,
 		"xp": 11,
-		"movement": "astar"
+		"movement": "stationary"
 	},
 	{
 		"id": 112,
