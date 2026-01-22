@@ -308,6 +308,13 @@ bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char
     // Set the spawned count on the area
     area->SetMonstersSpawnedCount(monstersSpawnedCount);
 
+    // Clear existing living monsters and spawn queue before restoring saved ones
+    area->ClearLivingMonsters();
+    area->ClearToSpawnMonsters();
+
+    // Refill the spawn queue based on the loaded monstersSpawnedCount
+    area->SetupMonstersToSpawn();
+
     // Find the "monsters" array in the JSON
     int monstersArrayIndex = -1;
     for (int i = 0; i < tokenCount - 1; i++) {
@@ -330,10 +337,6 @@ bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char
         Log::Info("SaveGame::DeserializeMonsters - No monsters to restore");
         return true;
     }
-
-    // Clear existing living monsters and spawn queue before restoring saved ones
-    area->ClearLivingMonsters();
-    area->ClearToSpawnMonsters();
 
     // Get the bank of monsters (templates) from the area
     std::vector<std::shared_ptr<Monster>> bankOfMonsters = area->GetMonsterBank();

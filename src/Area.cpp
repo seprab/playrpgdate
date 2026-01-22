@@ -261,7 +261,7 @@ void Area::SpawnCreature()
         ticksSinceLastSpawn++;
         return; // don't spawn monsters if the time hasn't passed
     }
-    int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - static_cast<int>(livingMonsters.size());
+    int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - monstersSpawnedCount;
     if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
     if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
 
