@@ -16,7 +16,8 @@ namespace  Globals
     constexpr int PLAYER_FOV_Y = 136; // Field of view height for the player
     constexpr int MONSTER_AWARENESS_RADIUS = 50; // Radius within which monsters can detect the player
     constexpr int MONSTER_SPAWN_RADIUS = 20; // Radius within which monsters can spawn around the player
-    constexpr int MONSTER_ATTACK_RANGE = 2; // Range within which monsters can attack the player
+    constexpr int MONSTER_ATTACK_RANGE = 2; // Range within which monsters can attack the player (melee)
+    constexpr int MONSTER_RANGED_ATTACK_RANGE = 15; // Range at which monsters can shoot projectiles
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; // Scale factor for diagonal movement speed of monsters
     constexpr int MONSTER_KITE_MIN_RANGE = 3; // Minimum distance for kiting monsters
     constexpr int MONSTER_KITE_MAX_RANGE = 7; // Maximum distance for kiting monsters
@@ -33,5 +34,15 @@ namespace  Globals
     constexpr unsigned int XP_FACTOR = 5;
     constexpr const char* GAME_SAVE_PATH = "saves/save.json";
     constexpr const char* MAX_SCORE_PATH = "saves/maxscore.data";
+    
+    // Enemy ranged attack constants
+    constexpr unsigned int MONSTER_RANGED_ATTACK_COOLDOWN = 2000; // Cooldown for ranged monsters in milliseconds
+    constexpr unsigned int MONSTER_STATIONARY_ATTACK_COOLDOWN = 4000; // Cooldown for stationary monsters in milliseconds
+    constexpr int MONSTER_STATIONARY_PROJECTILE_COUNT = 5; // Number of projectiles for spread shot
+    constexpr float MONSTER_STATIONARY_SPREAD_ANGLE = 0.8f; // Angle spread in radians (~45 degrees)
+    constexpr float MONSTER_PROJECTILE_SPEED = 6.0f; // Speed of enemy projectiles
+    constexpr unsigned int MONSTER_PROJECTILE_SIZE = 6; // Size of enemy projectiles
+    constexpr float MONSTER_PROJECTILE_DAMAGE = 1.0f; // Base damage of enemy projectiles
+    constexpr float MONSTER_STATIONARY_PROJECTILE_DAMAGE = 1.5f; // Damage for stationary monster projectiles (more powerful)
 }
 #endif //GLOBALS_H

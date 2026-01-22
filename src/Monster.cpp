@@ -6,7 +6,12 @@
 #include "Globals.h"
 #include "Player.h"
 #include "Log.h"
+#include "EnemyProjectile.h"
+#include "Area.h"
+#include "pdcpp/core/GlobalPlaydateAPI.h"
 #include <algorithm>
+#include <cmath>
+#include <memory>
 
 
 Monster::Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
@@ -27,9 +32,19 @@ void Monster::Tick(Player* player, Area* area)
         case MovementType::Stationary:
             pathFound = false;
             path.clear();
+            // Stationary monsters can fire ranged attacks
+            if (CanRangedAttack(player))
+            {
+                FireRangedAttack(player, area);
+            }
             break;
         case MovementType::RangedKite:
             HandleRangedKiteMovement(playerTiledPosition, area);
+            // RangedKite monsters can fire ranged attacks
+            if (CanRangedAttack(player))
+            {
+                FireRangedAttack(player, area);
+            }
             break;
     }
     if (ShouldAttack(playerTiledPosition))
@@ -436,4 +451,91 @@ pdcpp::Point<int> Monster::GetKiteTarget(const pdcpp::Point<int>& playerTiledPos
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const
 {
     return GetTiledPosition().distance(target) <= Globals::MONSTER_ATTACK_RANGE;
+}
+
+bool Monster::CanRangedAttack(Player* player) const
+{
+    if (!player || !player->IsAlive())
+    {
+        return false;
+    }
+    
+    // Check if player is in ranged attack range
+    float distance = GetTiledPosition().distance(player->GetTiledPosition());
+    if (distance > Globals::MONSTER_RANGED_ATTACK_RANGE)
+    {
+        return false;
+    }
+    
+    // Check cooldown based on movement type
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    unsigned int cooldown = (movementType == MovementType::Stationary) 
+        ? Globals::MONSTER_STATIONARY_ATTACK_COOLDOWN 
+        : Globals::MONSTER_RANGED_ATTACK_COOLDOWN;
+    
+    return (currentTime - lastAttackTime) >= cooldown;
+}
+
+float Monster::CalculateAngleToPlayer(Player* player) const
+{
+    if (!player)
+    {
+        return 0.0f;
+    }
+    
+    pdcpp::Point<int> monsterPos = GetCenteredPosition();
+    pdcpp::Point<int> playerPos = player->GetCenteredPosition();
+    
+    int dx = playerPos.x - monsterPos.x;
+    int dy = playerPos.y - monsterPos.y;
+    
+    // Calculate angle using atan2 (returns angle in radians)
+    return static_cast<float>(atan2(dy, dx));
+}
+
+void Monster::FireRangedAttack(Player* player, Area* area)
+{
+    if (!CanRangedAttack(player) || !area)
+    {
+        return;
+    }
+    
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    lastAttackTime = currentTime;
+    
+    pdcpp::Point<int> monsterPos = GetCenteredPosition();
+    float baseAngle = CalculateAngleToPlayer(player);
+    
+    // Area will handle creating projectiles with proper shared_ptr to player
+    if (movementType == MovementType::Stationary)
+    {
+        // Fire multiple projectiles in spread pattern
+        int projectileCount = Globals::MONSTER_STATIONARY_PROJECTILE_COUNT;
+        float spreadAngle = Globals::MONSTER_STATIONARY_SPREAD_ANGLE;
+        float angleStep = spreadAngle / static_cast<float>(projectileCount - 1);
+        float startAngle = baseAngle - (spreadAngle / 2.0f);
+        
+        for (int i = 0; i < projectileCount; i++)
+        {
+            float angle = startAngle + (angleStep * static_cast<float>(i));
+            area->CreateEnemyProjectile(
+                monsterPos,
+                angle,
+                Globals::MONSTER_PROJECTILE_SPEED,
+                Globals::MONSTER_PROJECTILE_SIZE,
+                Globals::MONSTER_STATIONARY_PROJECTILE_DAMAGE
+            );
+        }
+    }
+    else if (movementType == MovementType::RangedKite)
+    {
+        // Fire single projectile
+        area->CreateEnemyProjectile(
+            monsterPos,
+            baseAngle,
+            Globals::MONSTER_PROJECTILE_SPEED,
+            Globals::MONSTER_PROJECTILE_SIZE,
+            Globals::MONSTER_PROJECTILE_DAMAGE
+        );
+    }
 }

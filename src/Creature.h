@@ -5,7 +5,6 @@
 #include "Inventory.h"
 #include "Area.h"
 
-class Area;
 class EntityManager;
 class Weapon;
 class Armor;

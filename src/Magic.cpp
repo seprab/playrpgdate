@@ -3,6 +3,7 @@
 //
 
 #include "Magic.h"
+#include "Area.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
 

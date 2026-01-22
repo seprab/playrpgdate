@@ -33,6 +33,11 @@ public:
     void SetCanComputePath(bool value) { canComputePath = value; }
     void SetMovementType(MovementType value) { movementType = value; }
     [[nodiscard]] MovementType GetMovementType() const { return movementType; }
+    
+    // Ranged attack methods
+    [[nodiscard]] bool CanRangedAttack(Player* player) const;
+    void FireRangedAttack(Player* player, Area* area);
+    [[nodiscard]] float CalculateAngleToPlayer(Player* player) const;
 
 private:
     [[nodiscard]] bool ShouldMove(pdcpp::Point<int> playerPosition) const;
@@ -53,6 +58,7 @@ private:
     int pathFindingCooldown = 0; // Cooldown for pathfinding to avoid spamming
     bool canComputePath = true; // Flag to check if pathfinding is allowed
     MovementType movementType = MovementType::AStar;
+    unsigned int lastAttackTime = 0; // Last time the monster attacked (for cooldown)
 };
 
 

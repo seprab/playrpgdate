@@ -8,11 +8,14 @@
 #include "MapCollision.h"
 #include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
+#include <memory>
+#include <vector>
 
 class EntityManager;
 class Door;
 class Monster;
 class Player;
+class EnemyProjectile;
 
 struct Tile {
     int id;
@@ -45,6 +48,7 @@ private:
     std::vector<std::shared_ptr<Monster>> livingMonsters; // the monsters that are currently alive in the area
     std::vector<std::shared_ptr<Monster>> toSpawnMonsters; // the monsters that haven't been spawned yet
     std::shared_ptr<AStarContainer> pathfindingContainer;
+    std::vector<std::unique_ptr<EnemyProjectile>> enemyProjectiles; // enemy projectiles in the area
     void SpawnCreature();
     [[nodiscard]] Map_Layer ToMapLayer() const;
     pdcpp::Random random = {};
@@ -61,7 +65,8 @@ private:
     const unsigned int SLOWDOWN_COOLDOWN = 10000; // 10 seconds in milliseconds
 
 public:
-    Area() = default;
+    Area();
+    ~Area(); // Need explicit destructor for unique_ptr with forward declaration
     Area(const Area& other);
     Area(Area&& other) noexcept;
     Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
@@ -110,6 +115,12 @@ public:
     [[nodiscard]] MapCollision* GetCollider() const {return collider.get();}
 
     void SetEntityManager(EntityManager* manager) { entityManager = manager; }
+    
+    // Enemy projectile management
+    void CreateEnemyProjectile(pdcpp::Point<int> position, float angle, float speed, unsigned int size, float damage);
+    void AddEnemyProjectile(std::unique_ptr<EnemyProjectile> projectile);
+    void UpdateEnemyProjectiles(Player* player);
+    void DrawEnemyProjectiles() const;
 };
 
 #endif

@@ -10,7 +10,20 @@
 #include "EntityManager.h"
 #include "Monster.h"
 #include "Player.h"
+#include "EnemyProjectile.h"
 #include "pdcpp/core/Random.h"
+#include <algorithm>
+#include <memory>
+
+Area::Area()
+: Entity(0)
+{
+    // Initialize slowdown ability - ready to use immediately
+    lastSlowdownActivationTime = 0;
+    lastActivityCheckTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+}
+
+Area::~Area() = default; // Destructor defined here so unique_ptr can see full EnemyProjectile definition
 
 Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
 : Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
@@ -199,6 +212,8 @@ void Area::Render(int x, int y, int fovX, int fovY)
         if (!visibleX || !visibleY) continue;
         monster->Draw();
     }
+    // Draw enemy projectiles after monsters
+    DrawEnemyProjectiles();
 }
 bool Area::CheckCollision(int x, int y) const
 {
@@ -230,6 +245,9 @@ void Area::Unload()
     // Clean up all monster vectors
     livingMonsters.clear();
     toSpawnMonsters.clear();
+
+    // Clean up enemy projectiles
+    enemyProjectiles.clear();
 
     // Clean up other resources
     spawnablePositions.clear();
@@ -422,6 +440,9 @@ void Area::Tick(Player* player)
     {
         player->AddXP(xpGained);
     }
+    
+    // Update enemy projectiles
+    UpdateEnemyProjectiles(player);
 }
 Map_Layer Area::ToMapLayer() const
 {
@@ -446,6 +467,74 @@ void Area::SetUpPathfindingContainer()
             if (CheckCollision(i * tileWidth, j * tileHeight)) continue;
             auto* node = new AStarNode(pdcpp::Point<int>(i, j));
             pathfindingContainer->Add(node);
+        }
+    }
+}
+
+void Area::CreateEnemyProjectile(pdcpp::Point<int> position, float angle, float speed, unsigned int size, float damage)
+{
+    if (!entityManager)
+    {
+        return;
+    }
+    
+    auto playerPtr = entityManager->GetPlayer();
+    if (!playerPtr)
+    {
+        return;
+    }
+    
+    auto projectile = std::make_unique<EnemyProjectile>(
+        position,
+        std::weak_ptr<Player>(playerPtr),
+        angle,
+        speed,
+        size,
+        damage
+    );
+    enemyProjectiles.push_back(std::move(projectile));
+}
+
+void Area::AddEnemyProjectile(std::unique_ptr<EnemyProjectile> projectile)
+{
+    enemyProjectiles.push_back(std::move(projectile));
+}
+
+void Area::UpdateEnemyProjectiles(Player* player)
+{
+    if (!player)
+    {
+        return;
+    }
+    
+    // Create a shared_ptr to this Area for the Update call
+    // We use a custom deleter that does nothing since Area is managed elsewhere
+    std::shared_ptr<Area> areaShared(this, [](Area*) {});
+    
+    // Update all projectiles
+    for (auto& projectile : enemyProjectiles)
+    {
+        if (projectile && projectile->IsAlive())
+        {
+            projectile->Update(areaShared);
+        }
+    }
+    
+    // Remove dead projectiles
+    enemyProjectiles.erase(
+        std::remove_if(enemyProjectiles.begin(), enemyProjectiles.end(),
+            [](const std::unique_ptr<EnemyProjectile>& p) { return !p || !p->IsAlive(); }),
+        enemyProjectiles.end()
+    );
+}
+
+void Area::DrawEnemyProjectiles() const
+{
+    for (const auto& projectile : enemyProjectiles)
+    {
+        if (projectile && projectile->IsAlive())
+        {
+            projectile->Draw();
         }
     }
 }
