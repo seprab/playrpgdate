@@ -2,6 +2,7 @@
 #include "../playdate-cpp/inc/pdcpp/pdnewlib.h"
 #include "../playdate-cpp-extensions/inc/pdcpp/core/GlobalPlaydateAPI.h"
 #include "GameManager.h"
+#include "Globals.h"
 
 /**
  * You can use STL containers! Be careful with some stdlib objects which rely
@@ -54,7 +55,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
         //Initialize extension library for cpp
         pdcpp::GlobalPlaydateAPI::initialize(pd);
 
-        pd->display->setRefreshRate(20);
+        pd->display->setRefreshRate(Globals::GAME_REFRESH_RATE);
         gameManager = std::make_unique<GameManager>(pd);
 
         // and sets the tick function to be called on update to turn off the

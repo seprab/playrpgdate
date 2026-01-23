@@ -10,8 +10,8 @@
 
 std::unordered_map<std::string, LCDBitmap*> Entity::bitmapCache;
 
-Entity::Entity(const unsigned int _id):
-id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
+Entity::Entity(const unsigned int _id)
+    : id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 {
     hp = 0;
     maxHP = 0;
@@ -92,8 +92,12 @@ void Entity::Draw()
 
 void Entity::DrawHealthBar() const
 {
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(position.x-5, position.y - 10, 25, 4, kColorWhite);
-    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(position.x-5, position.y - 10, static_cast<int>(25 * (static_cast<float>(hp) / maxHP)), 4, kColorWhite);
+    int barX = position.x + Globals::HEALTH_BAR_OFFSET_X;
+    int barY = position.y + Globals::HEALTH_BAR_OFFSET_Y;
+    int barWidth = static_cast<int>(Globals::HEALTH_BAR_WIDTH * (static_cast<float>(hp) / maxHP));
+
+    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(barX, barY, Globals::HEALTH_BAR_WIDTH, Globals::HEALTH_BAR_HEIGHT, kColorWhite);
+    pdcpp::GlobalPlaydateAPI::get()->graphics->fillRect(barX, barY, barWidth, Globals::HEALTH_BAR_HEIGHT, kColorWhite);
 }
 
 void Entity::SetPosition(pdcpp::Point<int> _position)
@@ -112,13 +116,12 @@ void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
 
 void Entity::Damage(float damage)
 {
-    //Log::Info("Entity %s took damage", name);
     hp = std::max(0.f, hp - damage);
     isFlashing = true;
 }
 
-void Entity::Heal(float heal) {
-
+void Entity::Heal(float heal)
+{
     hp = std::min(maxHP, hp + heal);
 }
 

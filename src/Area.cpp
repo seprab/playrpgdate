@@ -22,7 +22,7 @@
 #include "jsmn.h"
 
 Area::Area()
-: Entity(0)
+    : Entity(0)
 {
     // Initialize slowdown ability - ready to use immediately
     lastSlowdownActivationTime = 0;
@@ -32,7 +32,7 @@ Area::Area()
 Area::~Area() = default; // Destructor defined here so unique_ptr can see full EnemyProjectile definition
 
 Area::Area(unsigned int _id, const char* _name, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
-: Entity(_id), dialogue(std::move(_dialogue))
+    : Entity(_id), dialogue(std::move(_dialogue))
 {
     SetName(_name);
     for (const std::shared_ptr<Monster>& monster : _monsters)
@@ -44,13 +44,15 @@ Area::Area(unsigned int _id, const char* _name, std::shared_ptr<Dialogue> _dialo
     lastActivityCheckTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
+
 Area::Area(const Area &other)
-        : Entity(other.GetId()), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
+    : Entity(other.GetId()), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
 {
     SetName(other.GetName());
 }
+
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
+    : Entity(other.GetId()), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
 {
     SetName(other.GetName());
 }
@@ -246,20 +248,17 @@ void Area::Render(int x, int y, int fovX, int fovY)
 }
 bool Area::CheckCollision(int x, int y) const
 {
-    x=x/tileWidth;
-    y=y/tileHeight;
+    x = x / tileWidth;
+    y = y / tileHeight;
     if (mapData[0].tiles[(y * width) + x].collision)
     {
-#if DEBUG
-        pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(x*tileWidth, y*tileHeight, Globals::MAP_TILE_SIZE, Globals::MAP_TILE_SIZE, kColorWhite);
-#endif
         return true;
     }
     return false;
 }
 void Area::LoadWithUI(UI* ui)
 {
-    StartIncrementalMapGeneration(40, 40, ui);
+    StartIncrementalMapGeneration(Globals::DEFAULT_MAP_WIDTH, Globals::DEFAULT_MAP_HEIGHT, ui);
 }
 
 void Area::StartIncrementalMapGeneration(int width, int height, UI* ui)

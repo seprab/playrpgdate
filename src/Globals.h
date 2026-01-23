@@ -5,7 +5,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-namespace  Globals
+namespace Globals
 {
     // Constants for game settings
     constexpr int MAX_PATH_FIND_FAILURE_COUNT = 2; // Maximum number of pathfinding failures before resetting
@@ -47,5 +47,28 @@ namespace  Globals
     constexpr float MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE = 1.0f; // Base damage for stationary monster projectiles (more powerful)
     constexpr float MONSTER_STATIONARY_PROJECTILE_STRENGTH_MULTIPLIER = 0.3f; // Damage multiplier per strength point for stationary monsters
     constexpr float MONSTER_PROJECTILE_MIN_DAMAGE = 0.5f; // Minimum damage floor to ensure projectiles always do some damage
+
+    // Player constants
+    constexpr int PLAYER_DEFAULT_HP = 100;
+    constexpr int PLAYER_DEFAULT_STRENGTH = 10;
+    constexpr int PLAYER_DEFAULT_AGILITY = 5;
+    constexpr int PLAYER_DEFAULT_CONSTITUTION = 5;
+    constexpr float PLAYER_DEFAULT_EVASION = 0.1f;
+    constexpr unsigned int PLAYER_AUTO_FIRE_COOLDOWN = 1000; // Milliseconds
+    constexpr unsigned int PLAYER_ACTIVITY_THRESHOLD = 500; // Milliseconds before player is considered idle
+    constexpr float PLAYER_MOVEMENT_SPEED = 5.0f;
+
+    // Entity visual constants
+    constexpr int HEALTH_BAR_WIDTH = 25;
+    constexpr int HEALTH_BAR_HEIGHT = 4;
+    constexpr int HEALTH_BAR_OFFSET_X = -5;
+    constexpr int HEALTH_BAR_OFFSET_Y = -10;
+
+    // Game refresh rate
+    constexpr int GAME_REFRESH_RATE = 20; // FPS
+
+    // Default map dimensions for procedural generation
+    constexpr int DEFAULT_MAP_WIDTH = 40;
+    constexpr int DEFAULT_MAP_HEIGHT = 40;
 }
 #endif //GLOBALS_H

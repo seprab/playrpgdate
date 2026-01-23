@@ -35,8 +35,8 @@ private:
     std::unique_ptr<AnimationClip> stab{};
     std::unique_ptr<AnimationClip> die{};
 
-    int dx =0;
-    int dy =0;
+    int dx = 0;
+    int dy = 0;
 
     bool attacking = true;
     unsigned int selectedMagic = 0;
@@ -52,7 +52,7 @@ private:
     std::vector<unsigned int> lastSkillCastTimes;
 
     // Auto-fire passive ability
-    unsigned int autoFireCooldown = 1000; // 1 second
+    unsigned int autoFireCooldown = Globals::PLAYER_AUTO_FIRE_COOLDOWN;
     unsigned int lastAutoFireTime;
 
     // Game stats tracking

@@ -15,13 +15,16 @@
 #include <limits>
 #include <algorithm>
 
-Player::Player(): Creature(0, "Player", "", 100, 10, 5, 5, 0.1, 0, 0, 0), level(0)
+Player::Player()
+    : Creature(0, "Player", "", Globals::PLAYER_DEFAULT_HP, Globals::PLAYER_DEFAULT_STRENGTH,
+               Globals::PLAYER_DEFAULT_AGILITY, Globals::PLAYER_DEFAULT_CONSTITUTION,
+               Globals::PLAYER_DEFAULT_EVASION, 0, 0, 0), level(0)
 {
     ResetStats();
     className = "Warrior";
-    SetHP(100);
-    SetMaxHP(100);
-    SetMovementScale(5.0f);
+    SetHP(Globals::PLAYER_DEFAULT_HP);
+    SetMaxHP(Globals::PLAYER_DEFAULT_HP);
+    SetMovementScale(Globals::PLAYER_MOVEMENT_SPEED);
     lastAutoFireTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     lastActivityTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     isPlayerActive = true;
@@ -89,7 +92,6 @@ void Player::Tick(const std::shared_ptr<Area>& area)
     HandleInput();
     HandleAutoFire(area);
     Move(dx, dy, area);
-    //Draw();
 
     for(auto& magic : magicLaunched)
     {
@@ -129,9 +131,6 @@ void Player::Draw()
     }
     Entity::DrawHealthBar();
     DrawAimDirection();
-#if DEBUG
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(GetPosition().first, GetPosition().second, 16, 16, kColorWhite);
-#endif
 }
 
 void Player::DrawMagic() const
@@ -149,7 +148,8 @@ void Player::HandleInput()
 {
     PDButtons clicked, pushed;
     pdcpp::GlobalPlaydateAPI::get()->system->getButtonState(&clicked, &pushed, nullptr);
-    dx = 0, dy = 0;
+    dx = 0;
+    dy = 0;
 
     // Track player activity for enemy slowdown
     bool movementInput = (clicked & (kButtonUp | kButtonDown | kButtonLeft | kButtonRight));
@@ -163,16 +163,16 @@ void Player::HandleInput()
     }
     else
     {
-        // Check if player has been idle for more than 0.5 seconds
+        // Check if player has been idle for more than the activity threshold
         unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
-        if (currentTime - lastActivityTime > 500) // 500ms threshold
+        if (currentTime - lastActivityTime > Globals::PLAYER_ACTIVITY_THRESHOLD)
         {
             isPlayerActive = false;
         }
     }
     if (clicked & kButtonRight)
     {
-        dx=1;
+        dx = 1;
         idle->SetFlip(false);
         run->SetFlip(false);
         attack->SetFlip(false);
@@ -180,14 +180,14 @@ void Player::HandleInput()
     }
     else if (clicked & kButtonLeft)
     {
-        dx= -1;
+        dx = -1;
         idle->SetFlip(true);
         run->SetFlip(true);
         attack->SetFlip(true);
         stab->SetFlip(true);
     }
-    if (clicked & kButtonUp) dy=-1;
-    else if (clicked & kButtonDown) dy=1;
+    if (clicked & kButtonUp) dy = -1;
+    else if (clicked & kButtonDown) dy = 1;
     dx *= static_cast<int>(GetMovementSpeed());
     dy *= static_cast<int>(GetMovementSpeed());
 
@@ -388,7 +388,7 @@ bool Player::LevelUp()
 
 void Player::Save(EntityManager* manager)
 {
-    //TODO: Implement player save
+    // Player save is now handled by SaveGame::Save
 }
 
 std::shared_ptr<void> Player::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) {

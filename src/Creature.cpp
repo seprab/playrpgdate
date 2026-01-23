@@ -12,9 +12,9 @@
 
 Creature::Creature(unsigned int _id, const std::string& _name, const std::string& image, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
-                   : Entity(_id), strength(_strength), agility(_agility),
-                   constitution(_constitution), evasion(_evasion), xp(_xp), weapon(_weapon), armor(_armor)
-                   {
+    : Entity(_id), strength(_strength), agility(_agility),
+      constitution(_constitution), evasion(_evasion), xp(_xp), weapon(_weapon), armor(_armor)
+{
     SetImagePath(image);
     SetName(_name);
     SetHP(_maxHp);
@@ -23,18 +23,19 @@ Creature::Creature(unsigned int _id, const std::string& _name, const std::string
 }
 
 Creature::Creature(const Creature &other)
-: Entity(other), strength(other.GetStrength()), agility(other.GetAgility()),
-  constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
-  weapon(other.weapon), armor(other.armor)
+    : Entity(other), strength(other.GetStrength()), agility(other.GetAgility()),
+      constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
+      weapon(other.weapon), armor(other.armor)
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
     SetMovementScale(3); // Default movement scale for creatures, can be adjusted later
 }
+
 Creature::Creature(Creature &&other) noexcept
-: Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility()),
-  constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
-  weapon(other.weapon), armor(other.armor)
+    : Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility()),
+      constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
+      weapon(other.weapon), armor(other.armor)
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());

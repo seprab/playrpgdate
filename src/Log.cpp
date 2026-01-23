@@ -2,8 +2,8 @@
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 #include "pd_api.h"
 
-const char*Log::infoPrefix = "[INFO] ";
-const char*Log::errorPrefix = "[ERROR] ";
+const char* Log::infoPrefix = "[INFO] ";
+const char* Log::errorPrefix = "[ERROR] ";
 
 template<typename... Args>
 void Log::Info(const char* message, Args... args) {

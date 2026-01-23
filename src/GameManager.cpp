@@ -4,15 +4,15 @@
 #include "pdcpp/core/File.h"
 
 GameManager::GameManager(PlaydateAPI* api)
-: pd(api)
+    : pd(api)
 {
     LoadMaxScore();
     entityManager = std::make_unique<EntityManager>();
     ui = std::make_shared<UI>("/System/Fonts/Asheville-Sans-14-Bold.pft", entityManager.get());
-    ui->SetOnNewGameSelected([this](){LoadNewGame();});
-    ui->SetOnLoadGameSelected([this](){LoadSavedGame();});
-    ui->SetOnGameOverSelected([this](){CleanGame();});
-    ui->SetOnSaveGameSelected([this](){SaveGame();});
+    ui->SetOnNewGameSelected([this]() { LoadNewGame(); });
+    ui->SetOnLoadGameSelected([this]() { LoadSavedGame(); });
+    ui->SetOnGameOverSelected([this]() { CleanGame(); });
+    ui->SetOnSaveGameSelected([this]() { SaveGame(); });
     ui->SetMaxScorePointer(&maxScore);
 }
 void GameManager::Update()

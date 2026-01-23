@@ -15,9 +15,11 @@
 
 
 Monster::Monster(unsigned int _id, const std::string& _name, const std::string& _image, float _maxHp, int _strength, int _agility,
-                 int _constitution, float _evasion, unsigned int _xp, int weapon, int armor) // Keeping weapon and armor on zeros to reduce json token utilization.
+                 int _constitution, float _evasion, unsigned int _xp, int weapon, int armor)
     : Creature(_id, _name, _image, _maxHp, _strength, _agility, _constitution, 0, _xp, 0, 0)
-{}
+{
+    // Keeping weapon and armor on zeros to reduce JSON token utilization
+}
 void Monster::Tick(Player* player, Area* area)
 {
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
@@ -247,51 +249,9 @@ void Monster::Move(pdcpp::Point<int> target, Area* area)
     const pdcpp::Point<int> d = {(fPos.x - iPos.x),(fPos.y - iPos.y)}; //direction vector
     pdcpp::Point<int> dn {0,0}; //direction normalized
 
-    // normalize the direction vector
+    // Normalize the direction vector and apply movement speed
     if (d.x != 0 || d.y != 0)
     {
-        /*
-         *The idea here was to normalize the direction vector so that the monster moves in a straight line towards the target.
-         *Nonetheless, it didn't work because when casting float to int, it would round down to 0.
-         *And when scaling up the value, there's a risk to enter in an cycle where it jumps back and fort
-        float length = sqrtf((d.x * d.x) + (d.y * d.y));
-        if (length > 0)
-        {
-            d.x = d.x / length;
-            d.y = d.y / length;
-        }*/
-
-        /*
-         *The idea here is to scale down the movement depending on the dx.
-         *The problem is that the monsters will always move at a different speed rate.
-         *And they should always move at the same speed rate.
-        if (GetMovementScale() > 1) Log::Error("Movement scale is greater than 1, this will cause the monster to jump beyond the nodes and move in cycle.");
-        else if (GetMovementScale() <= 0) Log::Error("Movement scale is less than or equal to 0, this will cause the monster to not move.");
-        else
-        {
-            d.x = d.x * GetMovementScale();
-            d.y = d.y * GetMovementScale();
-            if (d.x > 0 && d.x < 1) d.x = 1; // Ensure minimum movement in x direction is 1 unit or zero.
-            if (d.y > 0 && d.y < 1) d.y = 1; // Ensure minimum movement in y direction is 1 unit or zero.
-        }
-        */
-
-        /*
-         *This kind of works, but still the speed relies on the nodes distance. I want speed to be constant.
-        float length = sqrtf((d.x * d.x) + (d.y * d.y));
-        if (length > 0)
-        {
-            dn.x = d.x / length;
-            dn.y = d.y / length;
-        }
-        dn.x *= GetMovementScale();
-        dn.y *= GetMovementScale();
-        if (dn.x > d.x) dn.x = d.x; // Ensure we do not overshoot the target in x direction
-        if (dn.y > d.y) dn.y = d.y; // Ensure we do not overshoot the target in y direction
-        if (dn.x > 0 && dn.x < 1) dn.x = 1; // Ensure minimum movement in x direction is 1 unit or zero.
-        if (dn.y > 0 && dn.y < 1) dn.y = 1; // Ensure minimum movement in y direction is 1 unit or zero.
-        */
-
         int moveSpeed = GetMovementSpeed();
 
         // Apply slowdown ability - this is a special ability with a 10-second cooldown
@@ -354,8 +314,6 @@ void Monster::Move(pdcpp::Point<int> target, Area* area)
         reachedNode = true;
         return; // Already at the target position
     }
-    // print dx and dy for debugging
-    //Log::Info("dx (%f), dy  (%f)", d.x, d.y);
 
     pdcpp::Point<int> newPosition {iPos.x + dn.x, iPos.y + dn.y};
     if (area->GetCollider()->IsTileBlockedByChar(newPosition.x / Globals::MAP_TILE_SIZE, newPosition.y / Globals::MAP_TILE_SIZE))
