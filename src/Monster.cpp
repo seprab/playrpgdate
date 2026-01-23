@@ -506,6 +506,21 @@ void Monster::FireRangedAttack(Player* player, Area* area)
     pdcpp::Point<int> monsterPos = GetCenteredPosition();
     float baseAngle = CalculateAngleToPlayer(player);
     
+    // Calculate damage based on monster strength
+    float calculatedDamage;
+    if (movementType == MovementType::Stationary)
+    {
+        calculatedDamage = Globals::MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE + 
+                          (static_cast<float>(GetStrength()) * Globals::MONSTER_STATIONARY_PROJECTILE_STRENGTH_MULTIPLIER);
+    }
+    else
+    {
+        calculatedDamage = Globals::MONSTER_PROJECTILE_BASE_DAMAGE + 
+                          (static_cast<float>(GetStrength()) * Globals::MONSTER_PROJECTILE_STRENGTH_MULTIPLIER);
+    }
+    // Ensure minimum damage floor
+    calculatedDamage = std::max(calculatedDamage, Globals::MONSTER_PROJECTILE_MIN_DAMAGE);
+    
     // Area will handle creating projectiles with proper shared_ptr to player
     if (movementType == MovementType::Stationary)
     {
@@ -523,7 +538,7 @@ void Monster::FireRangedAttack(Player* player, Area* area)
                 angle,
                 Globals::MONSTER_PROJECTILE_SPEED,
                 Globals::MONSTER_PROJECTILE_SIZE,
-                Globals::MONSTER_STATIONARY_PROJECTILE_DAMAGE
+                calculatedDamage
             );
         }
     }
@@ -535,7 +550,7 @@ void Monster::FireRangedAttack(Player* player, Area* area)
             baseAngle,
             Globals::MONSTER_PROJECTILE_SPEED,
             Globals::MONSTER_PROJECTILE_SIZE,
-            Globals::MONSTER_PROJECTILE_DAMAGE
+            calculatedDamage
         );
     }
 }
