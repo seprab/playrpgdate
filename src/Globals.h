@@ -5,70 +5,121 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+/**
+ * @file Globals.h
+ * @brief Central configuration file for all game constants.
+ *
+ * This file contains all tunable game parameters organized by category.
+ * All values are constexpr for compile-time optimization and type safety.
+ *
+ * To modify game balance, adjust values here and recompile.
+ * No magic numbers should exist outside this file.
+ *
+ * Categories:
+ * - Pathfinding
+ * - Map & Rendering
+ * - Player Stats
+ * - Monster Behavior
+ * - Combat & Damage
+ * - Progression
+ * - Visuals
+ * - Performance
+ */
+
 namespace Globals
 {
-    // Constants for game settings
-    constexpr int MAX_PATH_FIND_FAILURE_COUNT = 2; // Maximum number of pathfinding failures before resetting
-    constexpr int MULT_FOR_RESET_PATH_FIND_FAILURE = 15; // Count to reset pathfinding failure count
-    constexpr int MAP_TILE_SIZE = 16; // Size of each tile in the map
-    constexpr int PLAYER_SIZE = 16; // Size of the player character
-    constexpr int PLAYER_FOV_X = 234; // Field of view width for the player
-    constexpr int PLAYER_FOV_Y = 136; // Field of view height for the player
-    constexpr int MONSTER_AWARENESS_RADIUS = 50; // Radius within which monsters can detect the player
-    constexpr int MONSTER_SPAWN_RADIUS = 20; // Radius within which monsters can spawn around the player
-    constexpr int MONSTER_ATTACK_RANGE = 2; // Range within which monsters can attack the player (melee)
-    constexpr int MONSTER_RANGED_ATTACK_RANGE = 15; // Range at which monsters can shoot projectiles
-    constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; // Scale factor for diagonal movement speed of monsters
-    constexpr int MONSTER_KITE_MIN_RANGE = 3; // Minimum distance for kiting monsters
-    constexpr int MONSTER_KITE_MAX_RANGE = 7; // Maximum distance for kiting monsters
-    constexpr int MONSTER_KITE_STEP = 4; // Tiles to move away when kiting
-    constexpr int MONSTER_MAX_LIVING_COUNT = 10; // Maximum number of monsters that can be present in an area
-    constexpr int MONSTER_TOTAL_TO_SPAWN = 50; // Total number of monsters to spawn in an area
-    constexpr int TICKS_BETWEEN_MONSTER_SPAWNS = 60; // Number of ticks between monster spawns
-    constexpr int MONSTER_RANDOM_SPACING = 4; // Random spacing for monster when moving and finding a blocker
-    constexpr int MAX_SPAWN_ATTEMPTS = 10; // Maximum number of attempts to spawn a monster
-    constexpr int PATH_FINDING_COOLDOWN = 50; // Cooldown for pathfinding in ticks
-    constexpr int MAX_ENTITY_FLASHING_TICKS = 10; // Maximum ticks an entity will flash when damaged
-    constexpr float AUTO_FIRE_RANGE = 100.0f;
-    constexpr unsigned int XP_BASE = 10;
-    constexpr unsigned int XP_FACTOR = 5;
-    constexpr const char* GAME_SAVE_PATH = "savegame.data";
-    constexpr const char* MAX_SCORE_PATH = "maxscore.data";
-    
+    // ========================================================================
+    // PATHFINDING CONSTANTS
+    // ========================================================================
+    constexpr int MAX_PATH_FIND_FAILURE_COUNT = 2;      ///< Max pathfinding failures before reset
+    constexpr int MULT_FOR_RESET_PATH_FIND_FAILURE = 15; ///< Count to reset pathfinding failure
+    constexpr int PATH_FINDING_COOLDOWN = 50;           ///< Cooldown between path recalculations (ticks)
+
+    // ========================================================================
+    // MAP & RENDERING CONSTANTS
+    // ========================================================================
+    constexpr int MAP_TILE_SIZE = 16;                    ///< Size of each tile in pixels (16x16)
+    constexpr int PLAYER_SIZE = 16;                      ///< Player sprite size (16x16)
+    constexpr int PLAYER_FOV_X = 234;                   ///< Render distance X (screen width + buffer)
+    constexpr int PLAYER_FOV_Y = 136;                   ///< Render distance Y (screen height + buffer)
+    constexpr int DEFAULT_MAP_WIDTH = 40;               ///< Procedural map width (tiles)
+    constexpr int DEFAULT_MAP_HEIGHT = 40;              ///< Procedural map height (tiles)
+
+    // ========================================================================
+    // MONSTER BEHAVIOR CONSTANTS
+    // ========================================================================
+    constexpr int MONSTER_AWARENESS_RADIUS = 50;        ///< Monster detection range (pixels)
+    constexpr int MONSTER_SPAWN_RADIUS = 20;            ///< Min distance from player to spawn (tiles)
+    constexpr int MONSTER_ATTACK_RANGE = 2;             ///< Melee attack range (tiles)
+    constexpr int MONSTER_RANGED_ATTACK_RANGE = 15;    ///< Ranged attack range (tiles)
+    constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; ///< Diagonal movement speed multiplier
+    constexpr int MONSTER_KITE_MIN_RANGE = 3;          ///< Kiting: minimum distance (tiles)
+    constexpr int MONSTER_KITE_MAX_RANGE = 7;          ///< Kiting: maximum distance (tiles)
+    constexpr int MONSTER_KITE_STEP = 4;               ///< Kiting: retreat distance (tiles)
+    constexpr int MONSTER_RANDOM_SPACING = 4;          ///< Random offset when blocked (tiles)
+    constexpr int MAX_SPAWN_ATTEMPTS = 10;             ///< Max attempts to find spawn position
+
+    // ========================================================================
+    // SPAWNING CONSTANTS
+    // ========================================================================
+    constexpr int MONSTER_MAX_LIVING_COUNT = 10;       ///< Max simultaneous living monsters
+    constexpr int MONSTER_TOTAL_TO_SPAWN = 50;         ///< Total monsters per game
+    constexpr int TICKS_BETWEEN_MONSTER_SPAWNS = 60;   ///< Spawn interval (3 seconds @ 20 FPS)
+
+    // ========================================================================
+    // COMBAT & DAMAGE CONSTANTS
+    // ========================================================================
+    constexpr int MAX_ENTITY_FLASHING_TICKS = 10;      ///< Damage flash duration (ticks)
+    constexpr float AUTO_FIRE_RANGE = 100.0f;          ///< Auto-fire targeting range (pixels)
+
     // Enemy ranged attack constants
-    constexpr unsigned int MONSTER_RANGED_ATTACK_COOLDOWN = 2000; // Cooldown for ranged monsters in milliseconds
-    constexpr unsigned int MONSTER_STATIONARY_ATTACK_COOLDOWN = 4000; // Cooldown for stationary monsters in milliseconds
-    constexpr int MONSTER_STATIONARY_PROJECTILE_COUNT = 5; // Number of projectiles for spread shot
-    constexpr float MONSTER_STATIONARY_SPREAD_ANGLE = 0.8f; // Angle spread in radians (~45 degrees)
-    constexpr float MONSTER_PROJECTILE_SPEED = 6.0f; // Speed of enemy projectiles
-    constexpr unsigned int MONSTER_PROJECTILE_SIZE = 6; // Size of enemy projectiles
-    constexpr float MONSTER_PROJECTILE_BASE_DAMAGE = 0.5f; // Base damage of enemy projectiles (before strength scaling)
-    constexpr float MONSTER_PROJECTILE_STRENGTH_MULTIPLIER = 0.2f; // Damage multiplier per strength point
-    constexpr float MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE = 1.0f; // Base damage for stationary monster projectiles (more powerful)
-    constexpr float MONSTER_STATIONARY_PROJECTILE_STRENGTH_MULTIPLIER = 0.3f; // Damage multiplier per strength point for stationary monsters
-    constexpr float MONSTER_PROJECTILE_MIN_DAMAGE = 0.5f; // Minimum damage floor to ensure projectiles always do some damage
+    constexpr unsigned int MONSTER_RANGED_ATTACK_COOLDOWN = 2000;  ///< Ranged cooldown (ms)
+    constexpr unsigned int MONSTER_STATIONARY_ATTACK_COOLDOWN = 4000; ///< Stationary cooldown (ms)
+    constexpr int MONSTER_STATIONARY_PROJECTILE_COUNT = 5;     ///< Spread shot count
+    constexpr float MONSTER_STATIONARY_SPREAD_ANGLE = 0.8f;    ///< Spread angle (~45°)
+    constexpr float MONSTER_PROJECTILE_SPEED = 6.0f;           ///< Projectile speed
+    constexpr unsigned int MONSTER_PROJECTILE_SIZE = 6;        ///< Projectile size (pixels)
+    constexpr float MONSTER_PROJECTILE_BASE_DAMAGE = 0.5f;     ///< Base damage (ranged)
+    constexpr float MONSTER_PROJECTILE_STRENGTH_MULTIPLIER = 0.2f; ///< Damage per strength
+    constexpr float MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE = 1.0f; ///< Base damage (stationary)
+    constexpr float MONSTER_STATIONARY_PROJECTILE_STRENGTH_MULTIPLIER = 0.3f; ///< Damage per strength
+    constexpr float MONSTER_PROJECTILE_MIN_DAMAGE = 0.5f;      ///< Minimum damage floor
 
-    // Player constants
-    constexpr int PLAYER_DEFAULT_HP = 100;
-    constexpr int PLAYER_DEFAULT_STRENGTH = 10;
-    constexpr int PLAYER_DEFAULT_AGILITY = 5;
-    constexpr int PLAYER_DEFAULT_CONSTITUTION = 5;
-    constexpr float PLAYER_DEFAULT_EVASION = 0.1f;
-    constexpr unsigned int PLAYER_AUTO_FIRE_COOLDOWN = 1000; // Milliseconds
-    constexpr unsigned int PLAYER_ACTIVITY_THRESHOLD = 500; // Milliseconds before player is considered idle
-    constexpr float PLAYER_MOVEMENT_SPEED = 5.0f;
+    // ========================================================================
+    // PLAYER CONSTANTS
+    // ========================================================================
+    constexpr int PLAYER_DEFAULT_HP = 100;               ///< Starting HP
+    constexpr int PLAYER_DEFAULT_STRENGTH = 10;         ///< Starting strength
+    constexpr int PLAYER_DEFAULT_AGILITY = 5;           ///< Starting agility
+    constexpr int PLAYER_DEFAULT_CONSTITUTION = 5;      ///< Starting constitution
+    constexpr float PLAYER_DEFAULT_EVASION = 0.1f;      ///< Starting evasion (10%)
+    constexpr unsigned int PLAYER_AUTO_FIRE_COOLDOWN = 1000; ///< Auto-fire cooldown (ms)
+    constexpr unsigned int PLAYER_ACTIVITY_THRESHOLD = 500;  ///< Idle threshold for slowdown (ms)
+    constexpr float PLAYER_MOVEMENT_SPEED = 5.0f;       ///< Movement speed (pixels/frame)
 
-    // Entity visual constants
-    constexpr int HEALTH_BAR_WIDTH = 25;
-    constexpr int HEALTH_BAR_HEIGHT = 4;
-    constexpr int HEALTH_BAR_OFFSET_X = -5;
-    constexpr int HEALTH_BAR_OFFSET_Y = -10;
+    // ========================================================================
+    // PROGRESSION CONSTANTS
+    // ========================================================================
+    constexpr unsigned int XP_BASE = 10;                 ///< Base XP for level 0→1
+    constexpr unsigned int XP_FACTOR = 5;                ///< XP scaling factor per level
 
-    // Game refresh rate
-    constexpr int GAME_REFRESH_RATE = 20; // FPS
+    // ========================================================================
+    // VISUAL CONSTANTS
+    // ========================================================================
+    constexpr int HEALTH_BAR_WIDTH = 25;                 ///< Health bar width (pixels)
+    constexpr int HEALTH_BAR_HEIGHT = 4;                 ///< Health bar height (pixels)
+    constexpr int HEALTH_BAR_OFFSET_X = -5;              ///< Health bar X offset
+    constexpr int HEALTH_BAR_OFFSET_Y = -10;             ///< Health bar Y offset
 
-    // Default map dimensions for procedural generation
-    constexpr int DEFAULT_MAP_WIDTH = 40;
-    constexpr int DEFAULT_MAP_HEIGHT = 40;
+    // ========================================================================
+    // PERFORMANCE CONSTANTS
+    // ========================================================================
+    constexpr int GAME_REFRESH_RATE = 20;                ///< Target FPS (20 Hz)
+
+    // ========================================================================
+    // FILE PATHS
+    // ========================================================================
+    constexpr const char* GAME_SAVE_PATH = "savegame.data";    ///< Save file path
+    constexpr const char* MAX_SCORE_PATH = "maxscore.data";    ///< Max score file path
 }
 #endif //GLOBALS_H
