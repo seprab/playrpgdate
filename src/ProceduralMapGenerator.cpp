@@ -39,7 +39,7 @@ std::vector<Layer> ProceduralMapGenerator::GenerateMap(const GenerationParams& p
     PlaceStructuredObstacles(collisionLayer, params.width, params.height, params, rng);
     ReportProgress(params, 0.7f);
     
-    // Step 4: Connectivity validation (70% - 90%)
+    // Step 4: Connectivity validation (70% - 100%)
     if (!ValidateConnectivity(collisionLayer, params.width, params.height)) {
         FixConnectivity(collisionLayer, params.width, params.height);
     }

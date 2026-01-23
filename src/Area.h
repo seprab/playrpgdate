@@ -64,6 +64,8 @@ private:
         PlaceSimpleObstacles,
         PlaceStructuredObstacles,
         ValidateConnectivity,
+        FixConnectivityCenter,
+        FixConnectivityIterate,
         Complete
     };
     GenerationStep currentGenerationStep = GenerationStep::None;
@@ -89,6 +91,11 @@ private:
     const int maxSimpleObstacleAttempts = 10000;
     const int maxStructuredObstacleAttempts = 200;
     UI* generationUI = nullptr;
+    // Connectivity fix state
+    bool connectivityValidated = false;
+    bool connectivityFixed = false;
+    int connectivityFixX = 1; // Current X position for iterative fix
+    int connectivityFixY = 1; // Current Y position for iterative fix
 
     // Player activity tracking for slowdown ability
     bool playerIsActive = true;

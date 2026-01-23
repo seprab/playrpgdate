@@ -309,9 +309,9 @@ void UI::DrawLoadingScreen() const
         // Simple dots animation
         switch ((frameCount / Loading::ANIMATION_FRAME_DELAY) % 3)
         {
-            case 0: loadingText = "."; break;
-            case 1: loadingText = ".."; break;
-            case 2: loadingText = "..."; break;
+            case 0: loadingText = "Loading."; break;
+            case 1: loadingText = "Loading.."; break;
+            case 2: loadingText = "Loading..."; break;
             default: loadingText = ""; break;
         }
 

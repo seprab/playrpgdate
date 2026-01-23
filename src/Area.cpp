@@ -294,6 +294,12 @@ void Area::StartIncrementalMapGeneration(int width, int height, UI* ui)
     simpleObstacleAttempts = 0;
     structuredObstacleAttempts = 0;
     
+    // Initialize connectivity fix state
+    connectivityValidated = false;
+    connectivityFixed = false;
+    connectivityFixX = 1;
+    connectivityFixY = 1;
+    
     // Initialize progress
     if (generationUI) {
         generationUI->UpdateLoadingProgress(0.0f);
@@ -441,29 +447,171 @@ bool Area::ContinueMapGeneration()
         }
         
         case GenerationStep::ValidateConnectivity: {
-            // Validate and fix connectivity - do this in one step
-            if (!generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
-                generator.FixConnectivity(generationLayer, generationParams.width, generationParams.height);
+            // Validate connectivity - do this incrementally
+            if (!connectivityValidated) {
+                // First validation check
+                bool isValid = generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height);
+                connectivityValidated = true;
+                
+                if (isValid) {
+                    // Map is already connected, move to completion
+                    currentGenerationStep = GenerationStep::Complete;
+                    if (generationUI) {
+                        generationUI->UpdateLoadingProgress(1.0f);
+                    }
+                    
+                    // Finalize map
+                    mapData.clear();
+                    mapData.push_back(generationLayer);
+                    isProcedural = true;
+                    
+                    // Set up collision and spawn points
+                    collider = std::make_shared<MapCollision>();
+                    collider->SetMap(ToMapLayer(), width, height);
+                    LoadSpawnablePositions();
+                    SetupMonstersToSpawn();
+                    
+                    Log::Info("Procedural map generated incrementally: %dx%d", width, height);
+                    return true; // Complete!
+                } else {
+                    // Need to fix connectivity, start with center fix
+                    currentGenerationStep = GenerationStep::FixConnectivityCenter;
+                    if (generationUI) {
+                        generationUI->UpdateLoadingProgress(0.75f);
+                    }
+                }
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::FixConnectivityCenter: {
+            // Remove obstacles near center to improve connectivity
+            int centerX = generationParams.width / 2;
+            int centerY = generationParams.height / 2;
+            int radius = 3;
+            
+            for (int y = centerY - radius; y <= centerY + radius; y++) {
+                for (int x = centerX - radius; x <= centerX + radius; x++) {
+                    if (x >= 0 && x < generationParams.width && y >= 0 && y < generationParams.height) {
+                        int index = y * generationParams.width + x;
+                        if (generationLayer.tiles[index].collision) {
+                            generationLayer.tiles[index] = {1, false};
+                        }
+                    }
+                }
             }
             
-            // Finalize map
-            mapData.clear();
-            mapData.push_back(generationLayer);
-            isProcedural = true;
+            // Validate again after center fix
+            if (generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
+                // Fixed! Move to completion
+                currentGenerationStep = GenerationStep::Complete;
+                if (generationUI) {
+                    generationUI->UpdateLoadingProgress(1.0f);
+                }
+                
+                // Finalize map
+                mapData.clear();
+                mapData.push_back(generationLayer);
+                isProcedural = true;
+                
+                // Set up collision and spawn points
+                collider = std::make_shared<MapCollision>();
+                collider->SetMap(ToMapLayer(), width, height);
+                LoadSpawnablePositions();
+                SetupMonstersToSpawn();
+                
+                Log::Info("Procedural map generated incrementally: %dx%d", width, height);
+                return true; // Complete!
+            } else {
+                // Still not connected, need to iterate through tiles
+                currentGenerationStep = GenerationStep::FixConnectivityIterate;
+                connectivityFixX = 1;
+                connectivityFixY = 1;
+                if (generationUI) {
+                    generationUI->UpdateLoadingProgress(0.80f);
+                }
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::FixConnectivityIterate: {
+            // Iterate through tiles incrementally, trying to remove obstacles
+            // Process a few tiles per tick to avoid blocking
+            const int tilesPerTick = 10;
+            int processed = 0;
             
-            currentGenerationStep = GenerationStep::Complete;
+            while (processed < tilesPerTick && connectivityFixY < generationParams.height - 1) {
+                int index = connectivityFixY * generationParams.width + connectivityFixX;
+                
+                if (generationLayer.tiles[index].collision) {
+                    // Temporarily make walkable to test connectivity
+                    generationLayer.tiles[index] = {1, false};
+                    
+                    if (generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
+                        // Fixed! Move to completion
+                        currentGenerationStep = GenerationStep::Complete;
+                        if (generationUI) {
+                            generationUI->UpdateLoadingProgress(1.0f);
+                        }
+                        
+                        // Finalize map
+                        mapData.clear();
+                        mapData.push_back(generationLayer);
+                        isProcedural = true;
+                        
+                        // Set up collision and spawn points
+                        collider = std::make_shared<MapCollision>();
+                        collider->SetMap(ToMapLayer(), width, height);
+                        LoadSpawnablePositions();
+                        SetupMonstersToSpawn();
+                        
+                        Log::Info("Procedural map generated incrementally: %dx%d", width, height);
+                        return true; // Complete!
+                    } else {
+                        // Didn't help, restore obstacle
+                        generationLayer.tiles[index] = {2, true};
+                    }
+                }
+                
+                processed++;
+                connectivityFixX++;
+                if (connectivityFixX >= generationParams.width - 1) {
+                    connectivityFixX = 1;
+                    connectivityFixY++;
+                }
+            }
+            
+            // Update progress based on how much we've processed
             if (generationUI) {
-                generationUI->UpdateLoadingProgress(1.0f);
+                float progress = 0.80f + (0.20f * static_cast<float>(connectivityFixY) / static_cast<float>(generationParams.height - 2));
+                if (progress > 0.99f) progress = 0.99f; // Cap at 99% until complete
+                generationUI->UpdateLoadingProgress(progress);
             }
             
-            // Set up collision and spawn points
-            collider = std::make_shared<MapCollision>();
-            collider->SetMap(ToMapLayer(), width, height);
-            LoadSpawnablePositions();
-            SetupMonstersToSpawn();
+            // Check if we've processed all tiles
+            if (connectivityFixY >= generationParams.height - 1) {
+                // We've tried everything, accept the map as-is
+                currentGenerationStep = GenerationStep::Complete;
+                if (generationUI) {
+                    generationUI->UpdateLoadingProgress(1.0f);
+                }
+                
+                // Finalize map
+                mapData.clear();
+                mapData.push_back(generationLayer);
+                isProcedural = true;
+                
+                // Set up collision and spawn points
+                collider = std::make_shared<MapCollision>();
+                collider->SetMap(ToMapLayer(), width, height);
+                LoadSpawnablePositions();
+                SetupMonstersToSpawn();
+                
+                Log::Info("Procedural map generated incrementally: %dx%d (connectivity fix completed)", width, height);
+                return true; // Complete!
+            }
             
-            Log::Info("Procedural map generated incrementally: %dx%d", width, height);
-            return true; // Complete!
+            return false; // Not complete yet
         }
         
         default:
