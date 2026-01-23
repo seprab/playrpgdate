@@ -32,8 +32,8 @@ namespace  Globals
     constexpr float AUTO_FIRE_RANGE = 100.0f;
     constexpr unsigned int XP_BASE = 10;
     constexpr unsigned int XP_FACTOR = 5;
-    constexpr const char* GAME_SAVE_PATH = "saves/save.json";
-    constexpr const char* MAX_SCORE_PATH = "saves/maxscore.data";
+    constexpr const char* GAME_SAVE_PATH = "savegame.data";
+    constexpr const char* MAX_SCORE_PATH = "maxscore.data";
     
     // Enemy ranged attack constants
     constexpr unsigned int MONSTER_RANGED_ATTACK_COOLDOWN = 2000; // Cooldown for ranged monsters in milliseconds
@@ -42,7 +42,10 @@ namespace  Globals
     constexpr float MONSTER_STATIONARY_SPREAD_ANGLE = 0.8f; // Angle spread in radians (~45 degrees)
     constexpr float MONSTER_PROJECTILE_SPEED = 6.0f; // Speed of enemy projectiles
     constexpr unsigned int MONSTER_PROJECTILE_SIZE = 6; // Size of enemy projectiles
-    constexpr float MONSTER_PROJECTILE_DAMAGE = 1.0f; // Base damage of enemy projectiles
-    constexpr float MONSTER_STATIONARY_PROJECTILE_DAMAGE = 1.5f; // Damage for stationary monster projectiles (more powerful)
+    constexpr float MONSTER_PROJECTILE_BASE_DAMAGE = 0.5f; // Base damage of enemy projectiles (before strength scaling)
+    constexpr float MONSTER_PROJECTILE_STRENGTH_MULTIPLIER = 0.2f; // Damage multiplier per strength point
+    constexpr float MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE = 1.0f; // Base damage for stationary monster projectiles (more powerful)
+    constexpr float MONSTER_STATIONARY_PROJECTILE_STRENGTH_MULTIPLIER = 0.3f; // Damage multiplier per strength point for stationary monsters
+    constexpr float MONSTER_PROJECTILE_MIN_DAMAGE = 0.5f; // Minimum damage floor to ensure projectiles always do some damage
 }
 #endif //GLOBALS_H
