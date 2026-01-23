@@ -80,35 +80,53 @@ void UI::HandleInputs()
             }
             break;
         case GameScreen::MAIN_MENU:
-            if (current & kButtonUp)
             {
-                selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
-            }
-            if (current & kButtonDown)
-            {
-                selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
-            }
-            if (current & kButtonA)
-            {
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
-                switch (selectedMenuItem)
+                // Handle crank navigation
+                float crankChange = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
+                if (crankChange > UIConstants::Input::CRANK_THRESHOLD)
                 {
-                    case 0: // New Game
-                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
-                        SwitchScreen(GameScreen::GAME);
-                        if (newGameCallback) newGameCallback();
-                        break;
-                    case 1: // Load Game
-                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
-                        SwitchScreen(GameScreen::GAME);
-                        if (loadGameCallback) loadGameCallback();
-                        break;
-                    default: break;
+                    // Clockwise rotation = move down
+                    selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
                 }
+                else if (crankChange < -UIConstants::Input::CRANK_THRESHOLD)
+                {
+                    // Counter-clockwise rotation = move up
+                    selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                
+                // Handle button navigation (existing code)
+                if (current & kButtonUp)
+                {
+                    selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                if (current & kButtonDown)
+                {
+                    selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                if (current & kButtonA)
+                {
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    switch (selectedMenuItem)
+                    {
+                        case 0: // New Game
+                            pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
+                            SwitchScreen(GameScreen::GAME);
+                            if (newGameCallback) newGameCallback();
+                            break;
+                        case 1: // Load Game
+                            pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
+                            SwitchScreen(GameScreen::GAME);
+                            if (loadGameCallback) loadGameCallback();
+                            break;
+                        default: break;
+                    }
+                }
+                break;
             }
-            break;
         case GameScreen::GAME:
             {
                 // Handle level-up popup input if it's showing
@@ -120,6 +138,22 @@ void UI::HandleInputs()
                         break;
                     }
 
+                    // Handle crank navigation for level-up popup
+                    float crankChange = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
+                    if (crankChange > UIConstants::Input::CRANK_THRESHOLD)
+                    {
+                        // Clockwise rotation = move down
+                        levelUpSelectedOption = (levelUpSelectedOption + 1) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (crankChange < -UIConstants::Input::CRANK_THRESHOLD)
+                    {
+                        // Counter-clockwise rotation = move up
+                        levelUpSelectedOption = (levelUpSelectedOption - 1 + 4) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+
+                    // Handle button navigation (existing code)
                     if (current & kButtonUp)
                     {
                         levelUpSelectedOption = (levelUpSelectedOption - 1 + 4) % 4;

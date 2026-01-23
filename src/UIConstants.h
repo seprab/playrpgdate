@@ -105,6 +105,7 @@ namespace UIConstants {
     // Input settings
     namespace Input {
         constexpr float COOLDOWN = 0.5f;
+        constexpr float CRANK_THRESHOLD = 2.0f; // Minimum degrees of crank rotation to trigger navigation
     }
 }
 
