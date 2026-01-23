@@ -181,6 +181,9 @@ void Area::GenerateProceduralMap(int width, int height, UI* ui)
     if (ui) {
         params.progressCallback = [ui](float progress) {
             ui->UpdateLoadingProgress(progress);
+            // Force UI to update/render during generation
+            // This allows the loading screen to be visible while generation happens
+            ui->Update();
         };
     }
     
@@ -256,11 +259,216 @@ bool Area::CheckCollision(int x, int y) const
 }
 void Area::LoadWithUI(UI* ui)
 {
-    GenerateProceduralMap(40, 40, ui);
-    collider = std::make_shared<MapCollision>();
-    collider->SetMap(ToMapLayer(), width, height);
-    LoadSpawnablePositions();
-    SetupMonstersToSpawn();
+    StartIncrementalMapGeneration(40, 40, ui);
+}
+
+void Area::StartIncrementalMapGeneration(int width, int height, UI* ui)
+{
+    // Initialize generation state
+    currentGenerationStep = GenerationStep::InitializeGrid;
+    generationParams.width = width;
+    generationParams.height = height;
+    generationParams.obstacleDensity = 0.15f;
+    generationParams.minObstacleSize = 1;
+    generationParams.maxObstacleSize = 3;
+    generationParams.minStructuredObstacles = 3;
+    generationParams.maxStructuredObstacles = 8;
+    generationParams.seed = 0;
+    
+    this->width = width;
+    this->height = height;
+    tileWidth = Globals::MAP_TILE_SIZE;
+    tileHeight = Globals::MAP_TILE_SIZE;
+    
+    generationUI = ui;
+    generationRNG = pdcpp::Random();
+    
+    // Calculate targets
+    int totalTiles = width * height;
+    simpleObstaclesTarget = static_cast<int>(totalTiles * generationParams.obstacleDensity);
+    structuredObstaclesTarget = generationParams.minStructuredObstacles + 
+                                (generationRNG.next() % (generationParams.maxStructuredObstacles - generationParams.minStructuredObstacles + 1));
+    
+    simpleObstaclesPlaced = 0;
+    structuredObstaclesPlaced = 0;
+    simpleObstacleAttempts = 0;
+    structuredObstacleAttempts = 0;
+    
+    // Initialize progress
+    if (generationUI) {
+        generationUI->UpdateLoadingProgress(0.0f);
+    }
+}
+
+bool Area::ContinueMapGeneration()
+{
+    if (currentGenerationStep == GenerationStep::None || currentGenerationStep == GenerationStep::Complete) {
+        return true; // Already complete or not started
+    }
+    
+    ProceduralMapGenerator generator;
+    
+    switch (currentGenerationStep) {
+        case GenerationStep::InitializeGrid: {
+            // Initialize grid - do this in one step
+            generationLayer.tiles.resize(generationParams.width * generationParams.height);
+            for (int i = 0; i < generationParams.width * generationParams.height; i++) {
+                generationLayer.tiles[i] = {1, false}; // ID 1, no collision
+            }
+            currentGenerationStep = GenerationStep::AddBoundaries;
+            if (generationUI) {
+                generationUI->UpdateLoadingProgress(0.05f);
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::AddBoundaries: {
+            // Add boundary obstacles - do this in one step
+            generator.AddBoundaryObstacles(generationLayer, generationParams.width, generationParams.height);
+            currentGenerationStep = GenerationStep::PlaceSimpleObstacles;
+            if (generationUI) {
+                generationUI->UpdateLoadingProgress(0.1f);
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::PlaceSimpleObstacles: {
+            // Place a few simple obstacles per tick
+            const int obstaclesPerTick = 5; // Place 5 obstacles per tick
+            int minX = 2;
+            int maxX = generationParams.width - 3;
+            int minY = 2;
+            int maxY = generationParams.height - 3;
+            
+            for (int i = 0; i < obstaclesPerTick && simpleObstaclesPlaced < simpleObstaclesTarget && 
+                 simpleObstacleAttempts < maxSimpleObstacleAttempts; i++) {
+                simpleObstacleAttempts++;
+                
+                int x = minX + (generationRNG.next() % (maxX - minX + 1));
+                int y = minY + (generationRNG.next() % (maxY - minY + 1));
+                int size = generationParams.minObstacleSize + 
+                           (generationRNG.next() % (generationParams.maxObstacleSize - generationParams.minObstacleSize + 1));
+                
+                if (generator.CanPlaceObstacle(generationLayer, generationParams.width, generationParams.height, x, y, size, size)) {
+                    generator.PlaceObstacle(generationLayer, generationParams.width, x, y, size, size);
+                    simpleObstaclesPlaced++;
+                }
+            }
+            
+            // Update progress
+            if (generationUI) {
+                float progress = 0.1f + (0.3f * static_cast<float>(simpleObstaclesPlaced) / static_cast<float>(simpleObstaclesTarget));
+                generationUI->UpdateLoadingProgress(progress);
+            }
+            
+            // Check if done with simple obstacles
+            if (simpleObstaclesPlaced >= simpleObstaclesTarget || simpleObstacleAttempts >= maxSimpleObstacleAttempts) {
+                currentGenerationStep = GenerationStep::PlaceStructuredObstacles;
+                if (generationUI) {
+                    generationUI->UpdateLoadingProgress(0.4f);
+                }
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::PlaceStructuredObstacles: {
+            // Place one structured obstacle per tick
+            int minX = 2;
+            int maxX = generationParams.width - 5;
+            int minY = 2;
+            int maxY = generationParams.height - 5;
+            
+            if (structuredObstaclesPlaced < structuredObstaclesTarget && 
+                structuredObstacleAttempts < maxStructuredObstacleAttempts) {
+                structuredObstacleAttempts++;
+                
+                int x = minX + (generationRNG.next() % (maxX - minX + 1));
+                int y = minY + (generationRNG.next() % (maxY - minY + 1));
+                int shapeType = generationRNG.next() % 5;
+                
+                bool placedShape = false;
+                switch (shapeType) {
+                    case 0: // L-shape
+                        if (x < maxX - 2 && y < maxY - 2) {
+                            generator.PlaceLShape(generationLayer, generationParams.width, generationParams.height, x, y, generationRNG);
+                            placedShape = true;
+                        }
+                        break;
+                    case 1: // T-shape
+                        if (x < maxX - 2 && y < maxY - 2) {
+                            generator.PlaceTShape(generationLayer, generationParams.width, generationParams.height, x, y, generationRNG);
+                            placedShape = true;
+                        }
+                        break;
+                    case 2: // Wall
+                        generator.PlaceWall(generationLayer, generationParams.width, generationParams.height, x, y, generationRNG);
+                        placedShape = true;
+                        break;
+                    case 3: // Platform
+                        if (x < maxX - 3 && y < maxY - 3) {
+                            int platformSize = 2 + (generationRNG.next() % 3);
+                            generator.PlacePlatform(generationLayer, generationParams.width, generationParams.height, x, y, platformSize, generationRNG);
+                            placedShape = true;
+                        }
+                        break;
+                    case 4: // Pillar
+                        if (generator.CanPlaceObstacle(generationLayer, generationParams.width, generationParams.height, x, y, 1, 1)) {
+                            generator.PlaceObstacle(generationLayer, generationParams.width, x, y, 1, 1);
+                            placedShape = true;
+                        }
+                        break;
+                }
+                
+                if (placedShape) {
+                    structuredObstaclesPlaced++;
+                }
+            }
+            
+            // Update progress
+            if (generationUI) {
+                float progress = 0.4f + (0.3f * static_cast<float>(structuredObstaclesPlaced) / static_cast<float>(structuredObstaclesTarget));
+                generationUI->UpdateLoadingProgress(progress);
+            }
+            
+            // Check if done with structured obstacles
+            if (structuredObstaclesPlaced >= structuredObstaclesTarget || structuredObstacleAttempts >= maxStructuredObstacleAttempts) {
+                currentGenerationStep = GenerationStep::ValidateConnectivity;
+                if (generationUI) {
+                    generationUI->UpdateLoadingProgress(0.7f);
+                }
+            }
+            return false; // Not complete yet
+        }
+        
+        case GenerationStep::ValidateConnectivity: {
+            // Validate and fix connectivity - do this in one step
+            if (!generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
+                generator.FixConnectivity(generationLayer, generationParams.width, generationParams.height);
+            }
+            
+            // Finalize map
+            mapData.clear();
+            mapData.push_back(generationLayer);
+            isProcedural = true;
+            
+            currentGenerationStep = GenerationStep::Complete;
+            if (generationUI) {
+                generationUI->UpdateLoadingProgress(1.0f);
+            }
+            
+            // Set up collision and spawn points
+            collider = std::make_shared<MapCollision>();
+            collider->SetMap(ToMapLayer(), width, height);
+            LoadSpawnablePositions();
+            SetupMonstersToSpawn();
+            
+            Log::Info("Procedural map generated incrementally: %dx%d", width, height);
+            return true; // Complete!
+        }
+        
+        default:
+            return true; // Unknown state, consider complete
+    }
 }
 void Area::LoadFromSavedData()
 {
@@ -287,6 +495,11 @@ void Area::Unload()
     spawnablePositions.clear();
     pathfindingContainer.reset();
     collider.reset();
+    
+    // Reset generation state
+    currentGenerationStep = GenerationStep::None;
+    generationLayer.tiles.clear();
+    generationUI = nullptr;
 }
 void Area::SetupMonstersToSpawn()
 {

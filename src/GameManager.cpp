@@ -22,44 +22,75 @@ void GameManager::Update()
 
     if (!isGameRunning)
     {
-        // I'm loading jsons here to create a loading bar. When a json load is complete, update the loading bar.
-        int tokenCount[] {128, 64, 64, 128, 2300, 128};
-        const char* jsonPaths[] {"data/items.json", "data/doors.json", "data/weapons.json", "data/armors.json", "data/creatures.json", "data/areas.json"};
-        float totalTokens = 128.f + 64.f + 64.f + 128.f + 2300.f + 128.f;
+        // Check if we're generating a map
+        if (activeArea) {
+            bool generationComplete = activeArea->ContinueMapGeneration();
+            if (generationComplete) {
+                // Map generation is complete, finish setup
+                ui->SwitchScreen(GameScreen::GAME);
 
-        static float progress = 0.0f;
-        static int frameCount = 0;
-
-        switch (frameCount)
-        {
-            case 0:
-                entityManager->LoadJSON<Item>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            case 1:
-                entityManager->LoadJSON<Door>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            case 2:
-                entityManager->LoadJSON<Weapon>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            case 3:
-                entityManager->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            case 4:
-                entityManager->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            case 5:
-                entityManager->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
-                break;
-            default:
-                progress = 1.f;
-                break;
+                player = std::make_shared<Player>();
+                // Set player to center of 40x40 map (was 23,32 for 47x47 map)
+                player->SetTiledPosition(pdcpp::Point<int>(20, 20));
+                player->ResetStats(); // Initialize game stats
+                entityManager->SetPlayer(player);
+                
+                // Initialize camera to player position (in pixel coordinates)
+                pdcpp::Point<int> playerPixelPos = player->GetPosition();
+                currentCameraOffset = playerPixelPos;
+                
+                // Reset draw offset to center camera on player
+                pd->graphics->setDrawOffset(0, 0);
+                
+                isGameRunning = true;
+                
+                // Ensure UI is in GAME screen (not LOADING)
+                ui->SwitchScreen(GameScreen::GAME);
+            }
+            // Generation in progress or complete - ensure UI updates to show loading screen
+            // Don't return early - let ui->Update() be called below
         }
-        if (frameCount < sizeof(tokenCount)/sizeof(tokenCount[0]))
+        else
         {
-            progress += (float)tokenCount[frameCount] / totalTokens;
-            ui->UpdateLoadingProgress(progress);
-            Log::Info("FrameCount: %d, Progress: %f", frameCount, progress);
-            frameCount++;
+            // I'm loading jsons here to create a loading bar. When a json load is complete, update the loading bar.
+            int tokenCount[] {128, 64, 64, 128, 2300, 128};
+            const char* jsonPaths[] {"data/items.json", "data/doors.json", "data/weapons.json", "data/armors.json", "data/creatures.json", "data/areas.json"};
+            float totalTokens = 128.f + 64.f + 64.f + 128.f + 2300.f + 128.f;
+
+            static float progress = 0.0f;
+            static int frameCount = 0;
+
+            switch (frameCount)
+            {
+                case 0:
+                    entityManager->LoadJSON<Item>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                case 1:
+                    entityManager->LoadJSON<Door>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                case 2:
+                    entityManager->LoadJSON<Weapon>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                case 3:
+                    entityManager->LoadJSON<Armor>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                case 4:
+                    entityManager->LoadJSON<Monster>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                case 5:
+                    entityManager->LoadJSON<Area>(jsonPaths[frameCount], tokenCount[frameCount]);
+                    break;
+                default:
+                    progress = 1.f;
+                    break;
+            }
+            if (frameCount < sizeof(tokenCount)/sizeof(tokenCount[0]))
+            {
+                progress += (float)tokenCount[frameCount] / totalTokens;
+                ui->UpdateLoadingProgress(progress);
+                Log::Info("FrameCount: %d, Progress: %f", frameCount, progress);
+                frameCount++;
+            }
         }
     }
     else
@@ -143,30 +174,11 @@ void GameManager::LoadNewGame()
     ui->SwitchScreen(GameScreen::LOADING);
     ui->UpdateLoadingProgress(0.0f);
 
-    // Load the area with UI for progress reporting
+    // Start incremental map generation (doesn't block)
     activeArea->LoadWithUI(ui.get());
-
-    // Map generation is complete, switch to game screen
-    ui->SwitchScreen(GameScreen::GAME);
-
-    player = std::make_shared<Player>();
-    // Set player to center of 40x40 map (was 23,32 for 47x47 map)
-    player->SetTiledPosition(pdcpp::Point<int>(20, 20));
-    player->ResetStats(); // Initialize game stats
-    entityManager->SetPlayer(player);
     
-    // Initialize camera to player position (in pixel coordinates)
-    // Player position is in pixels, so we need to get it after setting tiled position
-    pdcpp::Point<int> playerPixelPos = player->GetPosition();
-    currentCameraOffset = playerPixelPos;
-    
-    // Reset draw offset to center camera on player
-    pd->graphics->setDrawOffset(0, 0);
-    
-    isGameRunning = true;
-    
-    // Ensure UI is in GAME screen (not LOADING)
-    ui->SwitchScreen(GameScreen::GAME);
+    // Don't set up player or camera yet - wait for generation to complete
+    // This will be done in Update() when generation finishes
 }
 
 void GameManager::LoadSavedGame()

@@ -17,6 +17,7 @@ class Monster;
 class Player;
 class EnemyProjectile;
 class UI;
+class ProceduralMapGenerator;
 
 struct Tile {
     int id;
@@ -55,6 +56,40 @@ private:
     const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
     bool isProcedural = false; // Flag to indicate if map is procedurally generated
 
+    // Incremental map generation state
+    enum class GenerationStep {
+        None,
+        InitializeGrid,
+        AddBoundaries,
+        PlaceSimpleObstacles,
+        PlaceStructuredObstacles,
+        ValidateConnectivity,
+        Complete
+    };
+    GenerationStep currentGenerationStep = GenerationStep::None;
+    struct GenerationParams {
+        int width = 40;
+        int height = 40;
+        float obstacleDensity = 0.15f;
+        int minObstacleSize = 1;
+        int maxObstacleSize = 3;
+        int minStructuredObstacles = 3;
+        int maxStructuredObstacles = 8;
+        unsigned int seed = 0;
+    };
+    GenerationParams generationParams;
+    Layer generationLayer; // Working layer during generation
+    pdcpp::Random generationRNG;
+    int simpleObstaclesPlaced = 0;
+    int simpleObstaclesTarget = 0;
+    int structuredObstaclesPlaced = 0;
+    int structuredObstaclesTarget = 0;
+    int simpleObstacleAttempts = 0;
+    int structuredObstacleAttempts = 0;
+    const int maxSimpleObstacleAttempts = 10000;
+    const int maxStructuredObstacleAttempts = 200;
+    UI* generationUI = nullptr;
+
     // Player activity tracking for slowdown ability
     bool playerIsActive = true;
     float playerIdleTime = 0.0f;
@@ -90,8 +125,10 @@ public:
     void SetUpPathfindingContainer();
     void Unload();
     void SetupMonstersToSpawn();
-    void LoadWithUI(UI* ui); // Load with UI for progress reporting
+    void LoadWithUI(UI* ui); // Load with UI for progress reporting - starts incremental generation
     void LoadFromSavedData(); // Load when map data was deserialized from save
+    bool ContinueMapGeneration(); // Returns true when generation is complete
+    void StartIncrementalMapGeneration(int width, int height, UI* ui);
     pdcpp::Point<int> FindSpawnablePosition(int attemptCount);
     void LoadSpawnablePositions();
     std::string SerializeMapData() const;
