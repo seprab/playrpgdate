@@ -5,8 +5,12 @@
 #include "Dialogue.h"
 #include "Log.h"
 #include "Utils.h"
+#include "ProceduralMapGenerator.h"
+#include "UI.h"
 #include "pdcpp/core/File.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
+#include "pdcpp/graphics/Graphics.h"
+#include "pdcpp/graphics/Colors.h"
 #include "EntityManager.h"
 #include "Monster.h"
 #include "Player.h"
@@ -14,6 +18,8 @@
 #include "pdcpp/core/Random.h"
 #include <algorithm>
 #include <memory>
+#include <sstream>
+#include "jsmn.h"
 
 Area::Area()
 : Entity(0)
@@ -25,8 +31,8 @@ Area::Area()
 
 Area::~Area() = default; // Destructor defined here so unique_ptr can see full EnemyProjectile definition
 
-Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
-: Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
+Area::Area(unsigned int _id, const char* _name, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
+: Entity(_id), dialogue(std::move(_dialogue))
 {
     SetName(_name);
     for (const std::shared_ptr<Monster>& monster : _monsters)
@@ -39,12 +45,12 @@ Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, in
     Log::Info("Area created with id: %d, name: %s", _id, _name);
 }
 Area::Area(const Area &other)
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(other.dataPath), tilesetPath(other.tilesetPath), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
+        : Entity(other.GetId()), dialogue(other.dialogue), bankOfMonsters(other.bankOfMonsters)
 {
     SetName(other.GetName());
 }
 Area::Area(Area &&other) noexcept
-        : Entity(other.GetId()), tokens(other.GetTokenCount()), dataPath(std::move(other.dataPath)), tilesetPath(std::move(other.tilesetPath)), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
+        : Entity(other.GetId()), dialogue(std::move(other.dialogue)), bankOfMonsters(std::move(other.bankOfMonsters))
 {
     SetName(other.GetName());
 }
@@ -57,20 +63,12 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
         if(tokens[i].type != JSMN_OBJECT ) continue;
 
         int decodedId{};
-        int decodedTokens{};
-        std::string decodedName;
-        std::string decodedData;
-        std::string decodedTileset;
         std::shared_ptr<Dialogue> decodedDialogue;
         std::vector<std::shared_ptr<Door>> decodedDoors{};
         std::vector<std::shared_ptr<Monster>> decodedCreatures;
 
         const int endOfObject = tokens[i].end; //get the end of the Area object
         decodedId = std::stoi(Utils::ValueDecoder(buffer, tokens, tokens[i-1].start, endOfObject, "id"));
-        decodedName = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "name");
-        decodedData = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataPath");
-        decodedTokens = std::stoi(Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "dataTokens"));
-        decodedTileset = Utils::ValueDecoder(buffer, tokens, tokens[i].start, endOfObject, "tileset");
 
         i++; //move into the first property of the Area object. Otherwise, the while is invalid
         while(tokens[i].end < endOfObject)
@@ -127,8 +125,7 @@ std::shared_ptr<void> Area::DecodeJson(char *buffer, jsmntok_t *tokens, const in
             else i++;
         }
 
-        decodedAreas.emplace_back(decodedId, decodedName.c_str(), decodedData, decodedTokens,
-                                   decodedTileset, decodedDialogue, decodedCreatures);
+        decodedAreas.emplace_back(decodedId, "", decodedDialogue, decodedCreatures);
         i = endOfObject-1; //move back to the end of the Area object
     }
     return std::make_shared<std::vector<Area>>(decodedAreas);
@@ -173,22 +170,51 @@ void Area::LoadLayers(std::string fileName, int limitOfTokens)
     width = std::stoi(Utils::ValueDecoder(charBuffer.get(), t.get(), 0, t[0].end, "width"));
     Log::Info("Map loaded, %i width and %i height", width, height);
 }
-void Area::LoadImageTable(std::string fileName)
+void Area::GenerateProceduralMap(int width, int height, UI* ui)
 {
-    imageTable = std::make_unique<pdcpp::ImageTable>(fileName);
-    LCDBitmap* bitmap = (*imageTable)[0];
-    pdcpp::GlobalPlaydateAPI::get()->graphics->getBitmapData(bitmap, &tileWidth, &tileHeight, nullptr, nullptr, nullptr);
+    ProceduralMapGenerator generator;
+    ProceduralMapGenerator::GenerationParams params;
+    params.width = width;
+    params.height = height;
+    
+    // Set up progress callback if UI is provided
+    if (ui) {
+        params.progressCallback = [ui](float progress) {
+            ui->UpdateLoadingProgress(progress);
+        };
+    }
+    
+    // Generate the map
+    mapData = generator.GenerateMap(params);
+    
+    // Set dimensions
+    this->width = width;
+    this->height = height;
+    
+    // Initialize tile dimensions (16x16 pixels per tile)
+    tileWidth = Globals::MAP_TILE_SIZE;
+    tileHeight = Globals::MAP_TILE_SIZE;
+    
+    // Mark as procedural
+    isProcedural = true;
+    
+    Log::Info("Procedural map generated: %dx%d", width, height);
 }
 void Area::DrawTileFromLayer(int layer, int x, int y)
 {
-    int tileId = mapData[layer].tiles[(y * width) + x].id;
-    if (tileId == 0) return; // skip empty tiles
-    tileId = tileId - 1; //I'm not sure why.
-
-    LCDBitmap* bitmap = (*imageTable)[tileId];
     int drawX = x * tileWidth;
     int drawY = y * tileHeight;
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmap, drawX, drawY, LCDBitmapFlip::kBitmapUnflipped);
+    pdcpp::Rectangle<int> tileRect(drawX, drawY, tileWidth, tileHeight);
+
+    if (mapData[layer].tiles[(y * width) + x].collision) {
+        // Obstacle tiles - draw dark rectangles with white border
+        pdcpp::Graphics::fillRectangle(tileRect, pdcpp::Colors::black);
+        // Draw border for obstacles to make them stand out
+        pdcpp::Graphics::drawRectangle(tileRect, pdcpp::Colors::white);
+    } else {
+        // Walkable tiles - draw light gray ground
+        pdcpp::Graphics::fillRectangle(tileRect, pdcpp::Colors::solid50GrayA);
+    }
 }
 void Area::Render(int x, int y, int fovX, int fovY)
 {
@@ -228,10 +254,18 @@ bool Area::CheckCollision(int x, int y) const
     }
     return false;
 }
-void Area::Load()
+void Area::LoadWithUI(UI* ui)
 {
-    LoadLayers(dataPath, tokens);
-    LoadImageTable(tilesetPath);
+    GenerateProceduralMap(40, 40, ui);
+    collider = std::make_shared<MapCollision>();
+    collider->SetMap(ToMapLayer(), width, height);
+    LoadSpawnablePositions();
+    SetupMonstersToSpawn();
+}
+void Area::LoadFromSavedData()
+{
+    // This is called when map data was loaded from save file
+    // We just need to set up collision and spawn points
     collider = std::make_shared<MapCollision>();
     collider->SetMap(ToMapLayer(), width, height);
     LoadSpawnablePositions();
@@ -319,12 +353,193 @@ pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
 void Area::LoadSpawnablePositions()
 {
     spawnablePositions = std::vector<pdcpp::Point<int>>();
-    for (int i = 0; i < mapData[1].tiles.size(); i++)
+    // Ensure we have at least 2 layers (collision and spawn points)
+    for (int i = 0; i < mapData[0].tiles.size(); i++)
     {
-        if (mapData[1].tiles[i].id == 0) continue;
+        if (mapData[0].tiles[i].id == 0) continue;
         // flat coordinates to 2D coordinates
         spawnablePositions.emplace_back(i % width, i / width);
     }
+}
+
+std::string Area::SerializeMapData() const
+{
+    if (mapData.empty()) {
+        return "null"; // Not a procedural map or no data
+    }
+    
+    std::ostringstream json;
+    json << "{\n";
+    json << "  \"width\": " << width << ",\n";
+    json << "  \"height\": " << height << ",\n";
+    json << "  \"layers\": [\n";
+
+    for (size_t layerIdx = 0; layerIdx < mapData.size(); layerIdx++) {
+        const Layer& layer = mapData[layerIdx];
+        json << "    {\n";
+        json << "      \"tiles\": [\n";
+
+        for (size_t i = 0; i < layer.tiles.size(); i++) {
+            const Tile& tile = layer.tiles[i];
+            json << (tile.collision ? "1" : "0");
+            if (i < layer.tiles.size() - 1) json << ",";
+        }
+        json << "\n";
+        json << "      ]\n";
+        json << "    }";
+        if (layerIdx < mapData.size() - 1) json << ",";
+        json << "\n";
+    }
+
+    json << "  ]\n";
+    json << "}";
+    
+    return json.str();
+}
+
+bool Area::DeserializeMapData(const std::string& jsonData)
+{
+    if (jsonData == "null" || jsonData.empty()) {
+        return false;
+    }
+    
+    // Parse JSON
+    jsmn_parser parser;
+    jsmn_init(&parser);
+    
+    // First pass: count tokens
+    int tokenCount = jsmn_parse(&parser, jsonData.c_str(), jsonData.length(), nullptr, 0);
+    if (tokenCount < 0) {
+        Log::Error("Area::DeserializeMapData - JSON parse error: %d", tokenCount);
+        return false;
+    }
+    
+    // Allocate tokens
+    std::vector<jsmntok_t> tokens(tokenCount);
+    jsmn_init(&parser);
+    tokenCount = jsmn_parse(&parser, jsonData.c_str(), jsonData.length(), tokens.data(), tokenCount);
+    
+    if (tokenCount < 0) {
+        Log::Error("Area::DeserializeMapData - JSON parse error: %d", tokenCount);
+        return false;
+    }
+    
+    // Find width and height
+    int parsedWidth = 0;
+    int parsedHeight = 0;
+    for (int i = 0; i < tokenCount; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            std::string key = Utils::Subchar(jsonData.c_str(), tokens[i].start, tokens[i].end);
+            if (key == "width" && i + 1 < tokenCount && tokens[i + 1].type == JSMN_PRIMITIVE) {
+                std::string value = Utils::Subchar(jsonData.c_str(), tokens[i + 1].start, tokens[i + 1].end);
+                parsedWidth = std::stoi(value);
+            } else if (key == "height" && i + 1 < tokenCount && tokens[i + 1].type == JSMN_PRIMITIVE) {
+                std::string value = Utils::Subchar(jsonData.c_str(), tokens[i + 1].start, tokens[i + 1].end);
+                parsedHeight = std::stoi(value);
+            }
+        }
+    }
+    
+    if (parsedWidth == 0 || parsedHeight == 0) {
+        Log::Error("Area::DeserializeMapData - Invalid width or height");
+        return false;
+    }
+    
+    // Find layers array
+    int layersArrayIdx = -1;
+    for (int i = 0; i < tokenCount; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            std::string key = Utils::Subchar(jsonData.c_str(), tokens[i].start, tokens[i].end);
+            if (key == "layers" && i + 1 < tokenCount && tokens[i + 1].type == JSMN_ARRAY) {
+                layersArrayIdx = i + 1;
+                break;
+            }
+        }
+    }
+    
+    if (layersArrayIdx == -1) {
+        Log::Error("Area::DeserializeMapData - Layers array not found");
+        return false;
+    }
+    
+    // Clear existing map data
+    mapData.clear();
+    
+    // Parse layers
+    int numLayers = tokens[layersArrayIdx].size;
+    int currentIdx = layersArrayIdx + 1;
+    
+    for (int layerIdx = 0; layerIdx < numLayers && currentIdx < tokenCount; layerIdx++) {
+        if (tokens[currentIdx].type != JSMN_OBJECT) {
+            // Skip non-object tokens
+            currentIdx++;
+            continue;
+        }
+        
+        Layer layer;
+        int layerObjEnd = tokens[currentIdx].end;
+        
+        // Find tiles array in this layer
+        int tilesArrayIdx = -1;
+        
+        for (int i = currentIdx + 1; i < tokenCount && tokens[i].end < layerObjEnd; i++) {
+            if (tokens[i].type == JSMN_STRING) {
+                std::string key = Utils::Subchar(jsonData.c_str(), tokens[i].start, tokens[i].end);
+                if (key == "tiles" && i + 1 < tokenCount && tokens[i + 1].type == JSMN_ARRAY) {
+                    tilesArrayIdx = i + 1;
+                    break;
+                }
+            }
+        }
+        
+        if (tilesArrayIdx != -1) {
+            int numTiles = tokens[tilesArrayIdx].size;
+            int tileIdx = tilesArrayIdx + 1;
+            
+            // Parse tiles array - simplified format: just "1" or "0" strings
+            for (int i = 0; i < numTiles && tileIdx < tokenCount; i++) {
+                if (tokens[tileIdx].type == JSMN_PRIMITIVE || tokens[tileIdx].type == JSMN_STRING) {
+                    std::string value = Utils::Subchar(jsonData.c_str(), tokens[tileIdx].start, tokens[tileIdx].end);
+                    bool collision = (value == "1");
+                    // Use tile ID 1 for walkable, 2 for obstacles (matching generation)
+                    int tileId = collision ? 2 : 1;
+                    layer.tiles.push_back({tileId, collision});
+                    tileIdx++;
+                } else {
+                    tileIdx++;
+                }
+            }
+        }
+        
+        mapData.push_back(layer);
+        
+        // Move to next layer object - skip all tokens that belong to current layer
+        currentIdx++;
+        while (currentIdx < tokenCount && tokens[currentIdx].end <= layerObjEnd) {
+            currentIdx++;
+        }
+    }
+    
+    // Set dimensions
+    width = parsedWidth;
+    height = parsedHeight;
+    
+    // Initialize tile dimensions (16x16 pixels per tile)
+    tileWidth = Globals::MAP_TILE_SIZE;
+    tileHeight = Globals::MAP_TILE_SIZE;
+    
+    isProcedural = true;
+    
+    // Verify we loaded the expected number of tiles
+    int expectedTiles = width * height;
+    if (!mapData.empty() && !mapData[0].tiles.empty() && mapData[0].tiles.size() != static_cast<size_t>(expectedTiles)) {
+        Log::Error("Area::DeserializeMapData - Tile count mismatch: expected %d, got %zu", expectedTiles, mapData[0].tiles.size());
+        mapData.clear();
+        return false;
+    }
+    
+    Log::Info("Area::DeserializeMapData - Loaded map: %dx%d, %zu layers", width, height, mapData.size());
+    return true;
 }
 void Area::Tick(Player* player)
 {

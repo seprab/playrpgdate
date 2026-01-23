@@ -27,7 +27,8 @@ bool SaveGame::Save(
     json << "  \"area\": {\n";
     json << "    \"id\": " << area->GetId() << ",\n";
     json << "    \"monstersSpawned\": " << area->GetMonstersSpawnedCount() << ",\n";
-    json << "    \"monsters\": " << SerializeMonsters(area) << "\n";
+    json << "    \"monsters\": " << SerializeMonsters(area) << ",\n";
+    json << "    \"mapData\": " << SerializeMapData(area) << "\n";
     json << "  }\n";
     json << "}\n";
 
@@ -94,6 +95,11 @@ std::string SaveGame::SerializeMonsters(const std::shared_ptr<Area>& area)
      json << "  ]";
 
     return json.str();
+}
+
+std::string SaveGame::SerializeMapData(const std::shared_ptr<Area>& area)
+{
+    return area->SerializeMapData();
 }
 
 bool SaveGame::Load(
@@ -163,6 +169,9 @@ bool SaveGame::Load(
         Log::Error("SaveGame::Load - Failed to deserialize monsters");
         return false;
     }
+
+    // Parse map data (for procedural maps)
+    DeserializeMapData(area, buffer.get(), bytesRead);
 
     Log::Info("Game loaded successfully from %s", filePath);
     return true;
@@ -473,6 +482,87 @@ bool SaveGame::DeserializeMonsters(const std::shared_ptr<Area>& area, const char
 
     Log::Info("SaveGame::DeserializeMonsters - Successfully processed %d monsters", monsterCount);
     return true;
+}
+
+bool SaveGame::DeserializeMapData(const std::shared_ptr<Area>& area, const char* json, size_t length)
+{
+    jsmn_parser parser;
+    jsmn_init(&parser);
+
+    // Count tokens
+    int tokenCount = jsmn_parse(&parser, json, length, nullptr, 0);
+    if (tokenCount < 0) return false;
+
+    std::vector<jsmntok_t> tokens(tokenCount);
+    jsmn_init(&parser);
+    tokenCount = jsmn_parse(&parser, json, length, tokens.data(), tokenCount);
+    if (tokenCount < 0) return false;
+
+    // Find "area" object
+    int areaObjIdx = -1;
+    for (int i = 0; i < tokenCount; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            int len = tokens[i].end - tokens[i].start;
+            if (strncmp(json + tokens[i].start, "area", len) == 0 && len == 4) {
+                if (i + 1 < tokenCount && tokens[i + 1].type == JSMN_OBJECT) {
+                    areaObjIdx = i + 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (areaObjIdx == -1) {
+        // No area object found, that's okay (might be old save format)
+        return false;
+    }
+
+    // Find "mapData" within area object
+    int areaObjEnd = tokens[areaObjIdx].end;
+    int mapDataIdx = -1;
+    
+    for (int i = areaObjIdx + 1; i < tokenCount && tokens[i].end < areaObjEnd; i++) {
+        if (tokens[i].type == JSMN_STRING) {
+            int len = tokens[i].end - tokens[i].start;
+            if (strncmp(json + tokens[i].start, "mapData", len) == 0 && len == 7) {
+                mapDataIdx = i + 1;
+                break;
+            }
+        }
+    }
+
+    if (mapDataIdx == -1 || mapDataIdx >= tokenCount) {
+        // No mapData found, that's okay (might not be a procedural map or old save)
+        return false;
+    }
+
+    // Check if it's null
+    if (tokens[mapDataIdx].type == JSMN_PRIMITIVE) {
+        int len = tokens[mapDataIdx].end - tokens[mapDataIdx].start;
+        if (strncmp(json + tokens[mapDataIdx].start, "null", len) == 0) {
+            return false; // No map data
+        }
+    }
+
+    // Get the mapData object bounds
+    int mapDataStart = tokens[mapDataIdx].start;
+    int mapDataEnd = tokens[mapDataIdx].end;
+    
+    // Create a null-terminated substring for the map data
+    int mapDataLen = mapDataEnd - mapDataStart;
+    std::unique_ptr<char[]> mapDataStr = std::make_unique<char[]>(mapDataLen + 1);
+    strncpy(mapDataStr.get(), json + mapDataStart, mapDataLen);
+    mapDataStr[mapDataLen] = '\0';
+
+    // Deserialize using Area's method
+    std::string mapDataJson(mapDataStr.get());
+    bool success = area->DeserializeMapData(mapDataJson);
+    
+    if (success) {
+        Log::Info("SaveGame::DeserializeMapData - Successfully loaded map data");
+    }
+    
+    return success;
 }
 
 bool SaveGame::GetAreaIdFromSave(const char* filePath, unsigned int& outAreaId)

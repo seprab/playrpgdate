@@ -16,6 +16,7 @@ class Door;
 class Monster;
 class Player;
 class EnemyProjectile;
+class UI;
 
 struct Tile {
     int id;
@@ -33,13 +34,10 @@ private:
     std::vector<Layer> mapData;
     std::shared_ptr<MapCollision> collider;
     std::unique_ptr<pdcpp::ImageTable> imageTable;
-    int tokens{};
     int width{};
     int height{};
     int tileWidth{};
     int tileHeight{};
-    std::string dataPath;
-    std::string tilesetPath;
     int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
     int monstersSpawnedCount = 0; // total count of monsters that have been spawned (alive or dead)
     std::shared_ptr<Dialogue> dialogue;
@@ -55,6 +53,7 @@ private:
     std::vector<pdcpp::Point<int>> spawnablePositions; // positions where monsters can spawn
     int pathfindingTickCounter = 0; // Counter to stagger pathfinding updates
     const int staggerAmount = Globals::MONSTER_MAX_LIVING_COUNT; // Number of groups to stagger
+    bool isProcedural = false; // Flag to indicate if map is procedurally generated
 
     // Player activity tracking for slowdown ability
     bool playerIsActive = true;
@@ -69,11 +68,8 @@ public:
     ~Area(); // Need explicit destructor for unique_ptr with forward declaration
     Area(const Area& other);
     Area(Area&& other) noexcept;
-    Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
+    Area(unsigned int _id, const char* _name, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
 
-    [[nodiscard]] int GetTokenCount() const {return tokens;}
-    [[nodiscard]] const char* GetDataPath() const {return dataPath.c_str();}
-    [[nodiscard]] const char* GetTilesetPath() const {return tilesetPath.c_str();}
     [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return livingMonsters;}
     [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetMonsterBank() const {return bankOfMonsters;}
     [[nodiscard]] int GetMonstersSpawnedCount() const {return monstersSpawnedCount;}
@@ -82,23 +78,24 @@ public:
     void ClearToSpawnMonsters() {toSpawnMonsters.clear();}
     void SetMonstersSpawnedCount(int count) {monstersSpawnedCount = count;}
 
-    void SetTokenCount(int value){tokens=value;}
-    void SetDataPath(const std::string& value){dataPath=value;}
-    void SetTilesetPath(const std::string& value){tilesetPath=value;}
     std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) override;
 
     void LoadLayers(std::string fileName, int limitOfTokens);
     void LoadImageTable(std::string fileName);
+    void GenerateProceduralMap(int width = 40, int height = 40, UI* ui = nullptr);
     void DrawTileFromLayer(int layer, int x, int y);
     void Render(int x, int y, int fovX, int fovY);
     bool CheckCollision(int x, int y) const;
     void Tick(Player* player);
     void SetUpPathfindingContainer();
-    void Load();
     void Unload();
     void SetupMonstersToSpawn();
+    void LoadWithUI(UI* ui); // Load with UI for progress reporting
+    void LoadFromSavedData(); // Load when map data was deserialized from save
     pdcpp::Point<int> FindSpawnablePosition(int attemptCount);
     void LoadSpawnablePositions();
+    std::string SerializeMapData() const;
+    bool DeserializeMapData(const std::string& jsonData);
 
     // Player activity tracking for enemy slowdown
     [[nodiscard]] bool GetPlayerActivityStatus() const { return playerIsActive; }

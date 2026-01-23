@@ -61,11 +61,17 @@ private:
     // Helper to build JSON string for monsters in area
     static std::string SerializeMonsters(const std::shared_ptr<Area>& area);
 
+    // Helper to build JSON string for map data (procedural maps)
+    static std::string SerializeMapData(const std::shared_ptr<Area>& area);
+
     // Helper to parse player data from JSON
     static bool DeserializePlayer(const std::shared_ptr<Player>& player, const char* json, size_t length);
 
     // Helper to parse monsters data from JSON
     static bool DeserializeMonsters(const std::shared_ptr<Area>& area, const char* json, size_t length);
+
+    // Helper to parse map data from JSON (procedural maps)
+    static bool DeserializeMapData(const std::shared_ptr<Area>& area, const char* json, size_t length);
 
     // JSON string escaping helper
     static std::string EscapeJSON(const std::string& str);

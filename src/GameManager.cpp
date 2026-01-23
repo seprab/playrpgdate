@@ -138,13 +138,35 @@ void GameManager::LoadNewGame()
 {
     activeArea = std::static_pointer_cast<Area>(entityManager->GetEntity(9002));
     activeArea->SetEntityManager(entityManager.get());
-    activeArea->Load();
+
+    // Show loading screen for procedural generation
+    ui->SwitchScreen(GameScreen::LOADING);
+    ui->UpdateLoadingProgress(0.0f);
+
+    // Load the area with UI for progress reporting
+    activeArea->LoadWithUI(ui.get());
+
+    // Map generation is complete, switch to game screen
+    ui->SwitchScreen(GameScreen::GAME);
 
     player = std::make_shared<Player>();
-    player->SetTiledPosition(pdcpp::Point<int>(23, 32));
+    // Set player to center of 40x40 map (was 23,32 for 47x47 map)
+    player->SetTiledPosition(pdcpp::Point<int>(20, 20));
     player->ResetStats(); // Initialize game stats
     entityManager->SetPlayer(player);
+    
+    // Initialize camera to player position (in pixel coordinates)
+    // Player position is in pixels, so we need to get it after setting tiled position
+    pdcpp::Point<int> playerPixelPos = player->GetPosition();
+    currentCameraOffset = playerPixelPos;
+    
+    // Reset draw offset to center camera on player
+    pd->graphics->setDrawOffset(0, 0);
+    
     isGameRunning = true;
+    
+    // Ensure UI is in GAME screen (not LOADING)
+    ui->SwitchScreen(GameScreen::GAME);
 }
 
 void GameManager::LoadSavedGame()
@@ -169,14 +191,13 @@ void GameManager::LoadSavedGame()
 
     // Setup the area
     activeArea->SetEntityManager(entityManager.get());
-    activeArea->Load();
-
-    // Create player
+    
+    // Create player first (needed for save loading)
     player = std::make_shared<Player>();
     player->ResetStats(); // Initialize default stats (will be overwritten by save data)
     entityManager->SetPlayer(player);
 
-    // Load save data into player and area
+    // Load save data into player and area (this will also deserialize map data if available)
     if (!SaveGame::Load(player, activeArea, Globals::GAME_SAVE_PATH))
     {
         Log::Error("GameManager::LoadSavedGame - Failed to load save game data");
@@ -188,9 +209,22 @@ void GameManager::LoadSavedGame()
         ui->SwitchScreen(GameScreen::MAIN_MENU); // Return to main menu on failure
         return;
     }
+    activeArea->LoadFromSavedData();
+    ui->SwitchScreen(GameScreen::GAME);
+
+    // Initialize camera to player position (in pixel coordinates)
+    pdcpp::Point<int> playerPixelPos = player->GetPosition();
+    currentCameraOffset = playerPixelPos;
+    
+    // Reset draw offset to center camera on player
+    pd->graphics->setDrawOffset(0, 0);
 
     // Only set game as running if everything succeeded
     isGameRunning = true;
+    
+    // Ensure UI is in GAME screen
+    ui->SwitchScreen(GameScreen::GAME);
+    
     Log::Info("GameManager::LoadSavedGame - Game loaded successfully from area %u", areaId);
 }
 
