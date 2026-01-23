@@ -8,7 +8,7 @@
 
 #include "pdcpp/graphics/Point.h"
 #include <memory>
-#include "Area.h"
+
 class Area;
 class Player;
 

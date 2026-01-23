@@ -8,11 +8,14 @@
 #include "MapCollision.h"
 #include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
+#include <memory>
+#include <vector>
 
 class EntityManager;
 class Door;
 class Monster;
 class Player;
+class EnemyProjectile;
 
 struct Tile {
     int id;
@@ -38,12 +41,14 @@ private:
     std::string dataPath;
     std::string tilesetPath;
     int ticksSinceLastSpawn = 0; // ticks since the last monster spawn
+    int monstersSpawnedCount = 0; // total count of monsters that have been spawned (alive or dead)
     std::shared_ptr<Dialogue> dialogue;
     std::vector<std::shared_ptr<Door>> doors;
     std::vector<std::shared_ptr<Monster>> bankOfMonsters; // the type of monsters to spawn in the area
     std::vector<std::shared_ptr<Monster>> livingMonsters; // the monsters that are currently alive in the area
     std::vector<std::shared_ptr<Monster>> toSpawnMonsters; // the monsters that haven't been spawned yet
     std::shared_ptr<AStarContainer> pathfindingContainer;
+    std::vector<std::unique_ptr<EnemyProjectile>> enemyProjectiles; // enemy projectiles in the area
     void SpawnCreature();
     [[nodiscard]] Map_Layer ToMapLayer() const;
     pdcpp::Random random = {};
@@ -60,7 +65,8 @@ private:
     const unsigned int SLOWDOWN_COOLDOWN = 10000; // 10 seconds in milliseconds
 
 public:
-    Area() = default;
+    Area();
+    ~Area(); // Need explicit destructor for unique_ptr with forward declaration
     Area(const Area& other);
     Area(Area&& other) noexcept;
     Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters);
@@ -69,6 +75,12 @@ public:
     [[nodiscard]] const char* GetDataPath() const {return dataPath.c_str();}
     [[nodiscard]] const char* GetTilesetPath() const {return tilesetPath.c_str();}
     [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetCreatures() const {return livingMonsters;}
+    [[nodiscard]] std::vector<std::shared_ptr<Monster>> GetMonsterBank() const {return bankOfMonsters;}
+    [[nodiscard]] int GetMonstersSpawnedCount() const {return monstersSpawnedCount;}
+    void AddLivingMonster(const std::shared_ptr<Monster>& monster) {livingMonsters.push_back(monster);}
+    void ClearLivingMonsters() {livingMonsters.clear();}
+    void ClearToSpawnMonsters() {toSpawnMonsters.clear();}
+    void SetMonstersSpawnedCount(int count) {monstersSpawnedCount = count;}
 
     void SetTokenCount(int value){tokens=value;}
     void SetDataPath(const std::string& value){dataPath=value;}
@@ -103,6 +115,12 @@ public:
     [[nodiscard]] MapCollision* GetCollider() const {return collider.get();}
 
     void SetEntityManager(EntityManager* manager) { entityManager = manager; }
+    
+    // Enemy projectile management
+    void CreateEnemyProjectile(pdcpp::Point<int> position, float angle, float speed, unsigned int size, float damage);
+    void AddEnemyProjectile(std::unique_ptr<EnemyProjectile> projectile);
+    void UpdateEnemyProjectiles(Player* player);
+    void DrawEnemyProjectiles() const;
 };
 
 #endif

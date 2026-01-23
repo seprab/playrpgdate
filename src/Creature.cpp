@@ -5,6 +5,10 @@
 #include "Creature.h"
 #include "Utils.h"
 #include "Log.h"
+#include "Weapon.h"
+#include "Armor.h"
+#include "pdcpp/core/Random.h"
+#include <algorithm>
 
 Creature::Creature(unsigned int _id, const std::string& _name, const std::string& image, float _maxHp, int _strength, int _agility, int _constitution,
                    float _evasion, unsigned int _xp, int _weapon, int _armor)
@@ -19,14 +23,18 @@ Creature::Creature(unsigned int _id, const std::string& _name, const std::string
 }
 
 Creature::Creature(const Creature &other)
-: Entity(other), strength(other.GetStrength()), agility(other.GetAgility())
+: Entity(other), strength(other.GetStrength()), agility(other.GetAgility()),
+  constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
+  weapon(other.weapon), armor(other.armor)
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
     SetMovementScale(3); // Default movement scale for creatures, can be adjusted later
 }
 Creature::Creature(Creature &&other) noexcept
-: Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility())
+: Entity(std::move(other)), strength(other.GetStrength()), agility(other.GetAgility()),
+  constitution(other.GetConstitution()), evasion(other.GetEvasion()), xp(other.GetXP()),
+  weapon(other.weapon), armor(other.armor)
 {
     SetHP(other.GetHP());
     SetMaxHP(other.GetMaxHP());
@@ -81,6 +89,24 @@ Armor *Creature::GetEquippedArmor() {
     return equippedArmor;
 }
 
+int Creature::GetWeaponDamage() const
+{
+    if (!equippedWeapon)
+    {
+        return 0;
+    }
+    return equippedWeapon->GetDamage();
+}
+
+int Creature::GetArmorDefense() const
+{
+    if (!equippedArmor)
+    {
+        return 0;
+    }
+    return equippedArmor->GetDefense();
+}
+
 void Creature::EquipWeapon(Weapon *_weapon) {
     equippedWeapon = _weapon;
 }
@@ -90,8 +116,25 @@ void Creature::EquipArmor(Armor *_armor) {
 }
 
 int Creature::Attack(Creature *target) {
-    target->Damage(static_cast<float>(GetStrength()));
-    return GetStrength();
+    if (!target)
+    {
+        return 0;
+    }
+
+    pdcpp::Random random {};
+    float dodgeChance = std::min(0.5f, (target->GetEvasion() + target->GetAgility()) * 0.001f);
+    int roll = static_cast<int>(random.next() % 1000);
+    if (roll < static_cast<int>(dodgeChance * 1000.0f))
+    {
+        return 0;
+    }
+
+    int baseDamage = GetStrength() + GetWeaponDamage();
+    int defense = target->GetArmorDefense() + target->GetConstitution();
+    int finalDamage = std::max(1, baseDamage - (defense / 2));
+
+    target->Damage(static_cast<float>(finalDamage));
+    return finalDamage;
 }
 
 int Creature::TraverseDoor(Door *door) {

@@ -12,6 +12,7 @@ class Beam : public Magic{
 public:
     Beam() = delete;
     explicit Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> player);
+    Beam(pdcpp::Point<int> Position, std::weak_ptr<Player> player, unsigned int size, float length, unsigned int explosionThreshold, float damage);
     bool operator==(const Beam& other) const {return this == &other;}
 
     void Draw() const override;
@@ -22,6 +23,8 @@ private:
     bool exploding = false;
     unsigned int size;
     unsigned int explosionThreshold;
+    float beamLength = 150.0f;
+    float damagePerHit = 0.4f;
     pdcpp::Point<int> startPosition;
     pdcpp::Point<int> endPosition;
 };

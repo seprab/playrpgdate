@@ -12,6 +12,7 @@ class Projectile : public Magic{
 public:
     Projectile() = delete;
     explicit Projectile(pdcpp::Point<int> Position, std::weak_ptr<Player> player);
+    Projectile(pdcpp::Point<int> Position, std::weak_ptr<Player> player, float speed, unsigned int size, unsigned int explosionThreshold, float damage);
     bool operator==(const Projectile& other) const {return this == &other;}
 
     void Draw() const override;
@@ -26,6 +27,7 @@ private:
     unsigned int explosionThreshold;
     float launchAngle = 0.0f; // Angle in radians
     const int sizeIncrement = 3; // Increment size when exploding
+    float damagePerHit = 0.5f;
 };
 
 

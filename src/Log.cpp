@@ -46,6 +46,7 @@ template void Log::Info<>(const char*, char const*);
 template void Log::Info<>(const char*, char const*, unsigned int);
 template void Log::Info<>(const char*, unsigned int);
 template void Log::Info<>(const char*, unsigned int, int);
+template void Log::Info<>(const char*, unsigned int, unsigned int);
 template void Log::Info<>(const char*, unsigned int, char*);
 template void Log::Info<>(const char*, char const*, char const*);
 template void Log::Info<>(const char*, unsigned int, char*, char*);
@@ -56,8 +57,10 @@ template void Log::Info<>(char const*, char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned long);
 template void Log::Info<>(char const*, unsigned int, char const*);
 template void Log::Info<>(char const*, unsigned int, char const*, char const*);
+template void Log::Info<>(char const*, unsigned int, float, int, int);
 template void Log::Info<>(char const*, void*);
 template void Log::Info<>(char const*, PDMenuItem*);
+template void Log::Info<>(char const*, unsigned int, char const*, unsigned int);
 
 template void Log::Error<>(const char*);
 template void Log::Error<>(const char*, int);

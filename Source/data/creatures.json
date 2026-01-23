@@ -7,10 +7,8 @@
 		"str": 5,
 		"agi": 3,
 		"con": 2,
-		"evasion": 0.015625,
 		"xp": 1,
-		"weapon": 501,
-		"armor": 400
+		"movement": "noclip"
 	},
 	{
 		"id": 102,
@@ -20,10 +18,8 @@
 		"str": 6,
 		"agi": 4,
 		"con": 3,
-		"evasion": 0.03125,
 		"xp": 2,
-		"weapon": 502,
-		"armor": 401
+		"movement": "astar"
 	},
 	{
 		"id": 103,
@@ -33,10 +29,8 @@
 		"str": 7,
 		"agi": 5,
 		"con": 4,
-		"evasion": 0.0625,
 		"xp": 3,
-		"weapon": 503,
-		"armor": 402
+		"movement": "stationary"
 	},
 	{
 		"id": 104,
@@ -46,10 +40,8 @@
 		"str": 8,
 		"agi": 6,
 		"con": 5,
-		"evasion": 0.125,
 		"xp": 4,
-		"weapon": 504,
-		"armor": 403
+		"movement": "ranged"
 	},
 	{
 		"id": 105,
@@ -59,10 +51,8 @@
 		"str": 9,
 		"agi": 7,
 		"con": 6,
-		"evasion": 0.25,
 		"xp": 5,
-		"weapon": 505,
-		"armor": 404
+		"movement": "astar"
 	},
 	{
 		"id": 106,
@@ -72,10 +62,8 @@
 		"str": 10,
 		"agi": 8,
 		"con": 7,
-		"evasion": 0.5,
 		"xp": 6,
-		"weapon": 506,
-		"armor": 405
+		"movement": "astar"
 	},
 	{
 		"id": 107,
@@ -85,10 +73,8 @@
 		"str": 11,
 		"agi": 9,
 		"con": 8,
-		"evasion": 1,
 		"xp": 7,
-		"weapon": 507,
-		"armor": 406
+		"movement": "astar"
 	},
 	{
 		"id": 108,
@@ -98,10 +84,8 @@
 		"str": 12,
 		"agi": 10,
 		"con": 9,
-		"evasion": 2,
 		"xp": 8,
-		"weapon": 508,
-		"armor": 407
+		"movement": "astar"
 	},
 	{
 		"id": 109,
@@ -111,10 +95,8 @@
 		"str": 13,
 		"agi": 11,
 		"con": 10,
-		"evasion": 4,
 		"xp": 9,
-		"weapon": 509,
-		"armor": 408
+		"movement": "astar"
 	},
 	{
 		"id": 110,
@@ -124,10 +106,8 @@
 		"str": 14,
 		"agi": 12,
 		"con": 11,
-		"evasion": 8,
 		"xp": 10,
-		"weapon": 510,
-		"armor": 409
+		"movement": "ranged"
 	},
 	{
 		"id": 111,
@@ -137,10 +117,8 @@
 		"str": 15,
 		"agi": 13,
 		"con": 12,
-		"evasion": 16,
 		"xp": 11,
-		"weapon": 511,
-		"armor": 410
+		"movement": "stationary"
 	},
 	{
 		"id": 112,
@@ -150,10 +128,8 @@
 		"str": 16,
 		"agi": 14,
 		"con": 13,
-		"evasion": 32,
 		"xp": 12,
-		"weapon": 512,
-		"armor": 411
+		"movement": "astar"
 	},
 	{
 		"id": 201,
@@ -163,10 +139,8 @@
 		"str": 17,
 		"agi": 15,
 		"con": 14,
-		"evasion": 64,
 		"xp": 13,
-		"weapon": 513,
-		"armor": 412
+		"movement": "ranged"
 	},
 	{
 		"id": 202,
@@ -176,10 +150,8 @@
 		"str": 18,
 		"agi": 16,
 		"con": 15,
-		"evasion": 128,
 		"xp": 14,
-		"weapon": 514,
-		"armor": 413
+		"movement": "astar"
 	},
 	{
 		"id": 203,
@@ -189,10 +161,8 @@
 		"str": 19,
 		"agi": 17,
 		"con": 16,
-		"evasion": 256,
 		"xp": 15,
-		"weapon": 515,
-		"armor": 414
+		"movement": "astar"
 	},
 	{
 		"id": 204,
@@ -202,10 +172,8 @@
 		"str": 20,
 		"agi": 18,
 		"con": 17,
-		"evasion": 512,
 		"xp": 16,
-		"weapon": 516,
-		"armor": 415
+		"movement": "astar"
 	},
 	{
 		"id": 205,
@@ -215,10 +183,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 206,
@@ -228,10 +194,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 207,
@@ -241,10 +205,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 208,
@@ -254,10 +216,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 209,
@@ -267,10 +227,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 210,
@@ -280,10 +238,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 211,
@@ -293,10 +249,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 212,
@@ -306,10 +260,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 301,
@@ -319,10 +271,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 302,
@@ -332,10 +282,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 303,
@@ -345,10 +293,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 304,
@@ -358,10 +304,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 305,
@@ -371,10 +315,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 306,
@@ -384,10 +326,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 307,
@@ -397,10 +337,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 308,
@@ -410,10 +348,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 309,
@@ -423,10 +359,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 310,
@@ -436,10 +370,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 311,
@@ -449,10 +381,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 312,
@@ -462,10 +392,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 401,
@@ -475,10 +403,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 402,
@@ -488,10 +414,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 403,
@@ -501,10 +425,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 404,
@@ -514,10 +436,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 405,
@@ -527,10 +447,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 406,
@@ -540,10 +458,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 407,
@@ -553,10 +469,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 408,
@@ -566,10 +480,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 409,
@@ -579,10 +491,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 410,
@@ -592,10 +502,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 411,
@@ -605,10 +513,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 412,
@@ -618,10 +524,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 501,
@@ -631,10 +535,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 502,
@@ -644,10 +546,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 503,
@@ -657,10 +557,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 504,
@@ -670,10 +568,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 505,
@@ -683,10 +579,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 506,
@@ -696,10 +590,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 507,
@@ -709,10 +601,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 508,
@@ -722,10 +612,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 509,
@@ -735,10 +623,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 510,
@@ -748,10 +634,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 511,
@@ -761,10 +645,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 512,
@@ -774,10 +656,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 601,
@@ -787,10 +667,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 602,
@@ -800,10 +678,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 603,
@@ -813,10 +689,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 604,
@@ -826,10 +700,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 605,
@@ -839,10 +711,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 606,
@@ -852,10 +722,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 607,
@@ -865,10 +733,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 608,
@@ -878,10 +744,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 609,
@@ -891,10 +755,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 610,
@@ -904,10 +766,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 611,
@@ -917,10 +777,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 612,
@@ -930,10 +788,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 701,
@@ -943,10 +799,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 702,
@@ -956,10 +810,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 703,
@@ -969,10 +821,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 704,
@@ -982,10 +832,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 705,
@@ -995,10 +843,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 706,
@@ -1008,10 +854,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 707,
@@ -1021,10 +865,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 708,
@@ -1034,10 +876,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 709,
@@ -1047,10 +887,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 710,
@@ -1060,10 +898,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 711,
@@ -1073,10 +909,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 712,
@@ -1086,10 +920,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 801,
@@ -1099,10 +931,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 802,
@@ -1112,10 +942,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 803,
@@ -1125,10 +953,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 804,
@@ -1138,10 +964,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 805,
@@ -1151,10 +975,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 806,
@@ -1164,10 +986,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 807,
@@ -1177,10 +997,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 808,
@@ -1190,10 +1008,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 809,
@@ -1203,10 +1019,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 810,
@@ -1216,10 +1030,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 811,
@@ -1229,10 +1041,8 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	},
 	{
 		"id": 812,
@@ -1242,9 +1052,7 @@
 		"str": 21,
 		"agi": 19,
 		"con": 18,
-		"evasion": 1024,
 		"xp": 17,
-		"weapon": 517,
-		"armor": 416
+		"movement": "astar"
 	}
 ]

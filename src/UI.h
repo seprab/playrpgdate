@@ -8,6 +8,7 @@
 #include <functional>
 #include <utility>
 #include <memory>
+#include <string>
 #include "pd_api.h"
 #include "pdcpp/graphics/Point.h"
 #include "pdcpp/graphics/Font.h"
@@ -32,8 +33,8 @@ private:
     GameScreen currentScreen;
     float loadingProgress;
     int selectedMenuItem;
-    const char* menuItems[3] = {"New Game", "Load Game", "Close"};
-    int menuItemCount = 3;
+    const char* menuItems[2] = {"New Game", "Load Game"};
+    int menuItemCount = 2;
     pdcpp::Font font;  // Changed from LCDFont* to pdcpp::Font
     pdcpp::Point<int> offset = {0,0};
     std::unique_ptr<CircularProgress> magicCooldown;
@@ -42,6 +43,11 @@ private:
     PDMenuItem* statsMenuItem = nullptr;
 
     const float inputCooldown{UIConstants::Input::COOLDOWN};
+
+    // Level-up popup state
+    mutable bool showLevelUpPopup = false;
+    mutable int levelUpSelectedOption = 0;
+    mutable unsigned int pendingLevelUps = 0;
     LCDBitmap* backgroundLoader;
     LCDBitmap* gameOverlay;
     LCDBitmap* pauseOverlay;
@@ -50,7 +56,8 @@ private:
     std::function<void()> loadGameCallback;
     std::function<void()> gameOverCallback;
     std::function<void()> saveGameCallback;
-    std::vector<LCDBitmap*> magicIcons;
+    mutable std::vector<LCDBitmap*> magicIcons;
+    mutable std::vector<std::string> magicIconPaths;
     LCDBitmap * playerFace;
 
 public:
@@ -69,20 +76,24 @@ public:
     void SetOnGameOverSelected(std::function<void()> callback){gameOverCallback = std::move(callback);}
     void SetOnSaveGameSelected(std::function<void()> callback){saveGameCallback = std::move(callback);}
 
+    // Level-up popup methods
+    void ShowLevelUpPopup() { showLevelUpPopup = true; levelUpSelectedOption = 0; pendingLevelUps++; }
+    [[nodiscard]] bool IsLevelUpPopupShowing() const { return showLevelUpPopup; }
+
 private:
     int* maxScorePtr = nullptr;
     void DrawLoadingScreen() const;
     void DrawMainMenu() const;
     void DrawGameScreen() const;
     void DrawGameOverScreen() const;
-    void DrawDebugInfo() const;
+    void DrawLevelUpPopup() const;
+    void RefreshSkillIcons(const std::shared_ptr<Player>& player) const;
 
     // Helper methods for drawing (kept for compatibility, but prefer Font methods)
     void SetTextDrawMode(LCDColor color) const;
 
     // Static callback functions for menu items
     static void SaveGameCallback(void* userdata);
-    static void HomeMenuCallback(void* userdata);
 };
 
 

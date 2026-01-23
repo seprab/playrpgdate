@@ -36,13 +36,8 @@ UI::UI(const char *fontPath, EntityManager* manager)
 
     statsMenuItem = nullptr;
 
-    magicIcons = {
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_beam", &err),
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_projectile", &err),
-            pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_magic_orbiting_projectile", &err)
-    };
-    if (magicIcons[0] == nullptr || magicIcons[1] == nullptr || magicIcons[2] == nullptr)
-        Log::Error("Error loading magic icons: %s", err);
+    magicIcons.clear();
+    magicIconPaths.clear();
 
     playerFace = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap("images/ui/icon_player_face", &err);
     if (playerFace == nullptr)
@@ -52,6 +47,11 @@ UI::UI(const char *fontPath, EntityManager* manager)
     currentScreen = GameScreen::LOADING;
     loadingProgress = 0.0f;
     selectedMenuItem = 0;
+
+    // Initialize level-up popup state
+    showLevelUpPopup = false;
+    levelUpSelectedOption = 0;
+    pendingLevelUps = 0;
 }
 
 void UI::Update()
@@ -80,39 +80,130 @@ void UI::HandleInputs()
             }
             break;
         case GameScreen::MAIN_MENU:
-            if (current & kButtonUp)
             {
-                selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
-            }
-            if (current & kButtonDown)
-            {
-                selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
-            }
-            if (current & kButtonA)
-            {
-                switch (selectedMenuItem)
+                // Handle crank navigation
+                float crankChange = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
+                if (crankChange > UIConstants::Input::CRANK_THRESHOLD)
                 {
-                    case 0: // New Game
-                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
-                        SwitchScreen(GameScreen::GAME);
-                        if (newGameCallback) newGameCallback();
-                        break;
-                    case 1: // Load Game
-                        pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
-                        SwitchScreen(GameScreen::GAME);
-                        if (loadGameCallback) loadGameCallback();
-                        break;
-                    case 2: // Close
-                            exit(0);
-                    default: break;
+                    // Clockwise rotation = move down
+                    selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
                 }
-                pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                else if (crankChange < -UIConstants::Input::CRANK_THRESHOLD)
+                {
+                    // Counter-clockwise rotation = move up
+                    selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                
+                // Handle button navigation (existing code)
+                if (current & kButtonUp)
+                {
+                    selectedMenuItem = (selectedMenuItem - 1 + menuItemCount) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                if (current & kButtonDown)
+                {
+                    selectedMenuItem = (selectedMenuItem + 1) % menuItemCount;
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                }
+                if (current & kButtonA)
+                {
+                    pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    switch (selectedMenuItem)
+                    {
+                        case 0: // New Game
+                            pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
+                            SwitchScreen(GameScreen::GAME);
+                            if (newGameCallback) newGameCallback();
+                            break;
+                        case 1: // Load Game
+                            pdcpp::GlobalPlaydateAPI::get()->graphics->clear(kColorBlack);
+                            SwitchScreen(GameScreen::GAME);
+                            if (loadGameCallback) loadGameCallback();
+                            break;
+                        default: break;
+                    }
+                }
+                break;
             }
-            break;
         case GameScreen::GAME:
             {
+                // Handle level-up popup input if it's showing
+                if (showLevelUpPopup)
+                {
+                    std::shared_ptr<Player> player = entityManager->GetPlayer();
+                    if (!player)
+                    {
+                        break;
+                    }
+
+                    // Handle crank navigation for level-up popup
+                    float crankChange = pdcpp::GlobalPlaydateAPI::get()->system->getCrankChange();
+                    if (crankChange > UIConstants::Input::CRANK_THRESHOLD)
+                    {
+                        // Clockwise rotation = move down
+                        levelUpSelectedOption = (levelUpSelectedOption + 1) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (crankChange < -UIConstants::Input::CRANK_THRESHOLD)
+                    {
+                        // Counter-clockwise rotation = move up
+                        levelUpSelectedOption = (levelUpSelectedOption - 1 + 4) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+
+                    // Handle button navigation (existing code)
+                    if (current & kButtonUp)
+                    {
+                        levelUpSelectedOption = (levelUpSelectedOption - 1 + 4) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (current & kButtonDown)
+                    {
+                        levelUpSelectedOption = (levelUpSelectedOption + 1) % 4;
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    else if (current & kButtonA)
+                    {
+                        // Spend the skill point based on selection
+                        switch (levelUpSelectedOption)
+                        {
+                            case 0:
+                                player->SpendSkillPoint(Player::StatType::Strength);
+                                break;
+                            case 1:
+                                player->SpendSkillPoint(Player::StatType::Agility);
+                                break;
+                            case 2:
+                                player->SpendSkillPoint(Player::StatType::Constitution);
+                                break;
+                            case 3:
+                                player->SpendSkillPoint(Player::StatType::MaxHp);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // Check if there are more skill points to spend
+                        if (player->GetSkillPoints() > 0)
+                        {
+                            // Reset selection for next point
+                            levelUpSelectedOption = 0;
+                        }
+                        else
+                        {
+                            // Close popup when all skill points are spent
+                            showLevelUpPopup = false;
+                            pendingLevelUps = 0;
+                        }
+
+                        pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
+                    }
+                    break; // Don't process game input while popup is showing
+                }
+
+                // Normal game input handling
                 std::shared_ptr<Player> player = entityManager->GetPlayer();
                 if (!player->IsAlive())
                 {
@@ -153,13 +244,15 @@ void UI::Draw() const
             break;
         case GameScreen::GAME:
             DrawGameScreen();
+            // Draw level-up popup on top of the game screen if it's showing
+            if (showLevelUpPopup)
+            {
+                DrawLevelUpPopup();
+            }
             break;
         default:
             break;
     }
-
-    // Always draw debug info
-    DrawDebugInfo();
 }
 
 void UI::DrawLoadingScreen() const
@@ -170,21 +263,25 @@ void UI::DrawLoadingScreen() const
     // Draw background image
     pd->graphics->drawBitmap(backgroundLoader, 0, 0, kBitmapUnflipped);
 
-    // Draw black banner for text
-    pdcpp::Rectangle<int> banner(
-        0, Loading::BANNER_Y,
-        SCREEN_WIDTH, Loading::BANNER_HEIGHT
+    // Draw compact background panel for loading area with rounded corners
+    const int panelWidth = 320;
+    const int panelHeight = 55;
+    const int panelX = (SCREEN_WIDTH - panelWidth) / 2;
+    const int panelY = Loading::BANNER_Y + 5;
+    pdcpp::Rectangle<int> loadingPanel(
+        panelX, panelY,
+        panelWidth, panelHeight
     );
-    pdcpp::Graphics::fillRectangle(banner, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRoundedRectangle(loadingPanel, 8, pdcpp::Colors::black);
 
-    // Draw loading bar frame
+    // Draw loading bar frame (square corners - too small for rounded corners to work properly)
     pdcpp::Rectangle<int> progressBarFrame(
         Loading::PROGRESS_BAR_X, Loading::PROGRESS_BAR_Y,
         Loading::PROGRESS_BAR_WIDTH, Loading::PROGRESS_BAR_HEIGHT
     );
     pdcpp::Graphics::drawRectangle(progressBarFrame, pdcpp::Colors::white);
 
-    // Draw loading progress fill (with padding)
+    // Draw loading progress fill (with padding, square corners)
     int progressWidth = static_cast<int>(
         loadingProgress * (Loading::PROGRESS_BAR_WIDTH - 2 * Loading::PROGRESS_BAR_PADDING)
     );
@@ -384,30 +481,34 @@ void UI::DrawGameScreen() const
     magicCooldown->Draw(player->GetCooldownPercentage());
 
     // Draw magic icons (previous, current, next)
-    const unsigned int activeMagic = player->GetSelectedMagic();
+    RefreshSkillIcons(player);
     const int iconCount = static_cast<int>(magicIcons.size());
-    const int prevIndex = (activeMagic == 0) ? iconCount - 1 : activeMagic - 1;
-    const int currIndex = static_cast<int>(activeMagic);
-    const int nextIndex = (activeMagic + 1) % iconCount;
+    if (iconCount > 0)
+    {
+        unsigned int activeMagic = player->GetSelectedMagic() % static_cast<unsigned int>(iconCount);
+        const int prevIndex = (activeMagic == 0) ? iconCount - 1 : static_cast<int>(activeMagic - 1);
+        const int currIndex = static_cast<int>(activeMagic);
+        const int nextIndex = (activeMagic + 1) % iconCount;
 
-    pd->graphics->drawBitmap(
-        magicIcons[prevIndex],
-        offset.x + GameHUD::MAGIC_ICON_LEFT_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_LEFT_Y_OFFSET,
-        kBitmapUnflipped
-    );
-    pd->graphics->drawBitmap(
-        magicIcons[currIndex],
-        offset.x + GameHUD::MAGIC_ICON_CENTER_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_CENTER_Y_OFFSET,
-        kBitmapUnflipped
-    );
-    pd->graphics->drawBitmap(
-        magicIcons[nextIndex],
-        offset.x + GameHUD::MAGIC_ICON_RIGHT_X_OFFSET,
-        offset.y + GameHUD::MAGIC_ICON_RIGHT_Y_OFFSET,
-        kBitmapUnflipped
-    );
+        pd->graphics->drawBitmap(
+            magicIcons[prevIndex],
+            offset.x + GameHUD::MAGIC_ICON_LEFT_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_LEFT_Y_OFFSET,
+            kBitmapUnflipped
+        );
+        pd->graphics->drawBitmap(
+            magicIcons[currIndex],
+            offset.x + GameHUD::MAGIC_ICON_CENTER_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_CENTER_Y_OFFSET,
+            kBitmapUnflipped
+        );
+        pd->graphics->drawBitmap(
+            magicIcons[nextIndex],
+            offset.x + GameHUD::MAGIC_ICON_RIGHT_X_OFFSET,
+            offset.y + GameHUD::MAGIC_ICON_RIGHT_Y_OFFSET,
+            kBitmapUnflipped
+        );
+    }
 
     // Draw player face icon
     pd->graphics->drawBitmap(
@@ -416,6 +517,58 @@ void UI::DrawGameScreen() const
         offset.y + GameHUD::PLAYER_FACE_Y_OFFSET,
         kBitmapUnflipped
     );
+}
+
+void UI::RefreshSkillIcons(const std::shared_ptr<Player>& player) const
+{
+    if (!player)
+    {
+        return;
+    }
+
+    const size_t skillCount = player->GetSkillCount();
+    if (skillCount == 0)
+    {
+        magicIcons.clear();
+        magicIconPaths.clear();
+        return;
+    }
+
+    bool needsRefresh = magicIconPaths.size() != skillCount;
+    if (!needsRefresh)
+    {
+        for (size_t i = 0; i < skillCount; ++i)
+        {
+            if (magicIconPaths[i] != player->GetSkillIconPath(static_cast<unsigned int>(i)))
+            {
+                needsRefresh = true;
+                break;
+            }
+        }
+    }
+
+    if (!needsRefresh)
+    {
+        return;
+    }
+
+    magicIcons.clear();
+    magicIconPaths.clear();
+    magicIcons.reserve(skillCount);
+    magicIconPaths.reserve(skillCount);
+
+    const char* err = nullptr;
+    for (size_t i = 0; i < skillCount; ++i)
+    {
+        const std::string& path = player->GetSkillIconPath(static_cast<unsigned int>(i));
+        LCDBitmap* icon = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path.c_str(), &err);
+        if (icon == nullptr)
+        {
+            Log::Error("Error loading skill icon %s: %s", path.c_str(), err);
+        }
+        magicIcons.push_back(icon);
+        magicIconPaths.push_back(path);
+    }
 }
 
 void UI::DrawGameOverScreen() const
@@ -431,6 +584,7 @@ void UI::DrawGameOverScreen() const
     );
     pdcpp::Graphics::fillRoundedRectangle(panelRectA, 8, pdcpp::Colors::transparent50GrayB);
 
+    // Draw game over black panel
     pdcpp::Rectangle<int> panelRectB(
         offset.x + GameOver::PANELB_OFFSET_X,
         offset.y + GameOver::PANELB_OFFSET_Y,
@@ -471,6 +625,14 @@ void UI::SwitchScreen(GameScreen newScreen)
 {
     pdcpp::GlobalPlaydateAPI::get()->system->removeAllMenuItems();
     currentScreen = newScreen;
+
+    // Hide level-up popup when switching screens
+    if (newScreen != GameScreen::GAME)
+    {
+        showLevelUpPopup = false;
+        levelUpSelectedOption = 0;
+        pendingLevelUps = 0;
+    }
 }
 
 void UI::UpdateLoadingProgress(float progress)
@@ -478,54 +640,6 @@ void UI::UpdateLoadingProgress(float progress)
     loadingProgress = progress;
     if (loadingProgress > 1.0f) loadingProgress = 1.0f;
     if (loadingProgress < 0.0f) loadingProgress = 0.0f;
-}
-
-void UI::DrawDebugInfo() const
-{
-    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
-
-    // Reset draw offset to (0,0) for UI drawing
-    // GameManager will reset it again next frame, so no need to restore
-    //pd->graphics->setDrawOffset(0, 0); // when uncommented this, I no longer see automatic projectiles from player
-
-    // Get battery status
-    float percentage = pd->system->getBatteryPercentage();
-    float voltage = pd->system->getBatteryVoltage();
-
-    // Format battery info
-    char batteryText[32];
-    snprintf(batteryText, sizeof(batteryText), "Batt: %.0f%% %.2fV", percentage, voltage);
-
-    // Load smaller font for debug info
-    const char* err;
-    LCDFont* smallFont = pd->graphics->loadFont("/System/Fonts/Asheville-Sans-14-Bold.pft", &err);
-    if (smallFont) {
-        pd->graphics->setFont(smallFont);
-    }
-
-    // Measure text to create background panel
-    int textWidth = pd->graphics->getTextWidth(smallFont, batteryText, strlen(batteryText), kASCIIEncoding, 0);
-    int textHeight = pd->graphics->getFontHeight(smallFont);
-
-    // Draw at bottom-left corner
-    int screenHeight = pd->display->getHeight();
-    int padding = 2;
-    int textX = padding;
-    int textY = screenHeight - textHeight - padding;
-
-    // Draw black background panel
-    pdcpp::Rectangle<int> panel(
-        textX - padding,
-        textY - padding,
-        textWidth + padding * 2,
-        textHeight + padding * 2
-    );
-    pdcpp::Graphics::fillRectangle(panel, pdcpp::Colors::black);
-
-    // Draw white text on black background
-    SetTextDrawMode(UIConstants::Theme::TEXT_COLOR);
-    pd->graphics->drawText(batteryText, strlen(batteryText), kASCIIEncoding, textX, textY);
-    pd->graphics->setDrawMode(kDrawModeCopy);
 }
 
 void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
@@ -555,9 +669,8 @@ void UI::UpdateStatsMenuItem(const std::shared_ptr<Player>& player)
     static char time[32];
     snprintf(hp, sizeof(hp), "HP: %.0f", player->GetHP());
     snprintf(kills, sizeof(kills), "Kills: %u", player->GetMonstersKilled());
-    snprintf(time, sizeof(time), "Time: %.0fs", pd->system->getElapsedTime());
+    snprintf(time, sizeof(time), "Time: %.0us", player->GetSurvivalTimeSeconds());
     const char* stats_options[] = {hp, kills, time};
-
     statsMenuItem = pd->system->addOptionsMenuItem(
         "Stats",
         stats_options, 3,
@@ -577,6 +690,116 @@ void UI::SaveGameCallback(void* userdata)
         ui->SwitchScreen(GameScreen::MAIN_MENU);
         pdcpp::GlobalPlaydateAPI::get()->system->resetElapsedTime();
     }
+}
+
+void UI::DrawLevelUpPopup() const
+{
+    using namespace UIConstants;
+    PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
+
+    std::shared_ptr<Player> player = entityManager->GetPlayer();
+    if (!player)
+    {
+        return;
+    }
+
+    // Draw semi-transparent outer panel like game over screen
+    pdcpp::Rectangle<int> panelRectA(
+        offset.x + GameOver::PANELA_OFFSET_X,
+        offset.y + GameOver::PANELA_OFFSET_Y,
+        GameOver::PANELA_WIDTH,
+        GameOver::PANELA_HEIGHT
+    );
+    pdcpp::Graphics::fillRoundedRectangle(panelRectA, 8, pdcpp::Colors::transparent50GrayB);
+
+    // Draw main popup panel in center (larger than game over to fit content)
+    const int panelWidth = 320;
+    const int panelHeight = 220;
+    const int panelX = offset.x - (panelWidth / 2);
+    const int panelY = offset.y - (panelHeight / 2);
+
+    pdcpp::Rectangle<int> panel(panelX, panelY, panelWidth, panelHeight);
+    pdcpp::Graphics::fillRoundedRectangle(panel, 8, pdcpp::Colors::black);
+
+    // Draw title
+    const int titleY = panelY + 10;
+    pdcpp::Rectangle<float> titleBounds(
+        static_cast<float>(panelX), static_cast<float>(titleY),
+        static_cast<float>(panelWidth), static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText("LEVEL UP!", titleBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw current stats and level info
+    char statsBuffer[128];
+    snprintf(statsBuffer, sizeof(statsBuffer),
+        "Level %u | Skill Points: %u\nSTR:%d  AGI:%d  CON:%d  HP:%.0f/%.0f",
+        player->GetLevel(), player->GetSkillPoints(),
+        player->GetStrength(), player->GetAgility(), player->GetConstitution(),
+        player->GetHP(), player->GetMaxHP());
+    const int statsY = titleY + font.getFontHeight() + 6;
+    pdcpp::Rectangle<float> statsBounds(
+        static_cast<float>(panelX + 10), static_cast<float>(statsY),
+        static_cast<float>(panelWidth - 20), static_cast<float>(font.getFontHeight() * 3)
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText(statsBuffer, statsBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
+
+    // Draw stat options
+    const char* statOptions[] = {
+        "Strength +1",
+        "Agility +1",
+        "Constitution +1",
+        "Max HP +5"
+    };
+    const int optionStartY = statsY + (font.getFontHeight() * 2) + 12;
+    const int optionSpacing = 21;
+
+    for (int i = 0; i < 4; i++)
+    {
+        int optionY = optionStartY + (i * optionSpacing);
+
+        // Draw selection background for selected option
+        if (i == levelUpSelectedOption)
+        {
+            pdcpp::Rectangle<int> selectionBox(
+                panelX + 15, optionY - 2,
+                panelWidth - 30, font.getFontHeight() + 4
+            );
+            pdcpp::Graphics::fillRoundedRectangle(selectionBox, 4, pdcpp::Colors::white);
+
+            // Draw option text in black on white background
+            pdcpp::Rectangle<float> optionBounds(
+                static_cast<float>(panelX + 25), static_cast<float>(optionY),
+                static_cast<float>(panelWidth - 50), static_cast<float>(font.getFontHeight())
+            );
+            pd->graphics->setDrawMode(kDrawModeCopy);
+            font.drawWrappedText(statOptions[i], optionBounds, pdcpp::Font::Left, pdcpp::Font::Top);
+        }
+        else
+        {
+            // Draw option text in white for unselected options
+            pdcpp::Rectangle<float> optionBounds(
+                static_cast<float>(panelX + 25), static_cast<float>(optionY),
+                static_cast<float>(panelWidth - 50), static_cast<float>(font.getFontHeight())
+            );
+            SetTextDrawMode(Theme::TEXT_COLOR);
+            font.drawWrappedText(statOptions[i], optionBounds, pdcpp::Font::Left, pdcpp::Font::Top);
+            pd->graphics->setDrawMode(kDrawModeCopy);
+        }
+    }
+
+    // Draw instruction text at bottom
+    const int instructionY = panelY + panelHeight - font.getFontHeight() - 8;
+    pdcpp::Rectangle<float> instructionBounds(
+        static_cast<float>(panelX), static_cast<float>(instructionY),
+        static_cast<float>(panelWidth), static_cast<float>(font.getFontHeight())
+    );
+    SetTextDrawMode(Theme::TEXT_COLOR);
+    font.drawWrappedText("Up/Down: Select  |  A: Confirm", instructionBounds, pdcpp::Font::Center, pdcpp::Font::Top);
+    pd->graphics->setDrawMode(kDrawModeCopy);
 }
 
 // Helper methods implementation

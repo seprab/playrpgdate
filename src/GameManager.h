@@ -5,6 +5,7 @@
 #include "EntityManager.h"
 #include "Player.h"
 #include "UI.h"
+#include "SaveGame.h"
 #include "pdcpp/graphics/Point.h"
 
 class GameManager {

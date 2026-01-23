@@ -10,7 +10,20 @@
 #include "EntityManager.h"
 #include "Monster.h"
 #include "Player.h"
+#include "EnemyProjectile.h"
 #include "pdcpp/core/Random.h"
+#include <algorithm>
+#include <memory>
+
+Area::Area()
+: Entity(0)
+{
+    // Initialize slowdown ability - ready to use immediately
+    lastSlowdownActivationTime = 0;
+    lastActivityCheckTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+}
+
+Area::~Area() = default; // Destructor defined here so unique_ptr can see full EnemyProjectile definition
 
 Area::Area(unsigned int _id, const char* _name, const std::string& _dataPath, int _dataTokens, const std::string& _tilesetPath, std::shared_ptr<Dialogue> _dialogue, const std::vector<std::shared_ptr<Monster>>& _monsters)
 : Entity(_id), tokens(_dataTokens), dataPath(_dataPath), tilesetPath(_tilesetPath), dialogue(std::move(_dialogue))
@@ -199,6 +212,8 @@ void Area::Render(int x, int y, int fovX, int fovY)
         if (!visibleX || !visibleY) continue;
         monster->Draw();
     }
+    // Draw enemy projectiles after monsters
+    DrawEnemyProjectiles();
 }
 bool Area::CheckCollision(int x, int y) const
 {
@@ -231,6 +246,9 @@ void Area::Unload()
     livingMonsters.clear();
     toSpawnMonsters.clear();
 
+    // Clean up enemy projectiles
+    enemyProjectiles.clear();
+
     // Clean up other resources
     spawnablePositions.clear();
     pathfindingContainer.reset();
@@ -238,7 +256,16 @@ void Area::Unload()
 }
 void Area::SetupMonstersToSpawn()
 {
-    for (int i=0; i< Globals::MONSTER_TOTAL_TO_SPAWN; i++)
+    // Calculate how many monsters still need to be spawned
+    // This accounts for monsters that were already spawned when loading a saved game
+    int monstersToSetup = Globals::MONSTER_TOTAL_TO_SPAWN - monstersSpawnedCount;
+
+    // Ensure we don't spawn negative monsters
+    if (monstersToSetup <= 0) {
+        return;
+    }
+
+    for (int i=0; i< monstersToSetup; i++)
     {
         unsigned int randomIndex = random.next() % static_cast<unsigned int>(bankOfMonsters.size());
         auto monster = std::make_shared<Monster>(*bankOfMonsters[randomIndex]);
@@ -252,7 +279,7 @@ void Area::SpawnCreature()
         ticksSinceLastSpawn++;
         return; // don't spawn monsters if the time hasn't passed
     }
-    int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - static_cast<int>(livingMonsters.size());
+    int monstersToSpawn = Globals::MONSTER_TOTAL_TO_SPAWN - monstersSpawnedCount;
     if (monstersToSpawn <= 0 || toSpawnMonsters.empty()) return; // don't spawn more monsters if the max count is reached
     if (livingMonsters.size() >= Globals::MONSTER_MAX_LIVING_COUNT) return; // don't spawn more monsters if the max count is reached
 
@@ -268,6 +295,7 @@ void Area::SpawnCreature()
     livingMonsters.back()->SetTiledPosition(spawnPos); // set a default position for the monster
     toSpawnMonsters.erase(toSpawnMonsters.begin());
     ticksSinceLastSpawn = 0; // reset the spawn timer
+    monstersSpawnedCount++; // track total spawned monsters
 }
 /// Find a spawnable position in the area, out of the sight of the player and not colliding with any tile.
 pdcpp::Point<int> Area::FindSpawnablePosition(int attemptCount)
@@ -388,16 +416,33 @@ void Area::Tick(Player* player)
             static_cast<float>(blockedPosition.y));
     }
 
-    // Count dead monsters and increment player's kill count, then remove them from the living monsters list
-    size_t deadMonsters = std::erase_if(livingMonsters,
+    // Count dead monsters and accumulate XP before removing them
+    size_t deadMonsters = 0;
+    unsigned int xpGained = 0;
+    for (const auto& monster : livingMonsters)
+    {
+        if (!monster->IsAlive())
+        {
+            deadMonsters++;
+            xpGained += monster->GetXP();
+        }
+    }
+    std::erase_if(livingMonsters,
                   [](const std::shared_ptr<Monster>& monster)
                   { return !monster->IsAlive(); });
 
-    // Increment player's kill count for each dead monster
+    // Increment player's kill count and award XP for each dead monster
     for (size_t i = 0; i < deadMonsters; ++i)
     {
         player->IncrementKillCount();
     }
+    if (xpGained > 0)
+    {
+        player->AddXP(xpGained);
+    }
+    
+    // Update enemy projectiles
+    UpdateEnemyProjectiles(player);
 }
 Map_Layer Area::ToMapLayer() const
 {
@@ -422,6 +467,74 @@ void Area::SetUpPathfindingContainer()
             if (CheckCollision(i * tileWidth, j * tileHeight)) continue;
             auto* node = new AStarNode(pdcpp::Point<int>(i, j));
             pathfindingContainer->Add(node);
+        }
+    }
+}
+
+void Area::CreateEnemyProjectile(pdcpp::Point<int> position, float angle, float speed, unsigned int size, float damage)
+{
+    if (!entityManager)
+    {
+        return;
+    }
+    
+    auto playerPtr = entityManager->GetPlayer();
+    if (!playerPtr)
+    {
+        return;
+    }
+    
+    auto projectile = std::make_unique<EnemyProjectile>(
+        position,
+        std::weak_ptr<Player>(playerPtr),
+        angle,
+        speed,
+        size,
+        damage
+    );
+    enemyProjectiles.push_back(std::move(projectile));
+}
+
+void Area::AddEnemyProjectile(std::unique_ptr<EnemyProjectile> projectile)
+{
+    enemyProjectiles.push_back(std::move(projectile));
+}
+
+void Area::UpdateEnemyProjectiles(Player* player)
+{
+    if (!player)
+    {
+        return;
+    }
+    
+    // Create a shared_ptr to this Area for the Update call
+    // We use a custom deleter that does nothing since Area is managed elsewhere
+    std::shared_ptr<Area> areaShared(this, [](Area*) {});
+    
+    // Update all projectiles
+    for (auto& projectile : enemyProjectiles)
+    {
+        if (projectile && projectile->IsAlive())
+        {
+            projectile->Update(areaShared);
+        }
+    }
+    
+    // Remove dead projectiles
+    enemyProjectiles.erase(
+        std::remove_if(enemyProjectiles.begin(), enemyProjectiles.end(),
+            [](const std::unique_ptr<EnemyProjectile>& p) { return !p || !p->IsAlive(); }),
+        enemyProjectiles.end()
+    );
+}
+
+void Area::DrawEnemyProjectiles() const
+{
+    for (const auto& projectile : enemyProjectiles)
+    {
+        if (projectile && projectile->IsAlive())
+        {
+            projectile->Draw();
         }
     }
 }

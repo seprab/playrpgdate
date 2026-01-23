@@ -7,13 +7,19 @@
 #include "Log.h"
 #include "Monster.h"
 
-Projectile::Projectile(pdcpp::Point<int> Position, std::weak_ptr<Player> _player):
-Magic(Position, std::move(_player))
+Projectile::Projectile(pdcpp::Point<int> Position, std::weak_ptr<Player> _player)
+    : Projectile(Position, std::move(_player), 8.0f, 6, 800, 0.5f)
+{}
+
+Projectile::Projectile(pdcpp::Point<int> Position, std::weak_ptr<Player> _player,
+                       float _speed, unsigned int _size, unsigned int _explosionThreshold, float _damage)
+    : Magic(Position, std::move(_player))
 {
     iLifetime = 2000;
-    speed = 8;
-    size = 6;
-    explosionThreshold = 800;
+    speed = _speed;
+    size = _size;
+    explosionThreshold = _explosionThreshold;
+    damagePerHit = _damage;
     launchAngle = pdcpp::GlobalPlaydateAPI::get()->system->getCrankAngle() * kPI /180.f;
 }
 
@@ -53,7 +59,7 @@ void Projectile::Damage(const std::shared_ptr<Area>& area)
         float distance = projectileCenteredPos.distance(entity->GetPosition());
         if (distance < static_cast<float>(size)/2.f)
         {
-            entity->Damage(0.5f);
+            entity->Damage(damagePerHit);
         }
     }
 }
