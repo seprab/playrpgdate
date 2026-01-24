@@ -451,10 +451,10 @@ bool Area::ContinueMapGeneration()
                 connectivityValidated = true;
                 
                 if (isValid) {
-                    // Map is already connected, move to clear player spawn
-                    currentGenerationStep = GenerationStep::ClearPlayerSpawn;
+                    // Map is already connected, move to widen corridors
+                    currentGenerationStep = GenerationStep::WidenCorridors;
                     if (generationUI) {
-                        generationUI->UpdateLoadingProgress(0.9f);
+                        generationUI->UpdateLoadingProgress(0.8f);
                     }
                 } else {
                     // Need to fix connectivity, start with center fix
@@ -486,10 +486,10 @@ bool Area::ContinueMapGeneration()
             
             // Validate again after center fix
             if (generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
-                // Fixed! Move to clear player spawn
-                currentGenerationStep = GenerationStep::ClearPlayerSpawn;
+                // Fixed! Move to widen corridors
+                currentGenerationStep = GenerationStep::WidenCorridors;
                 if (generationUI) {
-                    generationUI->UpdateLoadingProgress(0.9f);
+                    generationUI->UpdateLoadingProgress(0.8f);
                 }
             } else {
                 // Still not connected, need to iterate through tiles
@@ -517,10 +517,10 @@ bool Area::ContinueMapGeneration()
                     generationLayer.tiles[index] = {1, false};
                     
                     if (generator.ValidateConnectivity(generationLayer, generationParams.width, generationParams.height)) {
-                        // Fixed! Move to clear player spawn
-                        currentGenerationStep = GenerationStep::ClearPlayerSpawn;
+                        // Fixed! Move to widen corridors
+                        currentGenerationStep = GenerationStep::WidenCorridors;
                         if (generationUI) {
-                            generationUI->UpdateLoadingProgress(0.9f);
+                            generationUI->UpdateLoadingProgress(0.8f);
                         }
                         return false; // Not complete yet
                     } else {
@@ -546,13 +546,25 @@ bool Area::ContinueMapGeneration()
             
             // Check if we've processed all tiles
             if (connectivityFixY >= generationParams.height - 1) {
-                // We've tried everything, accept the map as-is and clear player spawn
-                currentGenerationStep = GenerationStep::ClearPlayerSpawn;
+                // We've tried everything, accept the map as-is and widen corridors
+                currentGenerationStep = GenerationStep::WidenCorridors;
                 if (generationUI) {
-                    generationUI->UpdateLoadingProgress(0.9f);
+                    generationUI->UpdateLoadingProgress(0.8f);
                 }
             }
             
+            return false; // Not complete yet
+        }
+
+        case GenerationStep::WidenCorridors: {
+            // Widen narrow corridors to ensure multiple access paths
+            generator.WidenCorridors(generationLayer, generationParams.width, generationParams.height);
+
+            // Move to clear player spawn
+            currentGenerationStep = GenerationStep::ClearPlayerSpawn;
+            if (generationUI) {
+                generationUI->UpdateLoadingProgress(0.9f);
+            }
             return false; // Not complete yet
         }
 

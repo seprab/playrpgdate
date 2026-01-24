@@ -39,13 +39,17 @@ std::vector<Layer> ProceduralMapGenerator::GenerateMap(const GenerationParams& p
     PlaceStructuredObstacles(collisionLayer, params.width, params.height, params, rng);
     ReportProgress(params, 0.7f);
     
-    // Step 4: Connectivity validation (70% - 90%)
+    // Step 4: Connectivity validation (70% - 80%)
     if (!ValidateConnectivity(collisionLayer, params.width, params.height)) {
         FixConnectivity(collisionLayer, params.width, params.height);
     }
+    ReportProgress(params, 0.8f);
+
+    // Step 5: Widen corridors for multiple access paths (80% - 90%)
+    WidenCorridors(collisionLayer, params.width, params.height);
     ReportProgress(params, 0.9f);
 
-    // Step 5: Clear player spawn area (90% - 100%)
+    // Step 6: Clear player spawn area (90% - 100%)
     ClearPlayerSpawnArea(collisionLayer, params.width, params.height);
     ReportProgress(params, 1.0f);
     
@@ -263,6 +267,88 @@ void ProceduralMapGenerator::FixConnectivity(Layer& layer, int width, int height
                         return; // Fixed!
                     }
                     layer.tiles[index] = {2, true}; // Restore if didn't help
+                }
+            }
+        }
+    }
+}
+
+void ProceduralMapGenerator::WidenCorridors(Layer& layer, int width, int height) {
+    // Widen narrow corridors and chokepoints to ensure multiple access paths
+    // Scan for walkable tiles with 3+ obstacle neighbors (narrow chokepoints)
+
+    const int dx[] = {0, 1, 0, -1}; // Up, Right, Down, Left
+    const int dy[] = {-1, 0, 1, 0};
+
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            int index = y * width + x;
+
+            // Only process walkable tiles
+            if (layer.tiles[index].collision) continue;
+
+            // Count obstacle neighbors in 4 cardinal directions
+            int obstacleCount = 0;
+            int obstacleNeighbors[4] = {0, 0, 0, 0};
+
+            for (int dir = 0; dir < 4; dir++) {
+                int nx = x + dx[dir];
+                int ny = y + dy[dir];
+                int nIndex = ny * width + nx;
+
+                if (layer.tiles[nIndex].collision) {
+                    obstacleCount++;
+                    obstacleNeighbors[dir] = 1;
+                }
+            }
+
+            // If 3 or 4 neighbors are obstacles, this is a narrow chokepoint
+            // Remove one obstacle to widen the corridor
+            if (obstacleCount >= 3) {
+                // Try to remove obstacles in priority order:
+                // 1. Remove horizontal obstacles if vertical is blocked (or vice versa)
+                // 2. Prefer removing obstacles that create diagonal openings
+
+                // Check if we have opposite sides blocked (corridor)
+                bool horizontalBlocked = obstacleNeighbors[1] && obstacleNeighbors[3]; // Right & Left
+                bool verticalBlocked = obstacleNeighbors[0] && obstacleNeighbors[2];   // Up & Down
+
+                // If it's a corner (both directions blocked), remove one to widen
+                if (horizontalBlocked && verticalBlocked) {
+                    // Remove right or down obstacle (arbitrary choice)
+                    int removeDir = (obstacleNeighbors[1]) ? 1 : 3;
+                    int nx = x + dx[removeDir];
+                    int ny = y + dy[removeDir];
+                    int nIndex = ny * width + nx;
+                    layer.tiles[nIndex] = {1, false};
+                }
+                // If only horizontal blocked, remove one vertical obstacle
+                else if (horizontalBlocked) {
+                    int removeDir = (obstacleNeighbors[0]) ? 0 : 2;
+                    int nx = x + dx[removeDir];
+                    int ny = y + dy[removeDir];
+                    int nIndex = ny * width + nx;
+                    layer.tiles[nIndex] = {1, false};
+                }
+                // If only vertical blocked, remove one horizontal obstacle
+                else if (verticalBlocked) {
+                    int removeDir = (obstacleNeighbors[1]) ? 1 : 3;
+                    int nx = x + dx[removeDir];
+                    int ny = y + dy[removeDir];
+                    int nIndex = ny * width + nx;
+                    layer.tiles[nIndex] = {1, false};
+                }
+                // Otherwise just remove the first obstacle we find
+                else {
+                    for (int dir = 0; dir < 4; dir++) {
+                        if (obstacleNeighbors[dir]) {
+                            int nx = x + dx[dir];
+                            int ny = y + dy[dir];
+                            int nIndex = ny * width + nx;
+                            layer.tiles[nIndex] = {1, false};
+                            break;
+                        }
+                    }
                 }
             }
         }

@@ -44,6 +44,7 @@ public:
     void PlacePlatform(Layer& layer, int width, int height, int x, int y, int size, pdcpp::Random& rng);
     bool ValidateConnectivity(const Layer& layer, int width, int height);
     void FixConnectivity(Layer& layer, int width, int height);
+    void WidenCorridors(Layer& layer, int width, int height);
     void ClearPlayerSpawnArea(Layer& layer, int width, int height);
     int FloodFillCount(const Layer& layer, int width, int height, int startX, int startY);
 

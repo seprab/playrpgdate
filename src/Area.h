@@ -67,6 +67,7 @@ private:
         ValidateConnectivity,
         FixConnectivityCenter,
         FixConnectivityIterate,
+        WidenCorridors,
         ClearPlayerSpawn,
         Complete
     };
