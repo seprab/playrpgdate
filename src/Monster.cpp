@@ -390,20 +390,56 @@ pdcpp::Point<int> Monster::GetKiteTarget(const pdcpp::Point<int>& playerTiledPos
     int dx = monsterTiled.x - playerTiledPosition.x;
     int dy = monsterTiled.y - playerTiledPosition.y;
 
+    // Handle edge case: monster and player at same position
     if (dx == 0 && dy == 0)
     {
-        dx = 1;
+        dx = 1; // Default to moving right
     }
 
-    int stepX = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
-    int stepY = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
+    // Primary retreat direction (directly away from player)
+    int primaryX = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
+    int primaryY = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
 
-    int targetX = monsterTiled.x + stepX * Globals::MONSTER_KITE_STEP;
-    int targetY = monsterTiled.y + stepY * Globals::MONSTER_KITE_STEP;
+    // Generate candidate directions in priority order:
+    // Try the primary direction first, then adjacent directions, then fallbacks
+    const pdcpp::Point<int> candidateDirections[] = {
+        {primaryX, primaryY},           // 0: Direct retreat (highest priority)
+        {primaryX, 0},                  // 1: Horizontal component only
+        {0, primaryY},                  // 2: Vertical component only
+        {primaryX, -primaryY},          // 3: Diagonal opposite vertical
+        {-primaryX, primaryY},          // 4: Diagonal opposite horizontal
+        {-primaryX, 0},                 // 5: Opposite horizontal
+        {0, -primaryY},                 // 6: Opposite vertical
+        {-primaryX, -primaryY}          // 7: Complete opposite (last resort)
+    };
 
-    targetX = std::clamp(targetX, 0, area->GetWidth() - 1);
-    targetY = std::clamp(targetY, 0, area->GetHeight() - 1);
-    return {targetX, targetY};
+    // Try positions at decreasing distances to find a valid retreat
+    for (int distance = Globals::MONSTER_KITE_STEP; distance > 0; distance--)
+    {
+        // Try each direction at this distance
+        for (const auto& dir : candidateDirections)
+        {
+            int targetX = monsterTiled.x + dir.x * distance;
+            int targetY = monsterTiled.y + dir.y * distance;
+
+            // Check bounds
+            if (targetX < 0 || targetX >= area->GetWidth() ||
+                targetY < 0 || targetY >= area->GetHeight())
+            {
+                continue; // Out of bounds, try next direction
+            }
+
+            // Check if tile is walkable (not blocked by terrain or other monsters)
+            if (!area->GetCollider()->IsTileBlockedByChar(targetX, targetY))
+            {
+                return {targetX, targetY}; // Found valid retreat position!
+            }
+        }
+    }
+
+    // No valid retreat position found - stay in current position
+    // This is actually correct kiting behavior when cornered
+    return monsterTiled;
 }
 
 bool Monster::ShouldAttack(pdcpp::Point<int> target) const

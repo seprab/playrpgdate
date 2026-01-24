@@ -55,7 +55,7 @@ namespace Globals
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; ///< Diagonal movement speed multiplier
     constexpr int MONSTER_KITE_MIN_RANGE = 3;          ///< Kiting: minimum distance (tiles)
     constexpr int MONSTER_KITE_MAX_RANGE = 7;          ///< Kiting: maximum distance (tiles)
-    constexpr int MONSTER_KITE_STEP = 4;               ///< Kiting: retreat distance (tiles)
+    constexpr int MONSTER_KITE_STEP = 20;               ///< Kiting: retreat distance (tiles)
     constexpr int MONSTER_RANDOM_SPACING = 4;          ///< Random offset when blocked (tiles)
     constexpr int MAX_SPAWN_ATTEMPTS = 10;             ///< Max attempts to find spawn position
 

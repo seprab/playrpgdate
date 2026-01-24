@@ -48,6 +48,20 @@ private:
     void HandleAStarMovement(const pdcpp::Point<int>& playerTiledPosition, Area* area);
     void HandleNoClipMovement(const pdcpp::Point<int>& playerTiledPosition);
     void HandleRangedKiteMovement(const pdcpp::Point<int>& playerTiledPosition, Area* area);
+
+    /**
+     * @brief Calculate intelligent retreat position for kiting behavior.
+     *
+     * Tries to find a walkable tile away from the player by:
+     * 1. Attempting direct retreat (opposite of player direction)
+     * 2. Trying adjacent diagonal/cardinal directions if blocked
+     * 3. Reducing distance if no valid position at full distance
+     * 4. Returning current position if completely cornered
+     *
+     * @param playerTiledPosition Player's current tile position
+     * @param area Current area (for collision checking)
+     * @return Best valid retreat position, or current position if cornered
+     */
     [[nodiscard]] pdcpp::Point<int> GetKiteTarget(const pdcpp::Point<int>& playerTiledPosition, const Area* area) const;
     std::vector<pdcpp::Point<int>> path;
     bool pathFound = false;
