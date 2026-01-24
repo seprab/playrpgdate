@@ -6,6 +6,7 @@
 #include "AStarContainer.h"
 #include "Globals.h"
 #include "MapCollision.h"
+#include "MapGenerationTypes.h"
 #include "pdcpp/core/Random.h"
 #include "pdcpp/graphics/ImageTable.h"
 #include <memory>
@@ -66,20 +67,13 @@ private:
         ValidateConnectivity,
         FixConnectivityCenter,
         FixConnectivityIterate,
+        ClearPlayerSpawn,
         Complete
     };
     GenerationStep currentGenerationStep = GenerationStep::None;
-    struct GenerationParams {
-        int width = 40;
-        int height = 40;
-        float obstacleDensity = 0.15f;
-        int minObstacleSize = 1;
-        int maxObstacleSize = 3;
-        int minStructuredObstacles = 3;
-        int maxStructuredObstacles = 8;
-        unsigned int seed = 0;
-    };
-    GenerationParams generationParams;
+
+    /// Parameters for incremental map generation
+    MapGenerationParams generationParams;
     Layer generationLayer; // Working layer during generation
     pdcpp::Random generationRNG;
     int simpleObstaclesPlaced = 0;

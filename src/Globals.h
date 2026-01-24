@@ -45,6 +45,13 @@ namespace Globals
     constexpr int DEFAULT_MAP_WIDTH = 40;               ///< Procedural map width (tiles)
     constexpr int DEFAULT_MAP_HEIGHT = 40;              ///< Procedural map height (tiles)
 
+    // Procedural map generation defaults
+    constexpr float DEFAULT_OBSTACLE_DENSITY = 0.15f;   ///< 15% of tiles are obstacles
+    constexpr int DEFAULT_MIN_OBSTACLE_SIZE = 1;        ///< Minimum obstacle size (tiles)
+    constexpr int DEFAULT_MAX_OBSTACLE_SIZE = 2;        ///< Maximum obstacle size (tiles)
+    constexpr int DEFAULT_MIN_STRUCTURED_OBSTACLES = 5; ///< Minimum structured obstacles
+    constexpr int DEFAULT_MAX_STRUCTURED_OBSTACLES = 8; ///< Maximum structured obstacles
+
     // ========================================================================
     // MONSTER BEHAVIOR CONSTANTS
     // ========================================================================

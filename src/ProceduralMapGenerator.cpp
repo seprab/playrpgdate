@@ -39,10 +39,14 @@ std::vector<Layer> ProceduralMapGenerator::GenerateMap(const GenerationParams& p
     PlaceStructuredObstacles(collisionLayer, params.width, params.height, params, rng);
     ReportProgress(params, 0.7f);
     
-    // Step 4: Connectivity validation (70% - 100%)
+    // Step 4: Connectivity validation (70% - 90%)
     if (!ValidateConnectivity(collisionLayer, params.width, params.height)) {
         FixConnectivity(collisionLayer, params.width, params.height);
     }
+    ReportProgress(params, 0.9f);
+
+    // Step 5: Clear player spawn area (90% - 100%)
+    ClearPlayerSpawnArea(collisionLayer, params.width, params.height);
     ReportProgress(params, 1.0f);
     
     result.push_back(collisionLayer);
@@ -131,12 +135,12 @@ void ProceduralMapGenerator::PlaceSimpleObstacles(Layer& layer, int width, int h
 
 void ProceduralMapGenerator::PlaceStructuredObstacles(Layer& layer, int width, int height, const GenerationParams& params, pdcpp::Random& rng) {
     int obstacleCount = params.minStructuredObstacles + (rng.next() % (params.maxStructuredObstacles - params.minStructuredObstacles + 1));
-    
+
     // Keep 2-tile border walkable (but boundaries are already obstacles, so start from 2)
     int minX = 2;
-    int maxX = width - 5; // Leave room for larger shapes
+    int maxX = width - 7; // Leave room for larger shapes (up to 6 tiles wide)
     int minY = 2;
-    int maxY = height - 5;
+    int maxY = height - 5; // Leave room for larger shapes (up to 4 tiles tall)
     
     int placed = 0;
     int attempts = 0;
@@ -152,14 +156,14 @@ void ProceduralMapGenerator::PlaceStructuredObstacles(Layer& layer, int width, i
         
         bool placedShape = false;
         switch (shapeType) {
-            case 0: // L-shape
+            case 0: // L-shape (4 wide × 4 tall max)
                 if (x < maxX - 2 && y < maxY - 2) {
                     PlaceLShape(layer, width, height, x, y, rng);
                     placedShape = true;
                 }
                 break;
-            case 1: // T-shape
-                if (x < maxX - 2 && y < maxY - 2) {
+            case 1: // T-shape (6 wide × 6 tall max)
+                if (x < maxX - 4 && y < maxY - 4) {
                     PlaceTShape(layer, width, height, x, y, rng);
                     placedShape = true;
                 }
@@ -228,12 +232,12 @@ bool ProceduralMapGenerator::ValidateConnectivity(const Layer& layer, int width,
 void ProceduralMapGenerator::FixConnectivity(Layer& layer, int width, int height) {
     // Simple approach: remove obstacles near edges of isolated regions
     // More sophisticated: identify isolated regions and remove blocking obstacles
-    
+
     // Try removing obstacles near the center to improve connectivity
     int centerX = width / 2;
     int centerY = height / 2;
     int radius = 3;
-    
+
     for (int y = centerY - radius; y <= centerY + radius; y++) {
         for (int x = centerX - radius; x <= centerX + radius; x++) {
             if (x >= 0 && x < width && y >= 0 && y < height) {
@@ -245,7 +249,7 @@ void ProceduralMapGenerator::FixConnectivity(Layer& layer, int width, int height
             }
         }
     }
-    
+
     // Validate again
     if (!ValidateConnectivity(layer, width, height)) {
         // If still not connected, remove more obstacles
@@ -259,6 +263,26 @@ void ProceduralMapGenerator::FixConnectivity(Layer& layer, int width, int height
                         return; // Fixed!
                     }
                     layer.tiles[index] = {2, true}; // Restore if didn't help
+                }
+            }
+        }
+    }
+}
+
+void ProceduralMapGenerator::ClearPlayerSpawnArea(Layer& layer, int width, int height) {
+    // Clear area around map center where player spawns (20, 20 in a 40x40 map)
+    // Player needs walkable space to move after spawning
+    int centerX = width / 2;
+    int centerY = height / 2;
+    int clearRadius = 3; // Clear 3 tiles in each direction (7x7 area)
+
+    for (int y = centerY - clearRadius; y <= centerY + clearRadius; y++) {
+        for (int x = centerX - clearRadius; x <= centerX + clearRadius; x++) {
+            if (x >= 0 && x < width && y >= 0 && y < height) {
+                int index = y * width + x;
+                if (layer.tiles[index].collision) {
+                    // Restore to walkable ground tile
+                    layer.tiles[index] = {1, false};
                 }
             }
         }
@@ -295,93 +319,93 @@ void ProceduralMapGenerator::PlaceObstacle(Layer& layer, int width, int x, int y
 }
 
 void ProceduralMapGenerator::PlaceLShape(Layer& layer, int width, int height, int x, int y, pdcpp::Random& rng) {
-    // Create an L-shape: 2 tiles horizontal, 2 tiles vertical
+    // Create an L-shape scaled 2x: 4 tiles horizontal × 2 tiles tall, with 2×2 vertical extension
     int orientation = rng.next() % 4; // 0=up-right, 1=up-left, 2=down-right, 3=down-left
-    
+
     // Check if we can place it
     bool canPlace = false;
     switch (orientation) {
         case 0: // Up-right L (horizontal right, vertical up)
-            canPlace = (x + 2 <= width && y >= 1) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 2, 1) && 
-                       CanPlaceObstacle(layer, width, height, x, y-1, 1, 1);
+            canPlace = (x + 4 <= width && y >= 2) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 4, 2) &&
+                       CanPlaceObstacle(layer, width, height, x, y-2, 2, 2);
             break;
         case 1: // Up-left L (horizontal right, vertical up from right)
-            canPlace = (x + 2 <= width && y >= 1) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 2, 1) && 
-                       CanPlaceObstacle(layer, width, height, x+1, y-1, 1, 1);
+            canPlace = (x + 4 <= width && y >= 2) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 4, 2) &&
+                       CanPlaceObstacle(layer, width, height, x+2, y-2, 2, 2);
             break;
         case 2: // Down-right L (horizontal right, vertical down)
-            canPlace = (x + 2 <= width && y + 1 < height) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 2, 1) && 
-                       CanPlaceObstacle(layer, width, height, x, y+1, 1, 1);
+            canPlace = (x + 4 <= width && y + 4 <= height) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 4, 2) &&
+                       CanPlaceObstacle(layer, width, height, x, y+2, 2, 2);
             break;
         case 3: // Down-left L (horizontal right, vertical down from right)
-            canPlace = (x + 2 <= width && y + 1 < height) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 2, 1) && 
-                       CanPlaceObstacle(layer, width, height, x+1, y+1, 1, 1);
+            canPlace = (x + 4 <= width && y + 4 <= height) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 4, 2) &&
+                       CanPlaceObstacle(layer, width, height, x+2, y+2, 2, 2);
             break;
     }
-    
+
     if (!canPlace) return;
-    
+
     // Place the L-shape
-    PlaceObstacle(layer, width, x, y, 2, 1); // Horizontal part
+    PlaceObstacle(layer, width, x, y, 4, 2); // Horizontal part (4 wide × 2 tall)
     switch (orientation) {
-        case 0: PlaceObstacle(layer, width, x, y-1, 1, 1); break;
-        case 1: PlaceObstacle(layer, width, x+1, y-1, 1, 1); break;
-        case 2: PlaceObstacle(layer, width, x, y+1, 1, 1); break;
-        case 3: PlaceObstacle(layer, width, x+1, y+1, 1, 1); break;
+        case 0: PlaceObstacle(layer, width, x, y-2, 2, 2); break;    // Vertical extension up-left
+        case 1: PlaceObstacle(layer, width, x+2, y-2, 2, 2); break;  // Vertical extension up-right
+        case 2: PlaceObstacle(layer, width, x, y+2, 2, 2); break;    // Vertical extension down-left
+        case 3: PlaceObstacle(layer, width, x+2, y+2, 2, 2); break;  // Vertical extension down-right
     }
 }
 
 void ProceduralMapGenerator::PlaceTShape(Layer& layer, int width, int height, int x, int y, pdcpp::Random& rng) {
-    // Create a T-shape: horizontal bar with vertical stem
+    // Create a T-shape scaled 2x: 6×2 bar with 2×2 stem
     int orientation = rng.next() % 4; // 0=up, 1=down, 2=left, 3=right
-    
+
     bool canPlace = false;
     switch (orientation) {
         case 0: // T pointing up
-            canPlace = (x + 3 <= width && y >= 1) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 3, 1) && 
-                       CanPlaceObstacle(layer, width, height, x+1, y-1, 1, 1);
+            canPlace = (x + 6 <= width && y >= 2) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 6, 2) &&
+                       CanPlaceObstacle(layer, width, height, x+2, y-2, 2, 2);
             break;
         case 1: // T pointing down
-            canPlace = (x + 3 <= width && y + 1 < height) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 3, 1) && 
-                       CanPlaceObstacle(layer, width, height, x+1, y+1, 1, 1);
+            canPlace = (x + 6 <= width && y + 4 <= height) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 6, 2) &&
+                       CanPlaceObstacle(layer, width, height, x+2, y+2, 2, 2);
             break;
         case 2: // T pointing left
-            canPlace = (x >= 1 && y + 3 <= height) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 1, 3) && 
-                       CanPlaceObstacle(layer, width, height, x-1, y+1, 1, 1);
+            canPlace = (x >= 2 && y + 6 <= height) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 2, 6) &&
+                       CanPlaceObstacle(layer, width, height, x-2, y+2, 2, 2);
             break;
         case 3: // T pointing right
-            canPlace = (x + 1 < width && y + 3 <= height) && 
-                       CanPlaceObstacle(layer, width, height, x, y, 1, 3) && 
-                       CanPlaceObstacle(layer, width, height, x+1, y+1, 1, 1);
+            canPlace = (x + 4 <= width && y + 6 <= height) &&
+                       CanPlaceObstacle(layer, width, height, x, y, 2, 6) &&
+                       CanPlaceObstacle(layer, width, height, x+2, y+2, 2, 2);
             break;
     }
-    
+
     if (!canPlace) return;
-    
+
     // Place the T-shape
     switch (orientation) {
-        case 0:
-            PlaceObstacle(layer, width, x, y, 3, 1);
-            PlaceObstacle(layer, width, x+1, y-1, 1, 1);
+        case 0: // T pointing up
+            PlaceObstacle(layer, width, x, y, 6, 2);      // Horizontal bar
+            PlaceObstacle(layer, width, x+2, y-2, 2, 2);  // Vertical stem (centered)
             break;
-        case 1:
-            PlaceObstacle(layer, width, x, y, 3, 1);
-            PlaceObstacle(layer, width, x+1, y+1, 1, 1);
+        case 1: // T pointing down
+            PlaceObstacle(layer, width, x, y, 6, 2);      // Horizontal bar
+            PlaceObstacle(layer, width, x+2, y+2, 2, 2);  // Vertical stem (centered)
             break;
-        case 2:
-            PlaceObstacle(layer, width, x, y, 1, 3);
-            PlaceObstacle(layer, width, x-1, y+1, 1, 1);
+        case 2: // T pointing left
+            PlaceObstacle(layer, width, x, y, 2, 6);      // Vertical bar
+            PlaceObstacle(layer, width, x-2, y+2, 2, 2);  // Horizontal stem (centered)
             break;
-        case 3:
-            PlaceObstacle(layer, width, x, y, 1, 3);
-            PlaceObstacle(layer, width, x+1, y+1, 1, 1);
+        case 3: // T pointing right
+            PlaceObstacle(layer, width, x, y, 2, 6);      // Vertical bar
+            PlaceObstacle(layer, width, x+2, y+2, 2, 2);  // Horizontal stem (centered)
             break;
     }
 }
