@@ -6,6 +6,7 @@
 #include <pd_api/pd_api_file.h>
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
+#include "Particles.h"
 #include "pdcpp/graphics/Point.h"
 
 class EntityManager;
@@ -72,6 +73,7 @@ private:
     bool isBitmapVisible = true;
     int flashTimer = 0;
     bool isFlashing = false;
+    Particles sparks;
 };
 
 #endif

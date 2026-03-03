@@ -16,6 +16,7 @@ Entity::Entity(const unsigned int _id)
     hp = 0;
     maxHP = 0;
     bitmap = nullptr;
+    sparks = Particles();
 }
 
 void Entity::LoadBitmap()
@@ -82,12 +83,13 @@ bool Entity::CalculateFlashing()
 
 void Entity::Draw()
 {
-
     if (CalculateFlashing())
     {
         DrawBitmap();
     }
     DrawHealthBar();
+    sparks.update();
+    sparks.draw();
 }
 
 void Entity::DrawHealthBar() const
@@ -118,6 +120,7 @@ void Entity::Damage(float damage)
 {
     hp = std::max(0.f, hp - damage);
     isFlashing = true;
+    sparks.instantiate(position);
 }
 
 void Entity::Heal(float heal)
