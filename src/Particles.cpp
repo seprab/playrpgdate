@@ -20,8 +20,8 @@ void Particles::instantiate(pdcpp::Point<int> initialPosition)
 {
     if (lifetime > 0) return; // We return since particles are already being drawn
     lifetime = Globals::MAX_PARTICLES_LIFETIME;
-    for (auto x : iPositions) x = initialPosition;
-    for (auto x : fPositions) x = initialPosition;
+    for (auto& x : iPositions) x = initialPosition;  // Note the & for reference
+    for (auto& x : fPositions) x = initialPosition;  // Note the & for reference
     for (int i = 0; i < velocities.size(); i++)
     {
         velocities[i].x = (rand() % 20 - 10) / 5.0f;  // Random -2 to 2
@@ -56,6 +56,6 @@ void Particles::draw() const
     if (lifetime <= 0) return;
     for (int i = 0; i < iPositions.size(); i++)
     {
-        pdcpp::Graphics::drawLine(iPositions.at(i), fPositions.at(i), 2, kColorBlack);
+        pdcpp::Graphics::drawLine(iPositions.at(i), fPositions.at(i), 2, kColorWhite);
     }
 }

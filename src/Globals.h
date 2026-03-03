@@ -133,8 +133,8 @@ namespace Globals
     // ========================================================================
     // PARTICLES
     // ========================================================================
-    constexpr int MAX_PARTICLES_PER_INSTANCE = 10;
-    constexpr int MAX_PARTICLES_LIFETIME = 100;
+    constexpr int MAX_PARTICLES_PER_INSTANCE = 5;
+    constexpr int MAX_PARTICLES_LIFETIME = 10;
 
 }
 #endif //GLOBALS_H
