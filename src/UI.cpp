@@ -443,6 +443,36 @@ void UI::DrawGameScreen() const
     std::shared_ptr<Player> player = entityManager->GetPlayer();
     PlaydateAPI* pd = pdcpp::GlobalPlaydateAPI::get();
 
+    // Draw black rectangles around the UI to avoid showing the map when shaking the UI
+    pdcpp::Rectangle<int> top(
+        offset.x + GameHUD::OVERLAY_OFFSET_X,
+        offset.y  + GameHUD::OVERLAY_OFFSET_Y - 50,
+        UIConstants::SCREEN_WIDTH,
+        UIConstants::SCREEN_HEIGHT / 4
+        );
+    pdcpp::Rectangle<int> bottom(
+        offset.x + GameHUD::OVERLAY_OFFSET_X,
+        offset.y - GameHUD::OVERLAY_OFFSET_Y,
+        UIConstants::SCREEN_WIDTH,
+        UIConstants::SCREEN_HEIGHT / 4
+        );
+    pdcpp::Rectangle<int> left(
+        offset.x + GameHUD::OVERLAY_OFFSET_X - 50,
+        offset.y  + GameHUD::OVERLAY_OFFSET_Y,
+        UIConstants::SCREEN_WIDTH / 8,
+        UIConstants::SCREEN_HEIGHT
+        );
+    pdcpp::Rectangle<int> right(
+        offset.x + GameHUD::OVERLAY_OFFSET_X + UIConstants::SCREEN_WIDTH,
+        offset.y  + GameHUD::OVERLAY_OFFSET_Y,
+        UIConstants::SCREEN_WIDTH / 8,
+        UIConstants::SCREEN_HEIGHT
+        );
+    pdcpp::Graphics::fillRectangle(top, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRectangle(bottom, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRectangle(left, pdcpp::Colors::black);
+    pdcpp::Graphics::fillRectangle(right, pdcpp::Colors::black);
+
     // Draw game overlay HUD
     pd->graphics->drawBitmap(
         gameOverlay,

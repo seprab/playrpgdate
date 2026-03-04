@@ -34,6 +34,7 @@ public:
     [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
     [[nodiscard]] float GetHP() const {return hp;}
+    [[nodiscard]] bool IsFlashing() const {return isFlashing;}
 
     void SetHP(float _hp) {hp = _hp;}
     void SetMaxHP(float _maxHP) {maxHP = _maxHP;}
