@@ -10,6 +10,12 @@
 
 std::unordered_map<std::string, LCDBitmap*> Entity::bitmapCache;
 
+pdcpp::Font& Entity::getInGameFont()
+{
+    static pdcpp::Font font{"/System/Fonts/Roobert-10-Bold"};
+    return font;
+}
+
 Entity::Entity(const unsigned int _id)
     : id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
 {
@@ -88,6 +94,13 @@ void Entity::Draw()
         DrawBitmap();
     }
     DrawHealthBar();
+
+    lastDamage = (isFlashing ? lastDamage : 0.f);
+
+    if (lastDamage != 0)
+    {
+        getInGameFont().drawText(std::to_string(static_cast<int>(lastDamage*10)), position.x, position.y - flashTimer - 10);
+    }
     sparks.update();
     sparks.draw();
 }
@@ -119,6 +132,7 @@ void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
 void Entity::Damage(float damage)
 {
     hp = std::max(0.f, hp - damage);
+    lastDamage += damage;
     isFlashing = true;
     sparks.instantiate(position);
 }

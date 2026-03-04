@@ -7,7 +7,9 @@
 #include <pd_api/pd_api_gfx.h>
 #include "jsmn.h"
 #include "Particles.h"
+#include "pdcpp/components/TextComponent.h"
 #include "pdcpp/graphics/Point.h"
+#include "pdcpp/graphics/Font.h"
 
 class EntityManager;
 
@@ -58,6 +60,8 @@ public:
     bool CalculateFlashing();
     [[nodiscard]] bool IsAlive() const { return hp > 0; }
 
+    static pdcpp::Font& getInGameFont();  // Lazy initialization
+
     virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) = 0;
 
 private:
@@ -75,6 +79,7 @@ private:
     int flashTimer = 0;
     bool isFlashing = false;
     Particles sparks;
+    float lastDamage = 0;
 };
 
 #endif
