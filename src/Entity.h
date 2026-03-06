@@ -58,7 +58,7 @@ public:
     void DrawBitmap() const;
     void DrawBitmap(int x, int y);
     bool CalculateFlashing();
-    [[nodiscard]] bool IsAlive() const { return hp > 0; }
+    [[nodiscard]] bool IsAlive() const { return hp > 0 || deathToEraseCountdown > 0; }
 
     static pdcpp::Font& getInGameFont();  // Lazy initialization
 
@@ -80,6 +80,7 @@ private:
     bool isFlashing = false;
     Particles sparks;
     float lastDamage = 0;
+    int deathToEraseCountdown = 60;
 };
 
 #endif

@@ -89,20 +89,28 @@ bool Entity::CalculateFlashing()
 
 void Entity::Draw()
 {
-    if (CalculateFlashing())
+    if (hp>0)
     {
-        DrawBitmap();
+        if (CalculateFlashing())
+        {
+            DrawBitmap();
+        }
+        DrawHealthBar();
+
+        lastDamage = (isFlashing ? lastDamage : 0.f);
+
+        if (lastDamage != 0)
+        {
+            getInGameFont().drawText(std::to_string(static_cast<int>(lastDamage*10)), position.x, position.y - flashTimer - 10);
+        }
+        sparks.update();
+        sparks.draw();
     }
-    DrawHealthBar();
-
-    lastDamage = (isFlashing ? lastDamage : 0.f);
-
-    if (lastDamage != 0)
+    else if (deathToEraseCountdown > 0)
     {
-        getInGameFont().drawText(std::to_string(static_cast<int>(lastDamage*10)), position.x, position.y - flashTimer - 10);
+        deathToEraseCountdown--;
+
     }
-    sparks.update();
-    sparks.draw();
 }
 
 void Entity::DrawHealthBar() const

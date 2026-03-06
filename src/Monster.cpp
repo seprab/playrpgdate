@@ -22,37 +22,40 @@ Monster::Monster(unsigned int _id, const std::string& _name, const std::string& 
 }
 void Monster::Tick(Player* player, Area* area)
 {
+    if (GetHP() <= 0) return;
+
     pdcpp::Point<int> playerTiledPosition = player->GetTiledPosition();
     switch (movementType)
     {
-        case MovementType::AStar:
-            HandleAStarMovement(playerTiledPosition, area);
-            break;
-        case MovementType::NoClip:
-            HandleNoClipMovement(playerTiledPosition);
-            break;
-        case MovementType::Stationary:
-            pathFound = false;
-            path.clear();
-            // Stationary monsters can fire ranged attacks
-            if (CanRangedAttack(player))
-            {
-                FireRangedAttack(player, area);
-            }
-            break;
-        case MovementType::RangedKite:
-            HandleRangedKiteMovement(playerTiledPosition, area);
-            // RangedKite monsters can fire ranged attacks
-            if (CanRangedAttack(player))
-            {
-                FireRangedAttack(player, area);
-            }
-            break;
+    case MovementType::AStar:
+        HandleAStarMovement(playerTiledPosition, area);
+        break;
+    case MovementType::NoClip:
+        HandleNoClipMovement(playerTiledPosition);
+        break;
+    case MovementType::Stationary:
+        pathFound = false;
+        path.clear();
+        // Stationary monsters can fire ranged attacks
+        if (CanRangedAttack(player))
+        {
+            FireRangedAttack(player, area);
+        }
+        break;
+    case MovementType::RangedKite:
+        HandleRangedKiteMovement(playerTiledPosition, area);
+        // RangedKite monsters can fire ranged attacks
+        if (CanRangedAttack(player))
+        {
+            FireRangedAttack(player, area);
+        }
+        break;
     }
     if (ShouldAttack(playerTiledPosition))
     {
         player->Damage(static_cast<float>(GetStrength()));
     }
+
 }
 
 std::shared_ptr<void> Monster::DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager)
