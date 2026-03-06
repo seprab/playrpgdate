@@ -62,12 +62,24 @@ void Beam::Damage(const std::shared_ptr<Area>& area)
     {
         pdcpp::Point<int> creaturePos = entity->GetPosition();
 
-        // Calculate the perpendicular distance from the line to the point
-        const int numerator = abs((yf - yi) * (xi - creaturePos.x) - (xf - xi) * (yi - creaturePos.y));
-        const double denominator = sqrt(pow((yf - yi), 2) + pow((xf - xi), 2));
-        if ((numerator / denominator) < size)
+        // Calculate the projection of the creature position onto the beam line
+        const int dx = xf - xi;
+        const int dy = yf - yi;
+        const double lineLength = sqrt(pow(dx, 2) + pow(dy, 2));
+
+        // Calculate parametric t value (0 = start, 1 = end of beam)
+        const double t = ((creaturePos.x - xi) * dx + (creaturePos.y - yi) * dy) / (lineLength * lineLength);
+
+        // Only check distance if creature is within the beam segment (not beyond start or end)
+        if (t >= 0.0 && t <= 1.0)
         {
-            entity->Damage(damagePerHit);
+            // Calculate the perpendicular distance from the line segment to the point
+            const int numerator = abs((yf - yi) * (xi - creaturePos.x) - (xf - xi) * (yi - creaturePos.y));
+            const double denominator = lineLength;
+            if ((numerator / denominator) < size)
+            {
+                entity->Damage(damagePerHit);
+            }
         }
     }
 }
