@@ -4,6 +4,7 @@
 
 #include "Entity.h"
 
+#include <cmath>
 #include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
@@ -110,6 +111,31 @@ void Entity::Draw()
     {
         deathToEraseCountdown--;
 
+        // Rotating cross effect - expands and rotates from center
+        int length = (Globals::DEATH_COUNTDOWN_MAX - deathToEraseCountdown) * 2;
+        auto center = GetCenteredPosition();
+
+        // Calculate rotation angle based on countdown (rotates as it expands)
+        float angle = (Globals::DEATH_COUNTDOWN_MAX - deathToEraseCountdown) * 10.0f; // degrees per frame
+        float angleRad = angle * 3.14159f / 180.0f;
+
+        // Draw 8 lines rotated at 45 degree intervals (like a spinning cross)
+        for (int i = 0; i < 8; i++)
+        {
+            float currentAngle = angleRad + (i * 3.14159f / 4.0f); // 90 degrees apart
+
+            // Calculate line endpoints using rotation
+            int x1 = center.x + static_cast<int>(length * cos(currentAngle));
+            int y1 = center.y + static_cast<int>(length * sin(currentAngle));
+            int x2 = center.x - static_cast<int>(length * cos(currentAngle));
+            int y2 = center.y - static_cast<int>(length * sin(currentAngle));
+
+            pdcpp::Graphics::drawLine(
+                {x1, y1},
+                {x2, y2},
+                2, kColorWhite
+            );
+        }
     }
 }
 

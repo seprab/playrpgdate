@@ -30,10 +30,9 @@ This document outlines planned features, improvements, and ideas for future deve
 #### Visual Effects
 - [x] Particle system for magic impacts
 - [x] Screen shake on heavy hits
-- [ ] Better death animations for monsters
+- [x] Better death animations for monsters
 - [x] Explosion effects for projectiles
 - [x] Damage numbers floating above entities
-- [ ] Visual feedback for critical hits
 
 #### UI Improvements
 - [ ] Minimap in corner showing:

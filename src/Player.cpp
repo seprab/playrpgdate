@@ -28,7 +28,7 @@ Player::Player()
     lastAutoFireTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     lastActivityTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
     isPlayerActive = true;
-
+    SetDeathToEraseCountdown(0);
     idle = std::make_unique<AnimationClip>();
     run = std::make_unique<AnimationClip>();
     attack = std::make_unique<AnimationClip>();

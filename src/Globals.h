@@ -135,6 +135,7 @@ namespace Globals
     // ========================================================================
     constexpr int MAX_PARTICLES_PER_INSTANCE = 5;
     constexpr int MAX_PARTICLES_LIFETIME = 10;
+    constexpr int DEATH_COUNTDOWN_MAX = 10;
 
 }
 #endif //GLOBALS_H
