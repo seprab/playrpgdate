@@ -128,5 +128,14 @@ namespace Globals
     // ========================================================================
     constexpr const char* GAME_SAVE_PATH = "savegame.data";    ///< Save file path
     constexpr const char* MAX_SCORE_PATH = "maxscore.data";    ///< Max score file path
+
+
+    // ========================================================================
+    // PARTICLES
+    // ========================================================================
+    constexpr int MAX_PARTICLES_PER_INSTANCE = 5;
+    constexpr int MAX_PARTICLES_LIFETIME = 10;
+    constexpr int DEATH_COUNTDOWN_MAX = 10;
+
 }
 #endif //GLOBALS_H

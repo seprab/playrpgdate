@@ -4,11 +4,18 @@
 
 #include "Entity.h"
 
+#include <cmath>
 #include "Globals.h"
 #include "Log.h"
 #include "pdcpp/core/GlobalPlaydateAPI.h"
 
 std::unordered_map<std::string, LCDBitmap*> Entity::bitmapCache;
+
+pdcpp::Font& Entity::getInGameFont()
+{
+    static pdcpp::Font font{"/System/Fonts/Roobert-10-Bold"};
+    return font;
+}
 
 Entity::Entity(const unsigned int _id)
     : id(_id), position(pdcpp::Point<int>(0, 0)), size(pdcpp::Point<int>(0, 0))
@@ -16,6 +23,7 @@ Entity::Entity(const unsigned int _id)
     hp = 0;
     maxHP = 0;
     bitmap = nullptr;
+    sparks = Particles();
 }
 
 void Entity::LoadBitmap()
@@ -82,12 +90,53 @@ bool Entity::CalculateFlashing()
 
 void Entity::Draw()
 {
-
-    if (CalculateFlashing())
+    if (hp>0)
     {
-        DrawBitmap();
+        if (CalculateFlashing())
+        {
+            DrawBitmap();
+        }
+        DrawHealthBar();
+
+        lastDamage = (isFlashing ? lastDamage : 0.f);
+
+        if (lastDamage != 0)
+        {
+            getInGameFont().drawText(std::to_string(static_cast<int>(lastDamage*10)), position.x, position.y - flashTimer - 10);
+        }
+        sparks.update();
+        sparks.draw();
     }
-    DrawHealthBar();
+    else if (deathToEraseCountdown > 0)
+    {
+        deathToEraseCountdown--;
+
+        // Rotating cross effect - expands and rotates from center
+        int length = (Globals::DEATH_COUNTDOWN_MAX - deathToEraseCountdown) * 2;
+        auto center = GetCenteredPosition();
+
+        // Calculate rotation angle based on countdown (rotates as it expands)
+        float angle = (Globals::DEATH_COUNTDOWN_MAX - deathToEraseCountdown) * 10.0f; // degrees per frame
+        float angleRad = angle * 3.14159f / 180.0f;
+
+        // Draw 8 lines rotated at 45 degree intervals (like a spinning cross)
+        for (int i = 0; i < 8; i++)
+        {
+            float currentAngle = angleRad + (i * 3.14159f / 4.0f); // 90 degrees apart
+
+            // Calculate line endpoints using rotation
+            int x1 = center.x + static_cast<int>(length * cos(currentAngle));
+            int y1 = center.y + static_cast<int>(length * sin(currentAngle));
+            int x2 = center.x - static_cast<int>(length * cos(currentAngle));
+            int y2 = center.y - static_cast<int>(length * sin(currentAngle));
+
+            pdcpp::Graphics::drawLine(
+                {x1, y1},
+                {x2, y2},
+                2, kColorWhite
+            );
+        }
+    }
 }
 
 void Entity::DrawHealthBar() const
@@ -117,7 +166,9 @@ void Entity::SetTiledPosition(pdcpp::Point<int> _tiledPosition)
 void Entity::Damage(float damage)
 {
     hp = std::max(0.f, hp - damage);
+    lastDamage += damage;
     isFlashing = true;
+    sparks.instantiate(position);
 }
 
 void Entity::Heal(float heal)

@@ -5,8 +5,13 @@
 #include <unordered_map>
 #include <pd_api/pd_api_file.h>
 #include <pd_api/pd_api_gfx.h>
+
+#include "Globals.h"
 #include "jsmn.h"
+#include "Particles.h"
+#include "pdcpp/components/TextComponent.h"
 #include "pdcpp/graphics/Point.h"
+#include "pdcpp/graphics/Font.h"
 
 class EntityManager;
 
@@ -33,6 +38,7 @@ public:
     [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
     [[nodiscard]] float GetHP() const {return hp;}
+    [[nodiscard]] bool IsFlashing() const {return isFlashing;}
 
     void SetHP(float _hp) {hp = _hp;}
     void SetMaxHP(float _maxHP) {maxHP = _maxHP;}
@@ -54,7 +60,9 @@ public:
     void DrawBitmap() const;
     void DrawBitmap(int x, int y);
     bool CalculateFlashing();
-    [[nodiscard]] bool IsAlive() const { return hp > 0; }
+    [[nodiscard]] bool IsAlive() const { return hp > 0 || deathToEraseCountdown > 0; }
+    void SetDeathToEraseCountdown(int value){deathToEraseCountdown = value;}
+    static pdcpp::Font& getInGameFont();  // Lazy initialization
 
     virtual std::shared_ptr<void> DecodeJson(char *buffer, jsmntok_t *tokens, int size, EntityManager* entityManager) = 0;
 
@@ -72,6 +80,9 @@ private:
     bool isBitmapVisible = true;
     int flashTimer = 0;
     bool isFlashing = false;
+    Particles sparks;
+    float lastDamage = 0;
+    int deathToEraseCountdown = Globals::DEATH_COUNTDOWN_MAX;
 };
 
 #endif

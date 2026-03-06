@@ -147,7 +147,12 @@ void GameManager::Update()
         drawOffset.x = -drawOffset.x+screenCenterWidth;
         drawOffset.y = -drawOffset.y+screenCenterHeight;
 
-
+        if (player->IsFlashing())
+        {
+            pdcpp::Random random;
+            drawOffset.x += random.nextFloatInRange(-3.f, 3.f);
+            drawOffset.y += random.nextFloatInRange(-3.f, 3.f);
+        }
         activeArea->Render(drawOffset.x, drawOffset.y, Globals::PLAYER_FOV_X, Globals::PLAYER_FOV_Y);
         player->Draw();
         player->DrawMagic(); // Draw magic projectiles on top of the map

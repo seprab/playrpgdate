@@ -28,12 +28,11 @@ This document outlines planned features, improvements, and ideas for future deve
 - [ ] Audio fade in/out for transitions
 
 #### Visual Effects
-- [ ] Particle system for magic impacts
-- [ ] Screen shake on heavy hits
-- [ ] Better death animations for monsters
-- [ ] Explosion effects for projectiles
-- [ ] Damage numbers floating above entities
-- [ ] Visual feedback for critical hits
+- [x] Particle system for magic impacts
+- [x] Screen shake on heavy hits
+- [x] Better death animations for monsters
+- [x] Explosion effects for projectiles
+- [x] Damage numbers floating above entities
 
 #### UI Improvements
 - [ ] Minimap in corner showing:
