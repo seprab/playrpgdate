@@ -153,11 +153,14 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 }
 void Player::Draw()
 {
+    pdcpp::Point<int> drawPosition = GetPosition();
+    drawPosition.x -= 20;
+    drawPosition.y -= 20;
     if (CalculateFlashing())
     {
         if (attacking)
         {
-            attack->Draw(GetPosition().x, GetPosition().y);
+            attack->Draw(drawPosition);
         }
         else if (dx != 0 || dy != 0)
         {
@@ -165,23 +168,23 @@ void Player::Draw()
             switch (facingDirection)
             {
                 case Direction::North:
-                    walkNorth->Draw(GetPosition().x, GetPosition().y);
+                    walkNorth->Draw(drawPosition);
                     break;
                 case Direction::South:
-                    walkSouth->Draw(GetPosition().x, GetPosition().y);
+                    walkSouth->Draw(drawPosition);
                     break;
                 case Direction::East:
                 case Direction::West:
-                    walkEast->Draw(GetPosition().x, GetPosition().y);
+                    walkEast->Draw(drawPosition);
                     break;
                 default:
-                    walkSouth->Draw(GetPosition().x, GetPosition().y);
+                    walkSouth->Draw(drawPosition);
                     break;
             }
         }
         else
         {
-            idle->Draw(GetPosition().x, GetPosition().y);
+            idle->Draw(drawPosition);
         }
     }
     Entity::DrawHealthBar();

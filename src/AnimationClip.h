@@ -19,6 +19,7 @@ public:
 
     void AddImagePath(const std::string& path);
     void LoadImages();
+    void Draw(pdcpp::Point<int> location);
     void Draw(int x, int y);
     void SetDelay(int value){frameDelay = value; }
     void SetFlip(bool value){flip = value; }

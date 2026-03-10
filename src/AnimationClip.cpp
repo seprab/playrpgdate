@@ -36,6 +36,11 @@ void AnimationClip::LoadImages()
     loaded = true;
 }
 
+void AnimationClip::Draw(pdcpp::Point<int> location)
+{
+    Draw(location.x, location.y);
+}
+
 void AnimationClip::Draw(int x, int y)
 {
     if (!loaded || images.empty())
