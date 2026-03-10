@@ -39,7 +39,7 @@ namespace Globals
     // MAP & RENDERING CONSTANTS
     // ========================================================================
     constexpr int MAP_TILE_SIZE = 16;                    ///< Size of each tile in pixels (16x16)
-    constexpr int PLAYER_SIZE = 16;                      ///< Player sprite size (16x16)
+    constexpr int PLAYER_SIZE = 56;                      ///< Player sprite size (56x56)
     constexpr int PLAYER_FOV_X = 234;                   ///< Render distance X (screen width + buffer)
     constexpr int PLAYER_FOV_Y = 136;                   ///< Render distance Y (screen height + buffer)
     constexpr int DEFAULT_MAP_WIDTH = 40;               ///< Procedural map width (tiles)

@@ -2,7 +2,11 @@
 // Created by Sergio Prada on 8/12/24.
 //
 #include <filesystem>
+#include <vector>
+#include <memory>
 #include "pdcpp/core/GlobalPlaydateAPI.h"
+#include "pdcpp/graphics/Image.h"
+#include "pdcpp/graphics/Point.h"
 
 #ifndef CARDOBLAST_ANIMATIONCLIP_H
 #define CARDOBLAST_ANIMATIONCLIP_H
@@ -13,9 +17,8 @@ public:
     AnimationClip()=default;
     ~AnimationClip()=default;
 
-    void AddImagePath(const char* path){paths.emplace_back(path);}
-    void AddBitmap(LCDBitmap* bitmap){bitmaps.push_back(bitmap);}
-    void LoadBitmaps();
+    void AddImagePath(const std::string& path);
+    void LoadImages();
     void Draw(int x, int y);
     void SetDelay(int value){frameDelay = value; }
     void SetFlip(bool value){flip = value; }
@@ -27,10 +30,9 @@ private:
     int frameCount{0};
     int frameDelay{0};
     int frameDelayCounter{0};
-    std::pair<int, int> previousPosition;
 
-    std::vector<LCDBitmap*> bitmaps;
-    std::vector<std::filesystem::path> paths;
+    std::vector<std::unique_ptr<pdcpp::Image>> images;
+    std::vector<std::string> paths;
 };
 
 
