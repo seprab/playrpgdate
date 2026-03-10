@@ -96,7 +96,7 @@ void Entity::Draw()
         {
             DrawBitmap();
         }
-        DrawHealthBar();
+        DrawHealthBar(Globals::HEALTH_BAR_OFFSET_X, Globals::HEALTH_BAR_OFFSET_Y);
 
         lastDamage = (isFlashing ? lastDamage : 0.f);
 
@@ -139,10 +139,15 @@ void Entity::Draw()
     }
 }
 
-void Entity::DrawHealthBar() const
+void Entity::DrawHealthBar(pdcpp::Point<int> offset) const
 {
-    int barX = position.x + Globals::HEALTH_BAR_OFFSET_X;
-    int barY = position.y + Globals::HEALTH_BAR_OFFSET_Y;
+    DrawHealthBar(offset.x, offset.y);
+}
+
+void Entity::DrawHealthBar(int offsetX, int offsetY) const
+{
+    int barX = position.x + offsetX;
+    int barY = position.y + offsetY;
     int barWidth = static_cast<int>(Globals::HEALTH_BAR_WIDTH * (static_cast<float>(hp) / maxHP));
 
     pdcpp::GlobalPlaydateAPI::get()->graphics->drawRect(barX, barY, Globals::HEALTH_BAR_WIDTH, Globals::HEALTH_BAR_HEIGHT, kColorWhite);

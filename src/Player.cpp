@@ -21,6 +21,7 @@ Player::Player()
                Globals::PLAYER_DEFAULT_EVASION, 0, 0, 0), level(0)
 {
     ResetStats();
+    SetSize(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE);
     className = "Warrior";
     SetHP(Globals::PLAYER_DEFAULT_HP);
     SetMaxHP(Globals::PLAYER_DEFAULT_HP);
@@ -155,7 +156,7 @@ void Player::Draw()
 {
     pdcpp::Point<int> drawPosition = GetPosition();
     drawPosition.x -= 20;
-    drawPosition.y -= 20;
+    drawPosition.y -= 35;
     if (CalculateFlashing())
     {
         if (attacking)
@@ -187,7 +188,7 @@ void Player::Draw()
             idle->Draw(drawPosition);
         }
     }
-    Entity::DrawHealthBar();
+    Entity::DrawHealthBar(Globals::HEALTH_BAR_OFFSET_X, Globals::HEALTH_BAR_OFFSET_Y - 30);
     DrawAimDirection();
 }
 

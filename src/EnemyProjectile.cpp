@@ -60,8 +60,12 @@ void EnemyProjectile::Damage(const std::shared_ptr<Area>& area)
     auto projectileCenteredPos = GetCenteredPosition();
     auto playerPos = playerPtr->GetCenteredPosition();
     float distance = projectileCenteredPos.distance(playerPos);
-    
-    if (distance < static_cast<float>(size) / 2.f)
+
+    // Check collision using both projectile radius and player radius
+    float projectileRadius = static_cast<float>(size) / 2.f;
+    float playerRadius = static_cast<float>(Globals::PLAYER_SIZE) / 2.f;
+
+    if (distance < projectileRadius + playerRadius)
     {
         playerPtr->Damage(damagePerHit);
         Terminate(); // Projectile hits player and is destroyed

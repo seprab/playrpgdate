@@ -51,9 +51,15 @@ void Monster::Tick(Player* player, Area* area)
         }
         break;
     }
+    // Melee attack with cooldown
     if (ShouldAttack(playerTiledPosition))
     {
-        player->Damage(static_cast<float>(GetStrength()));
+        unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+        if (currentTime - lastAttackTime >= Globals::MONSTER_MELEE_ATTACK_COOLDOWN)
+        {
+            player->Damage(static_cast<float>(GetStrength()));
+            lastAttackTime = currentTime;
+        }
     }
 
 }

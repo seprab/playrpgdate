@@ -34,7 +34,7 @@ public:
     [[nodiscard]] const char* GetImagePath() const {return image_path.c_str();}
     [[nodiscard]] pdcpp::Point<int> GetPosition() const {return position;}
     [[nodiscard]] pdcpp::Point<int> GetTiledPosition() const {return tiledPosition;}
-    [[nodiscard]] pdcpp::Point<int> GetCenteredPosition() const {return {position.x + size.x / 2, position.y + size.y / 2};}
+    [[nodiscard]] pdcpp::Point<int> GetCenteredPosition() const {return position;}
     [[nodiscard]] pdcpp::Point<int> GetSize() const {return size;}
     [[nodiscard]] float GetMaxHP() const {return maxHP;}
     [[nodiscard]] float GetHP() const {return hp;}
@@ -48,12 +48,13 @@ public:
     void SetPosition(pdcpp::Point<int> _position);
     void SetTiledPosition(pdcpp::Point<int> _tiledPosition);
     void SetSize(pdcpp::Point<int> _size) {size = _size;}
-
+    void SetSize(int _width, int _height) {size.x = _width; size.y = _height;}
     void Damage(float damage);
     void Heal(float heal);
 
     virtual void Draw();
-    void DrawHealthBar() const;
+    void DrawHealthBar(pdcpp::Point<int>) const;
+    void DrawHealthBar(int, int) const;
 
     void LoadBitmap();
     void LoadBitmap(const std::string& path);
