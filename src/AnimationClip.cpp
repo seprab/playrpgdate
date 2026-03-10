@@ -5,32 +5,47 @@
 #include "AnimationClip.h"
 #include "Log.h"
 
-void AnimationClip::LoadBitmaps()
+void AnimationClip::AddImagePath(const std::string& path)
+{
+    paths.push_back(path);
+}
+
+void AnimationClip::LoadImages()
 {
     if (loaded)
     {
-        Log::Info("Attempting to load an already loaded bitmap");
+        Log::Info("Attempting to load an already loaded image");
         return;
     }
-    for (auto& path : paths)
+
+    for (const auto& path : paths)
     {
-        const char** error = nullptr;
-        LCDBitmap* bitmap = pdcpp::GlobalPlaydateAPI::get()->graphics->loadBitmap(path.c_str(), error);
-        if (bitmap == nullptr && *error != nullptr)
+        try
         {
-            Log::Error("Failed to load bitmap: %s", *error);
+            auto image = std::make_unique<pdcpp::Image>(path);
+            images.push_back(std::move(image));
+        }
+        catch (const std::exception& e)
+        {
+            Log::Error("Failed to load image: %s", path.c_str());
             return;
         }
-        bitmaps.emplace_back(bitmap);
     }
-    frameCount = static_cast<int>(bitmaps.size());
+
+    frameCount = static_cast<int>(images.size());
     loaded = true;
 }
+
+void AnimationClip::Draw(pdcpp::Point<int> location)
+{
+    Draw(location.x, location.y);
+}
+
 void AnimationClip::Draw(int x, int y)
 {
-    if (!loaded)
+    if (!loaded || images.empty())
     {
-        Log::Error("Attempting to draw an unloaded bitmap");
+        Log::Error("Attempting to draw an unloaded or empty animation");
         return;
     }
 
@@ -47,6 +62,8 @@ void AnimationClip::Draw(int x, int y)
     {
         frameDelayCounter++;
     }
-    pdcpp::GlobalPlaydateAPI::get()->graphics->drawBitmap(bitmaps[currentframe], x, y, flip ? kBitmapFlippedX : kBitmapUnflipped);
-    previousPosition = std::pair<int, int>(x, y);
+
+    pdcpp::Point<int> position(x, y);
+    LCDBitmapFlip flipMode = flip ? kBitmapFlippedX : kBitmapUnflipped;
+    images[currentframe]->draw(position, flipMode);
 }

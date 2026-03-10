@@ -38,8 +38,8 @@ namespace Globals
     // ========================================================================
     // MAP & RENDERING CONSTANTS
     // ========================================================================
-    constexpr int MAP_TILE_SIZE = 16;                    ///< Size of each tile in pixels (16x16)
-    constexpr int PLAYER_SIZE = 16;                      ///< Player sprite size (16x16)
+    constexpr int MAP_TILE_SIZE = 32;                    ///< Size of each tile in pixels (56x56)
+    constexpr int PLAYER_SIZE = 56;                      ///< Player sprite size (56x56)
     constexpr int PLAYER_FOV_X = 234;                   ///< Render distance X (screen width + buffer)
     constexpr int PLAYER_FOV_Y = 136;                   ///< Render distance Y (screen height + buffer)
     constexpr int DEFAULT_MAP_WIDTH = 40;               ///< Procedural map width (tiles)
@@ -57,7 +57,8 @@ namespace Globals
     // ========================================================================
     constexpr int MONSTER_AWARENESS_RADIUS = 50;        ///< Monster detection range (pixels)
     constexpr int MONSTER_SPAWN_RADIUS = 20;            ///< Min distance from player to spawn (tiles)
-    constexpr int MONSTER_ATTACK_RANGE = 2;             ///< Melee attack range (tiles)
+    constexpr int MONSTER_ATTACK_RANGE = 1;             ///< Melee attack range (tiles)
+    constexpr unsigned int MONSTER_MELEE_ATTACK_COOLDOWN = 1000;  ///< Melee attack cooldown (ms)
     constexpr int MONSTER_RANGED_ATTACK_RANGE = 15;    ///< Ranged attack range (tiles)
     constexpr float MONSTER_DIAGONAL_MOVE_SCALE = 0.7f; ///< Diagonal movement speed multiplier
     constexpr int MONSTER_KITE_MIN_RANGE = 3;          ///< Kiting: minimum distance (tiles)
@@ -85,7 +86,7 @@ namespace Globals
     constexpr int MONSTER_STATIONARY_PROJECTILE_COUNT = 5;     ///< Spread shot count
     constexpr float MONSTER_STATIONARY_SPREAD_ANGLE = 0.8f;    ///< Spread angle (~45°)
     constexpr float MONSTER_PROJECTILE_SPEED = 6.0f;           ///< Projectile speed
-    constexpr unsigned int MONSTER_PROJECTILE_SIZE = 6;        ///< Projectile size (pixels)
+    constexpr unsigned int MONSTER_PROJECTILE_SIZE = 12;        ///< Projectile size (pixels)
     constexpr float MONSTER_PROJECTILE_BASE_DAMAGE = 0.5f;     ///< Base damage (ranged)
     constexpr float MONSTER_PROJECTILE_STRENGTH_MULTIPLIER = 0.2f; ///< Damage per strength
     constexpr float MONSTER_STATIONARY_PROJECTILE_BASE_DAMAGE = 1.0f; ///< Base damage (stationary)

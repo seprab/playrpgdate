@@ -21,6 +21,7 @@ Player::Player()
                Globals::PLAYER_DEFAULT_EVASION, 0, 0, 0), level(0)
 {
     ResetStats();
+    SetSize(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE);
     className = "Warrior";
     SetHP(Globals::PLAYER_DEFAULT_HP);
     SetMaxHP(Globals::PLAYER_DEFAULT_HP);
@@ -30,47 +31,67 @@ Player::Player()
     isPlayerActive = true;
     SetDeathToEraseCountdown(0);
     idle = std::make_unique<AnimationClip>();
-    run = std::make_unique<AnimationClip>();
+    walkNorth = std::make_unique<AnimationClip>();
+    walkSouth = std::make_unique<AnimationClip>();
+    walkEast = std::make_unique<AnimationClip>();
     attack = std::make_unique<AnimationClip>();
-    stab = std::make_unique<AnimationClip>();
     die = std::make_unique<AnimationClip>();
 
-    animationTable = std::make_unique<pdcpp::ImageTable>("images/player/animmini");
-    auto& anim = *animationTable;  // Reference to the ImageTable
     SetSize(pdcpp::Point<int>(Globals::PLAYER_SIZE, Globals::PLAYER_SIZE));
-    // 16 x 16
-    // 16 x 4 = 64
-    // 16 x 5 = 80
-    idle->AddBitmap(anim[0]);
-    idle->AddBitmap(anim[1]);
+
+    // Load idle animation frames (8 frames)
+    for (int i = 0; i < 8; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        idle->AddImagePath("images/player/animations/fight-stance-idle-8-frames/south/frame_" + frameNum);
+    }
     idle->SetDelay(4);
-    idle->LoadBitmaps();
+    idle->LoadImages();
 
-    run->AddBitmap(anim[4]);
-    run->AddBitmap(anim[5]);
-    run->AddBitmap(anim[6]);
-    run->AddBitmap(anim[7]);
-    run->SetDelay(3);
-    run->LoadBitmaps();
+    // Load walking animation frames for south direction (6 frames)
+    for (int i = 0; i < 6; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        walkSouth->AddImagePath("images/player/animations/walking-6-frames/south/frame_" + frameNum);
+    }
+    walkSouth->SetDelay(2);
+    walkSouth->LoadImages();
 
-    attack->AddBitmap(anim[8]);
-    attack->AddBitmap(anim[9]);
-    attack->AddBitmap(anim[10]);
-    attack->AddBitmap(anim[11]);
+    // Load walking animation frames for north direction (6 frames)
+    for (int i = 0; i < 6; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        walkNorth->AddImagePath("images/player/animations/walking-6-frames/north/frame_" + frameNum);
+    }
+    walkNorth->SetDelay(2);
+    walkNorth->LoadImages();
+
+    // Load walking animation frames for east direction (6 frames)
+    for (int i = 0; i < 6; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        walkEast->AddImagePath("images/player/animations/walking-6-frames/east/frame_" + frameNum);
+    }
+    walkEast->SetDelay(2);
+    walkEast->LoadImages();
+
+    // Load attack animation frames (6 frames)
+    for (int i = 0; i < 6; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        attack->AddImagePath("images/player/animations/fireball/south/frame_" + frameNum);
+    }
     attack->SetDelay(0);
-    attack->LoadBitmaps();
+    attack->LoadImages();
 
-    stab->AddBitmap(anim[12]);
-    stab->AddBitmap(anim[13]);
-    stab->AddBitmap(anim[14]);
-    stab->SetDelay(0);
-    stab->LoadBitmaps();
-
-    die->AddBitmap(anim[16]);
-    die->AddBitmap(anim[17]);
-    die->AddBitmap(anim[18]);
+    // Load death animation frames (7 frames)
+    for (int i = 0; i < 7; i++)
+    {
+        std::string frameNum = (i < 10) ? "00" + std::to_string(i) : "0" + std::to_string(i);
+        die->AddImagePath("images/player/animations/falling-back-death/south/frame_" + frameNum);
+    }
     die->SetDelay(4);
-    die->LoadBitmaps();
+    die->LoadImages();
 
     skills = {
             {"Beam", "images/ui/icon_magic_beam", 2000,
@@ -92,6 +113,25 @@ void Player::Tick(const std::shared_ptr<Area>& area)
     HandleInput();
     HandleAutoFire(area);
     Move(dx, dy, area);
+
+    // Check if we have a pending cast that's ready to spawn
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    if (pendingCast && currentTime - pendingCastStartTime >= attackCastDelay)
+    {
+        // Spawn the magic projectile after the animation wind-up
+        std::unique_ptr<Magic> magic = skills[pendingCastMagicIndex].factory(GetCenteredPosition());
+        magicLaunched.push_back(std::move(magic));
+        pendingCast = false;
+    }
+
+    // Reset attack animation after duration
+    if (attacking)
+    {
+        if (currentTime - attackAnimationStartTime >= attackAnimationDuration)
+        {
+            attacking = false;
+        }
+    }
 
     for(auto& magic : magicLaunched)
     {
@@ -123,13 +163,41 @@ void Player::Move(int deltaX, int deltaY, const std::shared_ptr<Area>& area)
 }
 void Player::Draw()
 {
+    pdcpp::Point<int> drawPosition = GetPosition();
+    drawPosition.x -= 20;
+    drawPosition.y -= 35;
     if (CalculateFlashing())
     {
-        if (attacking) attack->Draw(GetPosition().x, GetPosition().y);
-        else if (dx != 0 || dy != 0) run->Draw(GetPosition().x, GetPosition().y);
-        else idle->Draw(GetPosition().x, GetPosition().y);
+        if (attacking)
+        {
+            attack->Draw(drawPosition);
+        }
+        else if (dx != 0 || dy != 0)
+        {
+            // Draw walking animation based on facing direction
+            switch (facingDirection)
+            {
+                case Direction::North:
+                    walkNorth->Draw(drawPosition);
+                    break;
+                case Direction::South:
+                    walkSouth->Draw(drawPosition);
+                    break;
+                case Direction::East:
+                case Direction::West:
+                    walkEast->Draw(drawPosition);
+                    break;
+                default:
+                    walkSouth->Draw(drawPosition);
+                    break;
+            }
+        }
+        else
+        {
+            idle->Draw(drawPosition);
+        }
     }
-    Entity::DrawHealthBar();
+    Entity::DrawHealthBar(Globals::HEALTH_BAR_OFFSET_X, Globals::HEALTH_BAR_OFFSET_Y - 30);
     DrawAimDirection();
 }
 
@@ -173,21 +241,25 @@ void Player::HandleInput()
     if (clicked & kButtonRight)
     {
         dx = 1;
-        idle->SetFlip(false);
-        run->SetFlip(false);
-        attack->SetFlip(false);
-        stab->SetFlip(false);
+        facingDirection = Direction::East;
+        walkEast->SetFlip(false);
     }
     else if (clicked & kButtonLeft)
     {
         dx = -1;
-        idle->SetFlip(true);
-        run->SetFlip(true);
-        attack->SetFlip(true);
-        stab->SetFlip(true);
+        facingDirection = Direction::West;
+        walkEast->SetFlip(true);  // Flip east animation for west
     }
-    if (clicked & kButtonUp) dy = -1;
-    else if (clicked & kButtonDown) dy = 1;
+    if (clicked & kButtonUp)
+    {
+        dy = -1;
+        facingDirection = Direction::North;
+    }
+    else if (clicked & kButtonDown)
+    {
+        dy = 1;
+        facingDirection = Direction::South;
+    }
     dx *= static_cast<int>(GetMovementSpeed());
     dy *= static_cast<int>(GetMovementSpeed());
 
@@ -217,13 +289,13 @@ void Player::HandleInput()
         return;
     }
 
-    if (attacking)
-    {
-        std::unique_ptr<Magic> magic;
-        lastSkillCastTimes[selectedMagic] = currentTime;
-        magic = skills[selectedMagic].factory(GetCenteredPosition());
-        magicLaunched.push_back(std::move(magic));
-    }
+    // Trigger attack animation immediately, queue the magic cast for later
+    attacking = true;
+    attackAnimationStartTime = currentTime;
+    pendingCast = true;
+    pendingCastStartTime = currentTime;
+    pendingCastMagicIndex = selectedMagic;
+    lastSkillCastTimes[selectedMagic] = currentTime;
 }
 float Player::GetCooldownPercentage() const
 {

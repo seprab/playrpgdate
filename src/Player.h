@@ -27,19 +27,37 @@ private:
     unsigned int skillPoints = 0;
     std::unordered_set<std::string> visitedAreas;
 
-    std::unique_ptr<pdcpp::ImageTable> animationTable;
+    // Animation direction enum
+    enum class Direction
+    {
+        South,
+        North,
+        East,
+        West
+    };
+
     // Animation clips
     std::unique_ptr<AnimationClip> idle{};
-    std::unique_ptr<AnimationClip> run{};
+    std::unique_ptr<AnimationClip> walkNorth{};
+    std::unique_ptr<AnimationClip> walkSouth{};
+    std::unique_ptr<AnimationClip> walkEast{};
     std::unique_ptr<AnimationClip> attack{};
-    std::unique_ptr<AnimationClip> stab{};
     std::unique_ptr<AnimationClip> die{};
 
+    Direction facingDirection = Direction::South;
     int dx = 0;
     int dy = 0;
 
-    bool attacking = true;
+    bool attacking = false;
+    unsigned int attackAnimationStartTime = 0;
+    unsigned int attackAnimationDuration = 450;
+    unsigned int attackCastDelay = 350; // Delay before projectile spawns (ms)
     unsigned int selectedMagic = 0;
+
+    // Pending cast tracking
+    bool pendingCast = false;
+    unsigned int pendingCastStartTime = 0;
+    unsigned int pendingCastMagicIndex = 0;
     std::vector<std::unique_ptr<Magic>> magicLaunched;
     struct SkillDefinition
     {

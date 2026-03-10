@@ -13,7 +13,7 @@ Magic(Position, std::move(_player)), target(std::move(_target))
 {
     iLifetime = 3000; // 3 seconds max lifetime
     speed = 6.0f;
-    size = 4;
+    size = 8;
 }
 
 void AutoProjectile::Draw() const
