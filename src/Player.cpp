@@ -114,10 +114,19 @@ void Player::Tick(const std::shared_ptr<Area>& area)
     HandleAutoFire(area);
     Move(dx, dy, area);
 
+    // Check if we have a pending cast that's ready to spawn
+    unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+    if (pendingCast && currentTime - pendingCastStartTime >= attackCastDelay)
+    {
+        // Spawn the magic projectile after the animation wind-up
+        std::unique_ptr<Magic> magic = skills[pendingCastMagicIndex].factory(GetCenteredPosition());
+        magicLaunched.push_back(std::move(magic));
+        pendingCast = false;
+    }
+
     // Reset attack animation after duration
     if (attacking)
     {
-        unsigned int currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
         if (currentTime - attackAnimationStartTime >= attackAnimationDuration)
         {
             attacking = false;
@@ -280,15 +289,13 @@ void Player::HandleInput()
         return;
     }
 
-    // Cast magic and trigger attack animation
-    std::unique_ptr<Magic> magic;
-    lastSkillCastTimes[selectedMagic] = currentTime;
-    magic = skills[selectedMagic].factory(GetCenteredPosition());
-    magicLaunched.push_back(std::move(magic));
-
-    // Show attack animation briefly when casting
+    // Trigger attack animation immediately, queue the magic cast for later
     attacking = true;
     attackAnimationStartTime = currentTime;
+    pendingCast = true;
+    pendingCastStartTime = currentTime;
+    pendingCastMagicIndex = selectedMagic;
+    lastSkillCastTimes[selectedMagic] = currentTime;
 }
 float Player::GetCooldownPercentage() const
 {

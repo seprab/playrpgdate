@@ -50,8 +50,14 @@ private:
 
     bool attacking = false;
     unsigned int attackAnimationStartTime = 0;
-    unsigned int attackAnimationDuration = 300;
+    unsigned int attackAnimationDuration = 450;
+    unsigned int attackCastDelay = 350; // Delay before projectile spawns (ms)
     unsigned int selectedMagic = 0;
+
+    // Pending cast tracking
+    bool pendingCast = false;
+    unsigned int pendingCastStartTime = 0;
+    unsigned int pendingCastMagicIndex = 0;
     std::vector<std::unique_ptr<Magic>> magicLaunched;
     struct SkillDefinition
     {
