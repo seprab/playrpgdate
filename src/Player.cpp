@@ -283,6 +283,22 @@ void Player::HandleInput()
     }
 
     const auto currentTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds();
+
+    // Track time delta since last frame to pause cooldowns during movement
+    static unsigned int lastFrameTime = currentTime;
+    unsigned int deltaTime = currentTime - lastFrameTime;
+    lastFrameTime = currentTime;
+
+    // If moving, advance all cooldown timestamps to "pause" them at current progress
+    if (dx != 0 || dy != 0)
+    {
+        for (auto& castTime : lastSkillCastTimes)
+        {
+            castTime += deltaTime;
+        }
+        return;
+    }
+
     const int magicCastElapsedTime = static_cast<int>(currentTime - lastSkillCastTimes[selectedMagic]);
     if (magicCastElapsedTime < static_cast<int>(skills[selectedMagic].cooldownMs))
     {
@@ -301,16 +317,17 @@ float Player::GetCooldownPercentage() const
 {
     if (skills.empty())
     {
-        return 1.0f;
+        return 0.0f;
     }
     unsigned int magicCastElapsedTime = pdcpp::GlobalPlaydateAPI::get()->system->getCurrentTimeMilliseconds()
         - lastSkillCastTimes[selectedMagic];
     float cooldown = static_cast<float>(skills[selectedMagic].cooldownMs);
-    if (cooldown <= 0.0f)
-    {
-        return 1.0f;
-    }
-    return std::min(1.0f, static_cast<float>(magicCastElapsedTime) / cooldown);
+
+    // Capping the magic gauge to avoid visual glitches when 0.0f or 1.0f
+    float load = static_cast<float>(magicCastElapsedTime) / cooldown;
+    load = std::min(0.99f, load);
+    load = std::max(0.01f, load);
+    return load;
 }
 
 std::string Player::GetClassName()
